@@ -1,15 +1,25 @@
 package iot.core.services.device.registry.client;
 
-import iotcore.service.device.Device;
-
 import java.util.HashMap;
 
+import iotcore.service.device.Device;
+import iotcore.service.device.InMemoryDeviceRegistry;
+
 public class Main {
+
+    private static Client createClient(final boolean local) {
+        if (!local) {
+            return FooBarClient.create()
+                    .endpoint("localhost:1234")
+                    .build();
+        } else {
+            return new LocalClient(new InMemoryDeviceRegistry());
+        }
+    }
+
     public static void main(final String[] args) throws Exception {
 
-        try (Client client = FooBarClient.create()
-                .endpoint("localhost:1234")
-                .build()) {
+        try (Client client = createClient(true)) {
 
             syncSave(client, "id1");
             syncFind(client, "id1");
