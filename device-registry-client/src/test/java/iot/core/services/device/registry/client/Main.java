@@ -2,6 +2,8 @@ package iot.core.services.device.registry.client;
 
 import iotcore.service.device.Device;
 
+import java.util.HashMap;
+
 public class Main {
     public static void main(final String[] args) throws Exception {
 
@@ -19,7 +21,7 @@ public class Main {
     }
 
     private static void syncSave(final Client client, final String id) {
-        final Device device = new Device(id);
+        final Device device = new Device(id, new HashMap<>());
         final String result = client.sync().save(device);
         System.out.format("save[sync]: %s -> %s%n", device, result);
     }
@@ -30,7 +32,7 @@ public class Main {
     }
 
     private static void asyncSave(final Client client, final String id) {
-        final Device device = new Device(id);
+        final Device device = new Device(id, new HashMap<>());
         client.async().save(device).whenComplete((result, error) -> {
             if (error != null) {
                 System.err.println("save[async]: operation failed");
