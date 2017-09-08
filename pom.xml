@@ -24,6 +24,7 @@
 
     <modules>
         <module>service-device</module>
+        <module>device-registry-client</module>
     </modules>
 
     <build>
