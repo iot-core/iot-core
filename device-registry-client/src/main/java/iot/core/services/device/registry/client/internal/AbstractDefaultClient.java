@@ -36,6 +36,7 @@ public abstract class AbstractDefaultClient implements Client {
     }
 
     protected abstract CompletionStage<Optional<Device>> internalFindById(final String id);
-    protected abstract  CompletionStage<String> internalSave(final Device device);
+
+    protected abstract CompletionStage<String> internalSave(final Device device);
 
 }

@@ -25,6 +25,7 @@
     <modules>
         <module>service-device</module>
         <module>device-registry-client</module>
+        <module>device-serialization-jackson</module>
     </modules>
 
     <build>
