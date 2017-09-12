@@ -22,6 +22,14 @@ public class SyncDeviceRegistryWrapper implements DeviceRegistry {
         }
     }
 
+    @Override public String create(Device device) {
+        return null;
+    }
+
+    @Override public void update(Device device) {
+
+    }
+
     @Override
     public String save(final Device device) {
         return await(this.async.save(device));
