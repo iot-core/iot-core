@@ -29,6 +29,8 @@ import iot.core.services.device.registry.serialization.Serializer;
 
 public abstract class AbstractAmqpClient extends AbstractDefaultClient {
 
+    private static final String ADDRESS_PATH_DELIMITER = ".";
+
     private static final Logger logger = LoggerFactory.getLogger(AbstractAmqpClient.class);
 
     @FunctionalInterface
@@ -174,7 +176,7 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
     }
 
     private String createReplyAddress(final String address, final String replyTo) {
-        return String.format("%s.reply.%s", address, replyTo);
+        return String.join(ADDRESS_PATH_DELIMITER, address, "reply", replyTo);
     }
 
     protected AbstractAmqpClient.ReplyHandler<Void> ignoreBody() {
