@@ -14,12 +14,6 @@ import iotcore.service.device.InMemoryDeviceRegistry;
 
 public class Main {
 
-    static Client createFooClient() {
-        return FooBarClient.create()
-                .endpoint("localhost:1234")
-                .build();
-    }
-
     static Client createLocalClient() {
         return new LocalClient(new InMemoryDeviceRegistry(new AlwaysPassingDeviceSchemaValidator()));
     }
