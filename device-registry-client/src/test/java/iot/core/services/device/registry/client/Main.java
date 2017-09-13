@@ -3,32 +3,42 @@ package iot.core.services.device.registry.client;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
+import io.vertx.core.Vertx;
 import iotcore.service.device.AlwaysPassingDeviceSchemaValidator;
 import iotcore.service.device.Device;
 import iotcore.service.device.InMemoryDeviceRegistry;
 
 public class Main {
 
-    private static Client createClient(final boolean local) {
-        if (!local) {
-            return FooBarClient.create()
-                    .endpoint("localhost:1234")
-                    .build();
-        } else {
-            return new LocalClient(new InMemoryDeviceRegistry(new AlwaysPassingDeviceSchemaValidator()));
-        }
+    static Client createFooClient() {
+        return FooBarClient.create()
+                .endpoint("localhost:1234")
+                .build();
+    }
+
+    static Client createLocalClient() {
+        return new LocalClient(new InMemoryDeviceRegistry(new AlwaysPassingDeviceSchemaValidator()));
+    }
+
+    static Client createAmqpClient() {
+        return AmqpClient.create()
+                .build(Vertx.vertx());
     }
 
     public static void main(final String[] args) throws Exception {
 
-        try (Client client = createClient(true)) {
+        try (final Client client = createAmqpClient()) {
+
+            asyncSave(client, "id2");
+            asyncFind(client, "id2");
 
             syncSave(client, "id1");
             syncFind(client, "id1");
 
-            asyncSave(client, "id2");
-            asyncFind(client, "id2");
         }
 
     }
@@ -48,21 +58,34 @@ public class Main {
                         .orElse("<null>"));
     }
 
-    private static void asyncSave(final Client client, final String id) {
+    private static void asyncSave(final Client client, final String id) throws InterruptedException {
+
+        final Semaphore s = new Semaphore(0);
+
         final Device device = createNewDevice(id);
 
-        client.async().save(device).whenComplete((result, error) -> {
-            if (error != null) {
-                System.err.println("save[async]: operation failed");
-                error.printStackTrace();
-            } else {
-                System.out.format("save[async]: %s -> %s%n", device, result);
-            }
-        });
+        client.async().save(device)
+
+                .whenComplete((result, error) -> {
+                    if (error != null) {
+                        System.err.println("save[async]: operation failed");
+                        error.printStackTrace();
+                    } else {
+                        System.out.format("save[async]: %s -> %s%n", device, result);
+                    }
+                })
+
+                .thenRun(s::release);
+
+        s.tryAcquire(5, TimeUnit.SECONDS);
     }
 
-    private static void asyncFind(final Client client, final String id) {
-        client.async().findById(id).whenComplete((result, error) -> {
+    private static void asyncFind(final Client client, final String id) throws InterruptedException {
+        final Semaphore s = new Semaphore(0);
+
+        final CompletionStage<Optional<Device>> f = client.async().findById(id);
+
+        f.whenComplete((result, error) -> {
             if (error != null) {
                 System.err.println("find[async]: operation failed");
                 error.printStackTrace();
@@ -72,7 +95,15 @@ public class Main {
                                 .map(Object::toString)
                                 .orElse("<null>"));
             }
-        });
+        })
+                .thenRun(s::release);
+
+        if (!s.tryAcquire(5, TimeUnit.SECONDS)) {
+            System.out.println("Cancel");
+            f.toCompletableFuture().cancel(true);
+        }
+
+        Thread.sleep(10_000);
     }
 
     private static Device createNewDevice(final String id) {
