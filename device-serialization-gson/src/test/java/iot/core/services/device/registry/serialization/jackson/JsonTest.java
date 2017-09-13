@@ -36,7 +36,7 @@ public class JsonTest {
         data.put("string1", "String 1");
         data.put("long1", Long.MAX_VALUE);
         data.put("double1", Double.MAX_VALUE);
-        data.put("instant1", Instant.now());
+        data.put("instant1", Instant.now().toString());
 
         device1.setProperties(data);
 
@@ -49,30 +49,7 @@ public class JsonTest {
 
         System.out.println(device1.getProperties());
         System.out.println(device2.getProperties());
-        System.out.println(Maps.difference(device1.getProperties(), device2.getProperties()));
         assertTrue(Maps.difference(device1.getProperties(), device2.getProperties()).areEqual());
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes"})
-    private void assertProperties(final Map<?, ?> expected, final Map<?, ?> actual) {
-
-        final List<?> keys1 = new ArrayList<>(expected.keySet());
-        final List<?> keys2 = new ArrayList<>(actual.keySet());
-
-        Collections.sort((List<Comparable>)keys1);
-        Collections.sort((List<Comparable>)keys2);
-
-        Assert.assertEquals(keys1, keys2);
-
-        for (final Object key : keys1) {
-            final Object v1 = expected.get(key);
-            final Object v2 = actual.get(key);
-
-            if (v1 instanceof Map) {
-                assertProperties((Map<?, ?>) v1, (Map<?, ?>) v2);
-            } else {
-                Assert.assertEquals(v1, v2);
-            }
-        }
-    }
 }
