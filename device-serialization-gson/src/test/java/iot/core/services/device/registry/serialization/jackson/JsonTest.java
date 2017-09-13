@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +47,10 @@ public class JsonTest {
         assertTrue(device1 != device2);
         assertEquals(device1.getDeviceId(), device2.getDeviceId());
 
-        assertProperties(device1.getProperties(), device2.getProperties());
+        System.out.println(device1.getProperties());
+        System.out.println(device2.getProperties());
+        System.out.println(Maps.difference(device1.getProperties(), device2.getProperties()));
+        assertTrue(Maps.difference(device1.getProperties(), device2.getProperties()).areEqual());
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes"})
