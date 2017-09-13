@@ -18,6 +18,8 @@ public class LocalClient extends AbstractDefaultClient {
     private final ExecutorService executionService;
 
     public LocalClient(final DeviceRegistry registry) {
+        super(0, null);
+
         Objects.requireNonNull(registry);
 
         this.registry = registry;

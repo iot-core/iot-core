@@ -8,7 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class ObjectMappers {
 
-    public static final ObjectMapper defaultJson(boolean pretty) {
+    public static final ObjectMapper defaultJson(final boolean pretty) {
         final ObjectMapper mapper = new ObjectMapper();
 
         if (pretty) {

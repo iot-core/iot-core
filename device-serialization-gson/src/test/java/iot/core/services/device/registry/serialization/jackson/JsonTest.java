@@ -3,17 +3,15 @@ package iot.core.services.device.registry.serialization.jackson;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Maps;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.Maps;
 
 import iot.core.services.device.registry.serialization.Serializer;
 import iotcore.service.device.Device;
@@ -40,12 +38,16 @@ public class JsonTest {
 
         device1.setProperties(data);
 
-        final String json = this.serializer.encode(device1);
+        final String json = new String (this.serializer.encode(device1), StandardCharsets.UTF_8);
         System.out.println(json);
-        final Device device2 = this.serializer.decodeDevice(json);
+        final Device device2 = this.serializer.decode(json.getBytes(StandardCharsets.UTF_8), Device.class);
 
         assertTrue(device1 != device2);
+
         assertEquals(device1.getDeviceId(), device2.getDeviceId());
+        assertEquals(device1.getType(), device2.getType());
+        assertEquals(device1.getCreated(), device2.getCreated());
+        assertEquals(device1.getUpdated(), device2.getUpdated());
 
         System.out.println(device1.getProperties());
         System.out.println(device2.getProperties());

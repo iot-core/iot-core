@@ -24,14 +24,16 @@ public class Main {
         return new LocalClient(new InMemoryDeviceRegistry(new AlwaysPassingDeviceSchemaValidator()));
     }
 
-    static Client createAmqpClient() {
+    static Client createAmqpClient(final Vertx vertx) {
         return AmqpClient.create()
-                .build(Vertx.vertx());
+                .build(vertx);
     }
 
     public static void main(final String[] args) throws Exception {
 
-        try (final Client client = createAmqpClient()) {
+        final Vertx vertx = Vertx.vertx();
+
+        try (final Client client = createAmqpClient(vertx)) {
 
             asyncSave(client, "id2");
             asyncFind(client, "id2");
@@ -39,6 +41,8 @@ public class Main {
             syncSave(client, "id1");
             syncFind(client, "id1");
 
+        } finally {
+            vertx.close();
         }
 
     }
@@ -64,20 +68,22 @@ public class Main {
 
         final Device device = createNewDevice(id);
 
-        client.async().save(device)
+        final CompletionStage<String> f = client.async().save(device);
 
-                .whenComplete((result, error) -> {
-                    if (error != null) {
-                        System.err.println("save[async]: operation failed");
-                        error.printStackTrace();
-                    } else {
-                        System.out.format("save[async]: %s -> %s%n", device, result);
-                    }
-                })
-
+        f.whenComplete((result, error) -> {
+            if (error != null) {
+                System.err.println("save[async]: operation failed");
+                error.printStackTrace();
+            } else {
+                System.out.format("save[async]: %s -> %s%n", device, result);
+            }
+        })
                 .thenRun(s::release);
 
-        s.tryAcquire(5, TimeUnit.SECONDS);
+        if (!s.tryAcquire(5, TimeUnit.SECONDS)) {
+            System.out.println("Cancel");
+            f.toCompletableFuture().cancel(true);
+        }
     }
 
     private static void asyncFind(final Client client, final String id) throws InterruptedException {

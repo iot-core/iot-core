@@ -1,15 +1,11 @@
 package iot.core.services.device.registry.client;
 
-import static iot.core.services.device.registry.client.internal.util.Messages.bodyAsString;
-
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
-import org.apache.qpid.proton.message.Message;
-
 import io.vertx.core.Vertx;
-import iot.core.services.device.registry.client.internal.util.Messages;
-import iot.core.services.device.registry.serialization.Serializer;
+import iot.core.services.device.registry.client.internal.AbstractAmqpClient;
 import iot.core.services.device.registry.serialization.jackson.JacksonSerializer;
 import iotcore.service.device.Device;
 
@@ -22,6 +18,8 @@ public class AmqpClient extends AbstractAmqpClient {
         private int port = 5672;
 
         private String container;
+
+        private Duration syncTimeout = Duration.ofSeconds(5);
 
         public Builder hostname(final String hostname) {
             this.hostname = hostname;
@@ -50,8 +48,17 @@ public class AmqpClient extends AbstractAmqpClient {
             return this.container;
         }
 
+        public Builder syncTimeout(final Duration syncTimeout) {
+            this.syncTimeout = syncTimeout;
+            return this;
+        }
+
+        public Duration syncTimeout() {
+            return this.syncTimeout;
+        }
+
         public Client build(final Vertx vertx) {
-            return new AmqpClient(vertx, this.hostname, this.port, this.container);
+            return new AmqpClient(vertx, this.hostname, this.port, this.container, this.syncTimeout);
         }
     }
 
@@ -59,25 +66,19 @@ public class AmqpClient extends AbstractAmqpClient {
         return new Builder();
     }
 
-    private final Serializer serializer = JacksonSerializer.json();
-
-    private AmqpClient(final Vertx vertx, final String hostname, final int port, final String container) {
-        super(vertx, hostname, port, container);
+    private AmqpClient(final Vertx vertx, final String hostname, final int port, final String container,
+            final Duration syncTimeout) {
+        super(vertx, hostname, port, container, JacksonSerializer.json(), syncTimeout.abs().toMillis());
     }
 
     @Override
     protected CompletionStage<Optional<Device>> internalFindById(final String id) {
-        return request("device", "findById", id, this::resultFindById);
+        return request("device", "findById", this.serializer.encode(id, null), bodyAsOptional(Device.class));
     }
 
     @Override
     protected CompletionStage<String> internalSave(final Device device) {
-        return request("device", "save", this.serializer.encode(device), Messages::bodyAsString);
-    }
-
-    private Optional<Device> resultFindById(final Message msg) {
-        return Optional.ofNullable(bodyAsString(msg))
-                .map(this.serializer::decodeDevice);
+        return request("device", "save", this.serializer.encode(device, null), bodyAs(String.class));
     }
 
 }

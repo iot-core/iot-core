@@ -1,12 +1,14 @@
 package iot.core.services.device.registry.serialization.jackson;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Objects;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import iot.core.services.device.registry.serialization.Serializer;
-import iotcore.service.device.Device;
 
 public class JacksonSerializer implements Serializer {
 
@@ -14,39 +16,42 @@ public class JacksonSerializer implements Serializer {
         return json(false);
     }
 
-    public static Serializer json(boolean pretty) {
+    public static Serializer json(final boolean pretty) {
         return new JacksonSerializer(ObjectMappers.defaultJson(pretty));
     }
 
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
-    private JacksonSerializer(ObjectMapper mapper) {
+    private JacksonSerializer(final ObjectMapper mapper) {
         this.mapper = mapper;
     }
 
     @Override
-    public String encode(Device device) {
-        if (device != null) {
+    public void encodeTo(final Object value, final OutputStream stream) throws IOException {
+        Objects.requireNonNull(stream);
+
+        if (value != null) {
             try {
-                return mapper.writeValueAsString(device);
-            } catch (JsonProcessingException e) {
+                this.mapper.writeValue(stream, value);
+            } catch (final JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
-        } else {
-            return null;
         }
     }
 
     @Override
-    public Device decodeDevice(String value) {
-        if (value != null) {
-            try {
-                return mapper.readerFor(Device.class).readValue(value);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
+    public <T> T decodeFrom(final InputStream stream, final Class<T> clazz) {
+
+        if (stream == null) {
             return null;
+        }
+
+        Objects.requireNonNull(clazz);
+
+        try {
+            return this.mapper.readValue(stream, clazz);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
