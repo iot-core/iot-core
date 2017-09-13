@@ -8,9 +8,17 @@ import static java.util.UUID.randomUUID;
 
 public class InMemoryDeviceRegistry implements DeviceRegistry {
 
+    private final DeviceSchemaValidator schemaValidator;
+
     private final Map<String, Device> devices = new HashMap<>();
 
+    public InMemoryDeviceRegistry(DeviceSchemaValidator schemaValidator) {
+        this.schemaValidator = schemaValidator;
+    }
+
     @Override public String create(Device device) {
+        schemaValidator.validate(device);
+
         if(devices.containsKey(device.getDeviceId())) {
             throw new IllegalArgumentException("Device with given ID already exists.");
         }
@@ -23,6 +31,8 @@ public class InMemoryDeviceRegistry implements DeviceRegistry {
     }
 
     @Override public void update(Device device) {
+        schemaValidator.validate(device);
+
         if(!devices.containsKey(device.getDeviceId())) {
             throw new IllegalArgumentException("Device with given ID does not exist.");
         }
@@ -31,6 +41,8 @@ public class InMemoryDeviceRegistry implements DeviceRegistry {
     }
 
     @Override public String save(Device device) {
+        schemaValidator.validate(device);
+
         if(devices.containsKey(device.getDeviceId())) {
             update(device);
             return device.getDeviceId();
