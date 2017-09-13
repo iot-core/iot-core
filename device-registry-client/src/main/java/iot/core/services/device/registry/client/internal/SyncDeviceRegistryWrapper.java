@@ -20,6 +20,10 @@ public class SyncDeviceRegistryWrapper implements DeviceRegistry {
         this.timeUnit = timeUnit;
     }
 
+    private <T> T await(final CompletionStage<T> stage) {
+        return Await.await(stage, this.timeout, this.timeUnit);
+    }
+
     @Override
     public String create(final Device device) {
         return await(this.async.create(device));
@@ -38,10 +42,6 @@ public class SyncDeviceRegistryWrapper implements DeviceRegistry {
     @Override
     public Optional<Device> findById(final String deviceId) {
         return await(this.async.findById(deviceId));
-    }
-
-    private <T> T await(final CompletionStage<T> stage) {
-        return Await.await(stage, this.timeout, this.timeUnit);
     }
 
 }

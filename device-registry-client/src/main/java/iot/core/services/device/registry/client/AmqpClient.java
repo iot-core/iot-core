@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 import io.vertx.core.Vertx;
-import iot.core.services.device.registry.client.internal.AbstractAmqpClient;
+import iot.core.services.device.registry.client.internal.util.AbstractAmqpClient;
 import iot.core.services.device.registry.serialization.jackson.JacksonSerializer;
 import iotcore.service.device.Device;
 

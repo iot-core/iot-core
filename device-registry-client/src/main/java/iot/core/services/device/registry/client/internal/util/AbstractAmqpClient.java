@@ -1,4 +1,4 @@
-package iot.core.services.device.registry.client.internal;
+package iot.core.services.device.registry.client.internal.util;
 
 import static java.util.Optional.ofNullable;
 
@@ -24,7 +24,7 @@ import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
-import iot.core.services.device.registry.client.internal.util.Messages;
+import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
 import iot.core.services.device.registry.serialization.Serializer;
 
 public abstract class AbstractAmqpClient extends AbstractDefaultClient {
