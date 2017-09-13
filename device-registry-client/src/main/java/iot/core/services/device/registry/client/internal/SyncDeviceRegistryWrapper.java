@@ -1,11 +1,11 @@
 package iot.core.services.device.registry.client.internal;
 
-import static iot.core.services.device.registry.client.util.Await.await;
-
 import java.util.Optional;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
 import iot.core.services.device.registry.client.DeviceRegistryAsync;
+import iot.core.services.device.registry.client.util.Await;
 import iotcore.service.device.Device;
 import iotcore.service.device.DeviceRegistry;
 
@@ -22,22 +22,26 @@ public class SyncDeviceRegistryWrapper implements DeviceRegistry {
 
     @Override
     public String create(final Device device) {
-        return null;
+        return await(this.async.create(device));
     }
 
     @Override
     public void update(final Device device) {
-
+        await(this.async.update(device));
     }
 
     @Override
     public String save(final Device device) {
-        return await(this.async.save(device), this.timeout, this.timeUnit);
+        return await(this.async.save(device));
     }
 
     @Override
     public Optional<Device> findById(final String deviceId) {
-        return await(this.async.findById(deviceId), this.timeout, this.timeUnit);
+        return await(this.async.findById(deviceId));
+    }
+
+    private <T> T await(final CompletionStage<T> stage) {
+        return Await.await(stage, this.timeout, this.timeUnit);
     }
 
 }

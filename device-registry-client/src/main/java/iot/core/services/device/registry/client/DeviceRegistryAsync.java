@@ -7,6 +7,11 @@ import iotcore.service.device.Device;
 
 public interface DeviceRegistryAsync {
     public CompletionStage<String> save(Device device);
-    public CompletionStage<Optional<Device>> findById ( String id );
+
+    public CompletionStage<Optional<Device>> findById(String id);
+
+    public CompletionStage<String> create(Device device);
+
+    public CompletionStage<Void> update(Device device);
 
 }

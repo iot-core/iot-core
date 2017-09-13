@@ -164,6 +164,10 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
         return String.format("%s.reply.%s", address, replyTo);
     }
 
+    protected AbstractAmqpClient.ReplyHandler<Void> ignoreBody() {
+        return msg -> null;
+    }
+
     protected <T> AbstractAmqpClient.ReplyHandler<T> bodyAs(final Class<T> clazz) {
         return msg -> this.serializer.decode(Messages.bodyAsBlob(msg), clazz);
     }

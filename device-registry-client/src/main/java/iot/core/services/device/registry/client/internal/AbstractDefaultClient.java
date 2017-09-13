@@ -41,11 +41,25 @@ public abstract class AbstractDefaultClient implements Client {
             public CompletionStage<Optional<Device>> findById(final String id) {
                 return internalFindById(id);
             }
+
+            @Override
+            public CompletionStage<String> create(final Device device) {
+                return internalCreate(device);
+            }
+
+            @Override
+            public CompletionStage<Void> update(final Device device) {
+                return internalUpdate(device);
+            }
         };
     }
 
-    protected abstract CompletionStage<Optional<Device>> internalFindById(final String id);
+    protected abstract CompletionStage<Optional<Device>> internalFindById(String id);
 
-    protected abstract CompletionStage<String> internalSave(final Device device);
+    protected abstract CompletionStage<String> internalSave(Device device);
+
+    protected abstract CompletionStage<Void> internalUpdate(Device device);
+
+    protected abstract CompletionStage<String> internalCreate(Device device);
 
 }

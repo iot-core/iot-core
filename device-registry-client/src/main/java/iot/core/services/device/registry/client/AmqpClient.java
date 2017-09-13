@@ -81,4 +81,14 @@ public class AmqpClient extends AbstractAmqpClient {
         return request("device", "save", this.serializer.encode(device, null), bodyAs(String.class));
     }
 
+    @Override
+    protected CompletionStage<String> internalCreate(final Device device) {
+        return request("device", "create", this.serializer.encode(device, null), bodyAs(String.class));
+    }
+
+    @Override
+    protected CompletionStage<Void> internalUpdate(final Device device) {
+        return request("device", "create", this.serializer.encode(device, null), ignoreBody());
+    }
+
 }

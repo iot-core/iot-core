@@ -1,5 +1,6 @@
 package iot.core.services.device.registry.client;
 
+import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 import java.util.Objects;
@@ -39,6 +40,16 @@ public class LocalClient extends AbstractDefaultClient {
     @Override
     protected CompletionStage<String> internalSave(final Device device) {
         return supplyAsync(() -> this.registry.save(device));
+    }
+
+    @Override
+    protected CompletionStage<String> internalCreate(final Device device) {
+        return supplyAsync(() -> this.registry.create(device));
+    }
+
+    @Override
+    protected CompletionStage<Void> internalUpdate(final Device device) {
+        return runAsync(() -> this.registry.update(device));
     }
 
 }
