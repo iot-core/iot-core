@@ -1,5 +1,6 @@
 package iot.core.services.device.registry.client.internal;
 
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
@@ -22,11 +23,11 @@ public class SyncDeviceRegistryWrapper implements DeviceRegistry {
         }
     }
 
-    @Override public String create(Device device) {
+    @Override public String create(final Device device) {
         return null;
     }
 
-    @Override public void update(Device device) {
+    @Override public void update(final Device device) {
 
     }
 
@@ -36,8 +37,8 @@ public class SyncDeviceRegistryWrapper implements DeviceRegistry {
     }
 
     @Override
-    public Device findById(final String deviceId) {
-        return await(this.async.findById(deviceId)).orElse(null);
+    public Optional<Device> findById(final String deviceId) {
+        return await(this.async.findById(deviceId));
     }
 
 }

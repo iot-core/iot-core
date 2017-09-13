@@ -1,7 +1,10 @@
 package iot.core.services.device.registry.client;
 
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Optional;
 
+import iotcore.service.device.AlwaysPassingDeviceSchemaValidator;
 import iotcore.service.device.Device;
 import iotcore.service.device.InMemoryDeviceRegistry;
 
@@ -13,7 +16,7 @@ public class Main {
                     .endpoint("localhost:1234")
                     .build();
         } else {
-            return new LocalClient(new InMemoryDeviceRegistry());
+            return new LocalClient(new InMemoryDeviceRegistry(new AlwaysPassingDeviceSchemaValidator()));
         }
     }
 
@@ -31,18 +34,23 @@ public class Main {
     }
 
     private static void syncSave(final Client client, final String id) {
-        final Device device = new Device(id, new HashMap<>());
+        final Device device = createNewDevice(id);
+
         final String result = client.sync().save(device);
         System.out.format("save[sync]: %s -> %s%n", device, result);
     }
 
     private static void syncFind(final Client client, final String id) {
-        final Device result = client.sync().findById(id);
-        System.out.format("find[sync]: %s -> %s%n", id, result);
+        final Optional<Device> result = client.sync().findById(id);
+        System.out.format("find[sync]: %s -> %s%n", id,
+                result
+                        .map(Object::toString)
+                        .orElse("<null>"));
     }
 
     private static void asyncSave(final Client client, final String id) {
-        final Device device = new Device(id, new HashMap<>());
+        final Device device = createNewDevice(id);
+
         client.async().save(device).whenComplete((result, error) -> {
             if (error != null) {
                 System.err.println("save[async]: operation failed");
@@ -61,9 +69,15 @@ public class Main {
             } else {
                 System.out.format("find[async]: %s -> %s%n", id,
                         result
-                                .map(device -> device.toString())
+                                .map(Object::toString)
                                 .orElse("<null>"));
             }
         });
+    }
+
+    private static Device createNewDevice(final String id) {
+        final Date now = new Date();
+        final Device device = new Device(id, now, now, "my:device", new HashMap<>());
+        return device;
     }
 }

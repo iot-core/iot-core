@@ -1,6 +1,5 @@
 package iot.core.services.device.registry.client;
 
-import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 import java.util.Objects;
@@ -32,8 +31,7 @@ public class LocalClient extends AbstractDefaultClient {
 
     @Override
     protected CompletionStage<Optional<Device>> internalFindById(final String id) {
-        return supplyAsync(() -> ofNullable(this.registry.findById(id)),
-                this.executionService);
+        return supplyAsync(() -> this.registry.findById(id), this.executionService);
     }
 
     @Override
