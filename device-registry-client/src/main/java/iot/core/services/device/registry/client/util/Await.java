@@ -1,4 +1,4 @@
-package iot.core.services.device.registry.client;
+package iot.core.services.device.registry.client.util;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;

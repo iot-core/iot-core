@@ -1,6 +1,6 @@
 package iot.core.services.device.registry.client.internal;
 
-import static iot.core.services.device.registry.client.Await.await;
+import static iot.core.services.device.registry.client.util.Await.await;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
