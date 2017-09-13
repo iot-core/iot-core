@@ -135,25 +135,37 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
                     con.result().close();
                     this.vertx.cancelTimer(timer);
                 }
-            }).open();
+            });
 
-            // send request
+            receiver.openHandler(receiverReady -> {
 
-            final ProtonSender sender = con.result().createSender(address);
-
-            sender.openHandler(senderReady -> {
-
-                logger.debug("senderReady -> {}", senderReady);
-
-                if (senderReady.failed()) {
-                    result.completeExceptionally(senderReady.cause());
+                if (receiverReady.failed()) {
                     con.result().close();
                     this.vertx.cancelTimer(timer);
                     return;
                 }
 
-                sender.send(message);
-            }).open();
+                // send request
+
+                final ProtonSender sender = con.result().createSender(address);
+
+                sender.openHandler(senderReady -> {
+
+                    logger.debug("senderReady -> {}", senderReady);
+
+                    if (senderReady.failed()) {
+                        result.completeExceptionally(senderReady.cause());
+                        con.result().close();
+                        this.vertx.cancelTimer(timer);
+                        return;
+                    }
+
+                    sender.send(message);
+                }).open();
+
+            });
+
+            receiver.open();
 
         });
 
