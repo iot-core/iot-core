@@ -142,6 +142,7 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
                 if (receiverReady.failed()) {
                     con.result().close();
                     this.vertx.cancelTimer(timer);
+                    result.completeExceptionally(receiverReady.cause());
                     return;
                 }
 
@@ -154,9 +155,9 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
                     logger.debug("senderReady -> {}", senderReady);
 
                     if (senderReady.failed()) {
-                        result.completeExceptionally(senderReady.cause());
                         con.result().close();
                         this.vertx.cancelTimer(timer);
+                        result.completeExceptionally(senderReady.cause());
                         return;
                     }
 
