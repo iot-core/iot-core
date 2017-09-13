@@ -38,7 +38,7 @@ public class JacksonSerializer implements Serializer {
     }
 
     @Override
-    public Device decode(String value) {
+    public Device decodeDevice(String value) {
         if (value != null) {
             try {
                 return mapper.readerFor(Device.class).readValue(value);

@@ -42,7 +42,7 @@ public class JsonTest {
 
         final String json = this.serializer.encode(device1);
         System.out.println(json);
-        final Device device2 = this.serializer.decode(json);
+        final Device device2 = this.serializer.decodeDevice(json);
 
         assertTrue(device1 != device2);
         assertEquals(device1.getDeviceId(), device2.getDeviceId());
