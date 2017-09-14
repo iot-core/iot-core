@@ -3,7 +3,7 @@ package iot.core.services.device.registry.serialization.jackson;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +22,7 @@ public class JsonTest {
 
     @Before
     public void setup() {
-        this.serializer = JacksonSerializer.json(true);
+        this.serializer = JacksonSerializer.json();
     }
 
     @Test
@@ -38,20 +38,32 @@ public class JsonTest {
 
         device1.setProperties(data);
 
-        final String json = new String (this.serializer.encode(device1), StandardCharsets.UTF_8);
-        System.out.println(json);
-        final Device device2 = this.serializer.decode(json.getBytes(StandardCharsets.UTF_8), Device.class);
+        assertDevice(device1, this.serializer.decode(this.serializer.encode(device1), Device.class));
 
-        assertTrue(device1 != device2);
+        assertDevice(device1, this.serializer.decode(encode(device1, null), Device.class));
+        assertDevice(device1,
+                this.serializer.decode(encode(device1, ByteBuffer.allocateDirect(64 * 1024)), Device.class));
 
-        assertEquals(device1.getDeviceId(), device2.getDeviceId());
-        assertEquals(device1.getType(), device2.getType());
-        assertEquals(device1.getCreated(), device2.getCreated());
-        assertEquals(device1.getUpdated(), device2.getUpdated());
+        assertDevice(device1,
+                this.serializer.decode(encode(device1, ByteBuffer.allocate(1)), Device.class));
 
-        System.out.println(device1.getProperties());
-        System.out.println(device2.getProperties());
-        assertTrue(Maps.difference(device1.getProperties(), device2.getProperties()).areEqual());
+    }
+
+    private ByteBuffer encode(final Object value, final ByteBuffer buffer) {
+        final ByteBuffer buffer1 = this.serializer.encode(value, buffer);
+        buffer1.flip();
+        return buffer1;
+    }
+
+    private void assertDevice(final Device expected, final Device actual) {
+        assertTrue(expected != actual);
+
+        assertEquals(expected.getDeviceId(), actual.getDeviceId());
+        assertEquals(expected.getType(), actual.getType());
+        assertEquals(expected.getCreated(), actual.getCreated());
+        assertEquals(expected.getUpdated(), actual.getUpdated());
+
+        assertTrue(Maps.difference(expected.getProperties(), actual.getProperties()).areEqual());
     }
 
 }
