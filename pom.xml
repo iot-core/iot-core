@@ -28,7 +28,7 @@
         <module>service-device</module>
         <module>device-registry-client</module>
         <module>service-device-binding</module>
-        <module>device-serialization-gson</module>
+        <module>device-serialization-jackson</module>
     </modules>
 
     <build>
