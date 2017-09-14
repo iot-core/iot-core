@@ -16,9 +16,7 @@ import org.apache.qpid.proton.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
@@ -26,10 +24,9 @@ import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
 import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
 import iot.core.services.device.registry.serialization.Serializer;
+import iot.core.utils.address.AddressProvider;
 
 public abstract class AbstractAmqpClient extends AbstractDefaultClient {
-
-    private static final String ADDRESS_PATH_DELIMITER = ".";
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractAmqpClient.class);
 
@@ -49,7 +46,7 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
     protected Serializer serializer;
 
     public AbstractAmqpClient(final Vertx vertx, final String hostname, final int port, final String container,
-            final Serializer serializer, final long timeoutMs) {
+            final Serializer serializer, final AddressProvider addressProvider, final long timeoutMs) {
         super(timeoutMs, TimeUnit.MILLISECONDS);
 
         this.vertx = vertx;
@@ -59,31 +56,38 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
         this.serializer = serializer;
     }
 
-    protected void withConnection(final Handler<AsyncResult<ProtonConnection>> handler) {
+    protected Future<ProtonConnection> createConnection() {
+
+        final Future<ProtonConnection> result = Future.future();
+
         final ProtonClient client = ProtonClient.create(this.vertx);
 
         client.connect(this.hostname, this.port, con -> {
 
-            logger.debug("Completed - connect: {}", con);
+            logger.debug("Connection -> {}", con);
 
             if (con.failed()) {
-                handler.handle(Future.failedFuture(con.cause()));
+                result.fail(con.cause());
                 return;
             }
 
-            con.result().setContainer(this.container).openHandler(h -> {
+            con.result()
+                    .setContainer(this.container)
+                    .openHandler(opened -> {
 
-                logger.debug("Container - connect: {}", h);
+                        logger.debug("Open - {}", opened);
 
-                if (h.failed()) {
-                    con.result().close();
-                    handler.handle(Future.failedFuture(con.cause()));
-                    return;
-                }
+                        if (opened.failed()) {
+                            result.fail(opened.cause());
+                            return;
+                        }
 
-                handler.handle(Future.succeededFuture(con.result()));
-            }).open();
+                        result.complete(opened.result());
+                    }).open();
+
         });
+
+        return result;
     }
 
     protected <R> CompletionStage<R> request(final String address, final String verb, final ByteBuffer body,
@@ -106,7 +110,7 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
 
         final CompletableFuture<R> result = new CompletableFuture<>();
 
-        withConnection(con -> {
+        createConnection().setHandler(con -> {
 
             logger.debug("With connection - {}", con);
 
@@ -129,6 +133,9 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
 
             final ProtonReceiver receiver = con.result().createReceiver(createReplyAddress(address, replyTo));
             receiver.handler((del, msg) -> {
+
+                logger.debug("Received result - {}", msg);
+
                 try {
                     result.complete(replyHandler.handleReply(msg));
                 } catch (final Exception e) {
@@ -163,6 +170,8 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
                         return;
                     }
 
+                    logger.debug("Sending request");
+
                     sender.send(message);
                 }).open();
 
@@ -176,7 +185,8 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
     }
 
     private String createReplyAddress(final String address, final String replyTo) {
-        return String.join(ADDRESS_PATH_DELIMITER, address, "reply", replyTo);
+        // return String.join(ADDRESS_PATH_DELIMITER, address, "reply", replyTo);
+        return replyTo;
     }
 
     protected AbstractAmqpClient.ReplyHandler<Void> ignoreBody() {

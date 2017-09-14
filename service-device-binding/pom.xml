@@ -29,6 +29,11 @@
             <artifactId>device-serialization-jackson</artifactId>
             <version>0.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>iot-core</groupId>
+            <artifactId>core-utils</artifactId>
+            <version>0.0-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>io.vertx</groupId>
@@ -60,6 +65,12 @@
             <artifactId>assertj-core</artifactId>
             <version>3.6.2</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.1</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

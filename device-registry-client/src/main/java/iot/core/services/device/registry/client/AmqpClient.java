@@ -7,6 +7,7 @@ import java.util.concurrent.CompletionStage;
 import io.vertx.core.Vertx;
 import iot.core.services.device.registry.client.internal.util.AbstractAmqpClient;
 import iot.core.services.device.registry.serialization.jackson.JacksonSerializer;
+import iot.core.utils.address.DefaultAddressProvider;
 import iotcore.service.device.Device;
 
 public class AmqpClient extends AbstractAmqpClient {
@@ -68,7 +69,8 @@ public class AmqpClient extends AbstractAmqpClient {
 
     private AmqpClient(final Vertx vertx, final String hostname, final int port, final String container,
             final Duration syncTimeout) {
-        super(vertx, hostname, port, container, JacksonSerializer.json(), syncTimeout.abs().toMillis());
+        super(vertx, hostname, port, container, JacksonSerializer.json(), new DefaultAddressProvider(),
+                syncTimeout.abs().toMillis());
     }
 
     @Override

@@ -6,6 +6,8 @@ import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonSender;
 import iot.core.services.device.registry.serialization.Serializer;
 import iot.core.services.device.registry.serialization.jackson.JacksonSerializer;
+import iot.core.utils.address.AddressProvider;
+import iot.core.utils.address.DefaultAddressProvider;
 import iotcore.service.device.AlwaysPassingDeviceSchemaValidator;
 import iotcore.service.device.Device;
 import iotcore.service.device.DeviceRegistry;
@@ -24,6 +26,8 @@ public class DeviceRegistryBinding {
     private final DeviceRegistry deviceRegistry;
 
     private final Serializer serializer = JacksonSerializer.json();
+    
+    private AddressProvider addressProvider = new DefaultAddressProvider();
 
     public DeviceRegistryBinding(DeviceRegistry deviceRegistry) {
         this.deviceRegistry = deviceRegistry;
@@ -47,7 +51,7 @@ public class DeviceRegistryBinding {
     private void helloWorldSendAndConsumeExample(ProtonConnection connection) {
         connection.open();
 
-        String address = "device";
+        String address = addressProvider.requestAddress("device");
 
         connection.createReceiver(address).handler((delivery, msg) -> {
             String replyTo = msg.getReplyTo();
@@ -71,7 +75,7 @@ public class DeviceRegistryBinding {
         ProtonSender sender = connection.createSender(replyTo);
 
         Message message = new MessageImpl();
-        message.setAddress(replyTo);
+        message.setAddress(addressProvider.replyAddress("device", replyTo));
         message.setBody(new Data(new Binary(serializer.encode(reply))));
 
         sender.open();

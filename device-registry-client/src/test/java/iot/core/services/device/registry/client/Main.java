@@ -102,8 +102,6 @@ public class Main {
             System.out.println("Cancel");
             f.toCompletableFuture().cancel(true);
         }
-
-        Thread.sleep(10_000);
     }
 
     private static Device createNewDevice(final String id) {
