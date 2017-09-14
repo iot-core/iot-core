@@ -75,7 +75,6 @@ public class DeviceRegistryBinding {
         ProtonSender sender = connection.createSender(replyTo);
 
         Message message = new MessageImpl();
-        message.setAddress(addressProvider.replyAddress("device", replyTo));
         message.setBody(new Data(new Binary(serializer.encode(reply))));
 
         sender.open();

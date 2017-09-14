@@ -91,10 +91,11 @@ public class AmqpTransport implements Transport<Message> {
         // setup message
 
         final String replyTo = UUID.randomUUID().toString();
+        final String replyToAddress = this.addressProvider.replyAddress(service, replyTo);
 
         final Properties p = new Properties();
         p.setSubject(verb);
-        p.setReplyTo(replyTo);
+        p.setReplyTo(replyToAddress);
 
         final Message message = Message.Factory.create();
 
@@ -127,7 +128,7 @@ public class AmqpTransport implements Transport<Message> {
             // setup receiver
 
             final ProtonReceiver receiver = con.result()
-                    .createReceiver(this.addressProvider.replyAddress(service, replyTo));
+                    .createReceiver(replyToAddress);
             receiver.handler((del, msg) -> {
 
                 logger.debug("Received result - {}", msg);
