@@ -2,12 +2,10 @@ package iot.core.services.device.registry.client.internal.util;
 
 import static java.util.Optional.ofNullable;
 
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.messaging.Data;
@@ -22,18 +20,12 @@ import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
-import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
 import iot.core.services.device.registry.serialization.Serializer;
 import iot.core.utils.address.AddressProvider;
 
-public abstract class AbstractAmqpClient extends AbstractDefaultClient {
+public class AmqpTransport implements Transport<Message> {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractAmqpClient.class);
-
-    @FunctionalInterface
-    public interface ReplyHandler<R> {
-        public R handleReply(Message response) throws Exception;
-    }
+    private static final Logger logger = LoggerFactory.getLogger(AmqpTransport.class);
 
     private final Vertx vertx;
 
@@ -43,17 +35,19 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
 
     private final String container;
 
-    protected Serializer serializer;
+    private final Serializer serializer;
 
-    public AbstractAmqpClient(final Vertx vertx, final String hostname, final int port, final String container,
-            final Serializer serializer, final AddressProvider addressProvider, final long timeoutMs) {
-        super(timeoutMs, TimeUnit.MILLISECONDS);
+    private final AddressProvider addressProvider;
+
+    public AmqpTransport(final Vertx vertx, final String hostname, final int port, final String container,
+            final Serializer serializer, final AddressProvider addressProvider) {
 
         this.vertx = vertx;
         this.hostname = hostname;
         this.port = port;
         this.container = container;
         this.serializer = serializer;
+        this.addressProvider = addressProvider;
     }
 
     protected Future<ProtonConnection> createConnection() {
@@ -90,8 +84,9 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
         return result;
     }
 
-    protected <R> CompletionStage<R> request(final String address, final String verb, final ByteBuffer body,
-            final ReplyHandler<R> replyHandler) {
+    @Override
+    public <R> CompletionStage<R> request(final String service, final String verb, final Object request,
+            final ReplyHandler<R, Message> replyHandler) {
 
         // setup message
 
@@ -104,7 +99,7 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
         final Message message = Message.Factory.create();
 
         message.setProperties(p);
-        message.setBody(new Data(Binary.create(body)));
+        message.setBody(new Data(new Binary(this.serializer.encode(request))));
 
         // start call
 
@@ -131,7 +126,8 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
 
             // setup receiver
 
-            final ProtonReceiver receiver = con.result().createReceiver(createReplyAddress(address, replyTo));
+            final ProtonReceiver receiver = con.result()
+                    .createReceiver(this.addressProvider.replyAddress(service, replyTo));
             receiver.handler((del, msg) -> {
 
                 logger.debug("Received result - {}", msg);
@@ -157,7 +153,7 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
 
                 // send request
 
-                final ProtonSender sender = con.result().createSender(address);
+                final ProtonSender sender = con.result().createSender(service);
 
                 sender.openHandler(senderReady -> {
 
@@ -184,20 +180,18 @@ public abstract class AbstractAmqpClient extends AbstractDefaultClient {
         return result;
     }
 
-    private String createReplyAddress(final String address, final String replyTo) {
-        // return String.join(ADDRESS_PATH_DELIMITER, address, "reply", replyTo);
-        return replyTo;
-    }
-
-    protected AbstractAmqpClient.ReplyHandler<Void> ignoreBody() {
+    @Override
+    public ReplyHandler<Void, Message> ignoreBody() {
         return msg -> null;
     }
 
-    protected <T> AbstractAmqpClient.ReplyHandler<T> bodyAs(final Class<T> clazz) {
+    @Override
+    public <T> ReplyHandler<T, Message> bodyAs(final Class<T> clazz) {
         return msg -> this.serializer.decode(Messages.bodyAsBlob(msg), clazz);
     }
 
-    protected <T> AbstractAmqpClient.ReplyHandler<Optional<T>> bodyAsOptional(final Class<T> clazz) {
+    @Override
+    public <T> ReplyHandler<Optional<T>, Message> bodyAsOptional(final Class<T> clazz) {
         return msg -> ofNullable(this.serializer.decode(Messages.bodyAsBlob(msg), clazz));
     }
 

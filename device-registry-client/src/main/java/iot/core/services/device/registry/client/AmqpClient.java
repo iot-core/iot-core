@@ -3,14 +3,17 @@ package iot.core.services.device.registry.client;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
 
 import io.vertx.core.Vertx;
-import iot.core.services.device.registry.client.internal.util.AbstractAmqpClient;
+import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
+import iot.core.services.device.registry.client.internal.util.AmqpTransport;
+import iot.core.services.device.registry.serialization.Serializer;
 import iot.core.services.device.registry.serialization.jackson.JacksonSerializer;
 import iot.core.utils.address.DefaultAddressProvider;
 import iotcore.service.device.Device;
 
-public class AmqpClient extends AbstractAmqpClient {
+public class AmqpClient extends AbstractDefaultClient {
 
     public static class Builder {
 
@@ -67,30 +70,36 @@ public class AmqpClient extends AbstractAmqpClient {
         return new Builder();
     }
 
+    private final Serializer serializer = JacksonSerializer.json();
+
+    private final AmqpTransport transport;
+
     private AmqpClient(final Vertx vertx, final String hostname, final int port, final String container,
             final Duration syncTimeout) {
-        super(vertx, hostname, port, container, JacksonSerializer.json(), new DefaultAddressProvider(),
-                syncTimeout.abs().toMillis());
+        super(syncTimeout.abs().toMillis(), TimeUnit.MILLISECONDS);
+
+        this.transport = new AmqpTransport(vertx, hostname, port, container, this.serializer,
+                new DefaultAddressProvider());
     }
 
     @Override
     protected CompletionStage<Optional<Device>> internalFindById(final String id) {
-        return request("device", "findById", this.serializer.encode(id, null), bodyAsOptional(Device.class));
+        return this.transport.request("device", "findById", id, this.transport.bodyAsOptional(Device.class));
     }
 
     @Override
     protected CompletionStage<String> internalSave(final Device device) {
-        return request("device", "save", this.serializer.encode(device, null), bodyAs(String.class));
+        return this.transport.request("device", "save", device, this.transport.bodyAs(String.class));
     }
 
     @Override
     protected CompletionStage<String> internalCreate(final Device device) {
-        return request("device", "create", this.serializer.encode(device, null), bodyAs(String.class));
+        return this.transport.request("device", "create", device, this.transport.bodyAs(String.class));
     }
 
     @Override
     protected CompletionStage<Void> internalUpdate(final Device device) {
-        return request("device", "create", this.serializer.encode(device, null), ignoreBody());
+        return this.transport.request("device", "create", device, this.transport.ignoreBody());
     }
 
 }
