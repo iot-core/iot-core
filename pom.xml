@@ -23,6 +23,7 @@
     </properties>
 
     <modules>
+        <module>core-utils</module>
         <module>service-device</module>
         <module>device-registry-client</module>
         <module>service-device-binding</module>
