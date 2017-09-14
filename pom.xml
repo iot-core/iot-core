@@ -24,7 +24,8 @@
 
     <modules>
         <module>service-device</module>
-        <!--<module>device-registry-client</module>-->
+        <module>device-registry-client</module>
+        <module>service-device-binding</module>
         <module>device-serialization-gson</module>
     </modules>
 
