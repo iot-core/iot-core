@@ -50,6 +50,10 @@ public class AmqpTransport implements Transport<Message> {
         this.addressProvider = addressProvider;
     }
 
+    @Override
+    public void close() throws Exception {
+    }
+
     protected Future<ProtonConnection> createConnection() {
 
         final Future<ProtonConnection> result = Future.future();

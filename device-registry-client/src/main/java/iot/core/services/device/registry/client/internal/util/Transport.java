@@ -5,7 +5,7 @@ import java.util.concurrent.CompletionStage;
 
 import org.apache.qpid.proton.message.Message;
 
-public interface Transport<M> {
+public interface Transport<M> extends AutoCloseable {
 
     public <R> CompletionStage<R> request(String address, String verb, Object request,
             ReplyHandler<R, Message> replyHandler);

@@ -83,6 +83,12 @@ public class AmqpClient extends AbstractDefaultClient {
     }
 
     @Override
+    public void close() throws Exception {
+        this.transport.close();
+        super.close();
+    }
+
+    @Override
     protected CompletionStage<Optional<Device>> internalFindById(final String id) {
         return this.transport.request("device", "findById", id, this.transport.bodyAsOptional(Device.class));
     }
