@@ -44,6 +44,12 @@
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.7.9</version>
                 </plugin>
+
+                <plugin>
+                    <groupId>de.dentrassi.maven</groupId>
+                    <artifactId>jacoco-extras</artifactId>
+                    <version>0.1.1</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -65,6 +71,18 @@
                         <phase>test</phase>
                         <goals>
                             <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>de.dentrassi.maven</groupId>
+                <artifactId>jacoco-extras</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>xml</goal>
                         </goals>
                     </execution>
                 </executions>
