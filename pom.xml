@@ -21,6 +21,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+
+        <!-- Dependencies versions -->
+        <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
     </properties>
 
     <modules>
@@ -29,6 +32,7 @@
         <module>device-registry-client</module>
         <module>service-device-binding</module>
         <module>device-serialization-jackson</module>
+        <module>distribution</module>
     </modules>
 
     <build>

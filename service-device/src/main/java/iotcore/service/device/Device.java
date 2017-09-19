@@ -1,5 +1,7 @@
 package iotcore.service.device;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.util.Date;
 import java.util.Map;
 
@@ -64,6 +66,10 @@ public class Device {
 
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
+    }
+
+    @Override public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 
 }
