@@ -35,6 +35,8 @@ public class Main {
             syncSave(client, "id1");
             syncFind(client, "id1");
 
+            Thread.sleep(1_000);
+
         } finally {
             vertx.close();
         }

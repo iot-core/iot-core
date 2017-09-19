@@ -1,11 +1,11 @@
 package iot.core.services.device.registry.client.internal;
 
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
 import iot.core.services.device.registry.client.Client;
 import iot.core.services.device.registry.client.DeviceRegistryAsync;
+import iot.core.services.device.registry.client.util.CloseableCompletionStage;
 import iotcore.service.device.Device;
 import iotcore.service.device.DeviceRegistry;
 
@@ -33,33 +33,33 @@ public abstract class AbstractDefaultClient implements Client {
         return new DeviceRegistryAsync() {
 
             @Override
-            public CompletionStage<String> save(final Device device) {
+            public CloseableCompletionStage<String> save(final Device device) {
                 return internalSave(device);
             }
 
             @Override
-            public CompletionStage<Optional<Device>> findById(final String id) {
+            public CloseableCompletionStage<Optional<Device>> findById(final String id) {
                 return internalFindById(id);
             }
 
             @Override
-            public CompletionStage<String> create(final Device device) {
+            public CloseableCompletionStage<String> create(final Device device) {
                 return internalCreate(device);
             }
 
             @Override
-            public CompletionStage<Void> update(final Device device) {
+            public CloseableCompletionStage<Void> update(final Device device) {
                 return internalUpdate(device);
             }
         };
     }
 
-    protected abstract CompletionStage<Optional<Device>> internalFindById(String id);
+    protected abstract CloseableCompletionStage<Optional<Device>> internalFindById(String id);
 
-    protected abstract CompletionStage<String> internalSave(Device device);
+    protected abstract CloseableCompletionStage<String> internalSave(Device device);
 
-    protected abstract CompletionStage<Void> internalUpdate(Device device);
+    protected abstract CloseableCompletionStage<Void> internalUpdate(Device device);
 
-    protected abstract CompletionStage<String> internalCreate(Device device);
+    protected abstract CloseableCompletionStage<String> internalCreate(Device device);
 
 }

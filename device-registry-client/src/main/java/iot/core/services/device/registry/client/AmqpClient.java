@@ -2,12 +2,12 @@ package iot.core.services.device.registry.client;
 
 import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
 import io.vertx.core.Vertx;
 import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
 import iot.core.services.device.registry.client.internal.util.AmqpTransport;
+import iot.core.services.device.registry.client.util.CloseableCompletionStage;
 import iot.core.services.device.registry.serialization.Serializer;
 import iot.core.services.device.registry.serialization.jackson.JacksonSerializer;
 import iot.core.utils.address.DefaultAddressProvider;
@@ -89,22 +89,22 @@ public class AmqpClient extends AbstractDefaultClient {
     }
 
     @Override
-    protected CompletionStage<Optional<Device>> internalFindById(final String id) {
+    protected CloseableCompletionStage<Optional<Device>> internalFindById(final String id) {
         return this.transport.request("device", "findById", id, this.transport.bodyAsOptional(Device.class));
     }
 
     @Override
-    protected CompletionStage<String> internalSave(final Device device) {
+    protected CloseableCompletionStage<String> internalSave(final Device device) {
         return this.transport.request("device", "save", device, this.transport.bodyAs(String.class));
     }
 
     @Override
-    protected CompletionStage<String> internalCreate(final Device device) {
+    protected CloseableCompletionStage<String> internalCreate(final Device device) {
         return this.transport.request("device", "create", device, this.transport.bodyAs(String.class));
     }
 
     @Override
-    protected CompletionStage<Void> internalUpdate(final Device device) {
+    protected CloseableCompletionStage<Void> internalUpdate(final Device device) {
         return this.transport.request("device", "create", device, this.transport.ignoreBody());
     }
 

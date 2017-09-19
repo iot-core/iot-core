@@ -1,4 +1,4 @@
-package iot.core.services.device.registry.client.util;
+package iot.core.services.device.registry.client;
 
 import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
