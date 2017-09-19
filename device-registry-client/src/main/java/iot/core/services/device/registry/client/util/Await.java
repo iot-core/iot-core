@@ -24,9 +24,6 @@ public final class Await {
 
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new RuntimeException(e);
-        } finally {
-            // finally cancel, doesn't matter if we are already complete
-            future.cancel(false);
         }
     }
 

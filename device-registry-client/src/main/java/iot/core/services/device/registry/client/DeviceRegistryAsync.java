@@ -1,17 +1,17 @@
 package iot.core.services.device.registry.client;
 
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
 
+import iot.core.services.device.registry.client.util.CloseableCompletionStage;
 import iotcore.service.device.Device;
 
 public interface DeviceRegistryAsync {
-    public CompletionStage<String> save(Device device);
+    public CloseableCompletionStage<String> save(Device device);
 
-    public CompletionStage<Optional<Device>> findById(String id);
+    public CloseableCompletionStage<Optional<Device>> findById(String id);
 
-    public CompletionStage<String> create(Device device);
+    public CloseableCompletionStage<String> create(Device device);
 
-    public CompletionStage<Void> update(Device device);
+    public CloseableCompletionStage<Void> update(Device device);
 
 }
