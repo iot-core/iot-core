@@ -447,47 +447,6 @@ public class AmqpTransport implements Transport<Message> {
         receiver.open();
     }
 
-    /*
-     * protected void processRequest(final Request<?> request) {
-     *
-     * if (isClosed()) { logger.debug("Client is closed when processing request");
-     * request.fail("Client closed"); return; }
-     *
-     * final Future<ProtonSender> senderFuture = createSender(this.connection,
-     * request.getAddress());
-     *
-     * senderFuture.setHandler(sender -> {
-     *
-     * logger.debug("Sender ready -> {}", sender);
-     *
-     * if (sender.failed()) { request.fail(sender.cause()); return; }
-     *
-     * logger.debug("Sending request: {}", request);
-     *
-     * final ProtonReceiver receiver =
-     * this.connection.createReceiver(request.getReplyAddress());
-     * receiver.openHandler(opened -> {
-     *
-     * logger.debug("Receiver -> {}", opened);
-     *
-     * if (opened.failed()) { request.fail(opened.cause()); return; }
-     *
-     * request.whenClosed(() -> this.context.runOnContext(v -> receiver.close()));
-     *
-     * receiver.handler((delivery, message) -> { logger.debug("Received reply: {}",
-     * message); request.complete(message); });
-     *
-     * receiver.openHandler(receiverReady -> {
-     * sender.result().send(request.getMessage()); });
-     *
-     * receiver.open();
-     *
-     * }); });
-     *
-     * }
-     *
-     */
-
     private Message createMessage(final String verb, final Object request, final String replyToAddress) {
         final Properties p = new Properties();
         p.setSubject(verb);
