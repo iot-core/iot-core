@@ -1,4 +1,4 @@
-package iot.core.services.device.registry.client.internal.util;
+package iot.core.amqp.transport;
 
 @FunctionalInterface
 public interface ReplyHandler<R, M> {

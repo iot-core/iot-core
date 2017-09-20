@@ -10,22 +10,16 @@
         <version>0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>device-registry-client</artifactId>
+    <artifactId>amqp-transport</artifactId>
 
     <dependencies>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>amqp-transport</artifactId>
+            <artifactId>core-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>iot-core-service-device</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
+        
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>device-serialization-jackson</artifactId>
@@ -33,9 +27,9 @@
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>core-utils</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
         </dependency>
 
         <dependency>
@@ -51,16 +45,10 @@
         </dependency>
 
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
-        </dependency>
-
-        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.2.1</version>
-            <scope>runtime</scope>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

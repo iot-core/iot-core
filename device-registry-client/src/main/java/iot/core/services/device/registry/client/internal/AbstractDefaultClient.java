@@ -1,22 +1,20 @@
 package iot.core.services.device.registry.client.internal;
 
+import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
+import io.glutamate.util.concurrent.CloseableCompletionStage;
 import iot.core.services.device.registry.client.Client;
 import iot.core.services.device.registry.client.DeviceRegistryAsync;
-import iot.core.services.device.registry.client.util.CloseableCompletionStage;
 import iotcore.service.device.Device;
 import iotcore.service.device.DeviceRegistry;
 
 public abstract class AbstractDefaultClient implements Client {
 
-    private final long timeout;
-    private final TimeUnit timeUnit;
+    private final Duration timeout;
 
-    public AbstractDefaultClient(final long timeout, final TimeUnit timeUnit) {
+    public AbstractDefaultClient(final Duration timeout) {
         this.timeout = timeout;
-        this.timeUnit = timeUnit;
     }
 
     @Override
@@ -25,7 +23,7 @@ public abstract class AbstractDefaultClient implements Client {
 
     @Override
     public DeviceRegistry sync() {
-        return new SyncDeviceRegistryWrapper(async(), this.timeout, this.timeUnit);
+        return new SyncDeviceRegistryWrapper(async(), this.timeout);
     }
 
     @Override

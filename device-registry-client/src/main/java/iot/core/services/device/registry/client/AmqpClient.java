@@ -5,12 +5,11 @@ import static iot.core.services.device.registry.serialization.jackson.JacksonSer
 
 import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
+import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.Vertx;
+import iot.core.amqp.transport.AmqpTransport;
 import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
-import iot.core.services.device.registry.client.internal.util.AmqpTransport;
-import iot.core.services.device.registry.client.util.CloseableCompletionStage;
 import iot.core.services.device.registry.serialization.AmqpSerializer;
 import iot.core.utils.address.DefaultAddressProvider;
 import iotcore.service.device.Device;
@@ -78,7 +77,7 @@ public class AmqpClient extends AbstractDefaultClient {
 
     private AmqpClient(final Vertx vertx, final String hostname, final int port, final String container,
             final Duration syncTimeout) {
-        super(syncTimeout.abs().toMillis(), TimeUnit.MILLISECONDS);
+        super(syncTimeout.abs());
 
         this.transport = new AmqpTransport(vertx, hostname, port, container, this.serializer,
                 new DefaultAddressProvider());

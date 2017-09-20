@@ -2,7 +2,7 @@ package iot.core.services.device.registry.client;
 
 import java.util.Optional;
 
-import iot.core.services.device.registry.client.util.CloseableCompletionStage;
+import io.glutamate.util.concurrent.CloseableCompletionStage;
 import iotcore.service.device.Device;
 
 public interface DeviceRegistryAsync {

@@ -12,7 +12,6 @@ import org.junit.Test;
 
 import com.google.common.collect.Maps;
 
-import iot.core.services.device.registry.client.LocalClient;
 import iotcore.service.device.AlwaysPassingDeviceSchemaValidator;
 import iotcore.service.device.Device;
 import iotcore.service.device.InMemoryDeviceRegistry;

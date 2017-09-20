@@ -1,4 +1,4 @@
-package iot.core.services.device.registry.client.internal.util;
+package iot.core.amqp.transport;
 
 import static java.util.Optional.ofNullable;
 
@@ -18,6 +18,8 @@ import org.apache.qpid.proton.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.glutamate.util.concurrent.CloseableCompletableFuture;
+import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
@@ -26,8 +28,6 @@ import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
-import iot.core.services.device.registry.client.util.CloseableCompletableFuture;
-import iot.core.services.device.registry.client.util.CloseableCompletionStage;
 import iot.core.services.device.registry.serialization.AmqpSerializer;
 import iot.core.utils.address.AddressProvider;
 

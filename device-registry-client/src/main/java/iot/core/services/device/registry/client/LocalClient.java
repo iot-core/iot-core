@@ -1,6 +1,6 @@
 package iot.core.services.device.registry.client;
 
-import static iot.core.services.device.registry.client.util.CloseableCompletionStage.of;
+import static io.glutamate.util.concurrent.CloseableCompletionStage.of;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
@@ -9,8 +9,8 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import io.glutamate.util.concurrent.CloseableCompletionStage;
 import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
-import iot.core.services.device.registry.client.util.CloseableCompletionStage;
 import iotcore.service.device.Device;
 import iotcore.service.device.DeviceRegistry;
 
@@ -20,7 +20,7 @@ public class LocalClient extends AbstractDefaultClient {
     private final ExecutorService executionService;
 
     public LocalClient(final DeviceRegistry registry) {
-        super(0, null);
+        super(null);
 
         Objects.requireNonNull(registry);
 

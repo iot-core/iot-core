@@ -24,6 +24,7 @@
 
         <!-- Dependencies versions -->
         <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
+        <vertx.version>3.4.2</vertx.version>
     </properties>
 
     <modules>

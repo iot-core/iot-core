@@ -1,35 +1,19 @@
 package iot.core.services.device.registry.client.internal;
 
+import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import iot.core.services.device.registry.client.DeviceRegistryAsync;
-import iot.core.services.device.registry.client.util.Await;
-import iot.core.services.device.registry.client.util.CloseableCompletionStage;
+import iot.core.utils.client.AbstractSyncWrapper;
 import iotcore.service.device.Device;
 import iotcore.service.device.DeviceRegistry;
 
-public class SyncDeviceRegistryWrapper implements DeviceRegistry {
+public class SyncDeviceRegistryWrapper extends AbstractSyncWrapper implements DeviceRegistry {
     private final DeviceRegistryAsync async;
-    private final long timeout;
-    private final TimeUnit timeUnit;
 
-    public SyncDeviceRegistryWrapper(final DeviceRegistryAsync async, final long timeout, final TimeUnit timeUnit) {
+    public SyncDeviceRegistryWrapper(final DeviceRegistryAsync async, final Duration timeout) {
+        super(timeout);
         this.async = async;
-        this.timeout = timeout;
-        this.timeUnit = timeUnit;
-    }
-
-    private <T> T await(final CloseableCompletionStage<T> stage) {
-        try {
-            return Await.await(stage, this.timeout, this.timeUnit);
-        } finally {
-            try {
-                stage.close();
-            } catch (final Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     @Override
