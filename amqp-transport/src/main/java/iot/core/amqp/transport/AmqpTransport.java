@@ -53,115 +53,7 @@ public class AmqpTransport implements Transport<Message> {
 
     private final Context context;
 
-    public AmqpTransport(final Vertx vertx, final String hostname, final int port, final String container,
-            final AmqpSerializer serializer, final AddressProvider addressProvider) {
-
-        logger.debug("Creating AMQP transport - endpoint: {}:{}, container: {}", hostname, port, container);
-
-        this.vertx = vertx;
-        this.hostname = hostname;
-        this.port = port;
-        this.container = container;
-        this.serializer = serializer;
-        this.addressProvider = addressProvider;
-
-        this.context = vertx.getOrCreateContext();
-
-        this.context.runOnContext(v -> startConnection());
-    }
-
-    public boolean isClosed() {
-        return this.closed.get();
-    }
-
-    private void startConnection() {
-        logger.trace("Starting connection...");
-
-        if (isClosed()) {
-            logger.debug("Starting connection... abort, we are closed!");
-            // we are marked closed
-            return;
-        }
-
-        createConnection(this::handleConnection);
-    }
-
-    protected void handleConnection(final AsyncResult<ProtonConnection> result) {
-        if (result.failed()) {
-            if (isClosed()) {
-                // we are closed, nothing to do
-                return;
-            }
-
-            // set up timer for re-connect
-            this.vertx.setTimer(1_000, timer -> startConnection());
-        } else {
-            if (isClosed()) {
-                // we got marked closed in the meantime
-                result.result().close();
-                return;
-            }
-
-            this.connection = result.result();
-            this.connection.disconnectHandler(this::handleDisconnected);
-
-            this.buffer.getAddresses().forEach(this::requestSender);
-        }
-    }
-
-    protected void handleDisconnected(final ProtonConnection connection) {
-
-        logger.debug("Got disconnected: {}", connection);
-
-        this.connection = null;
-        if (!isClosed()) {
-            startConnection();
-        }
-    }
-
-    @Override
-    public void close() throws Exception {
-        if (this.closed.compareAndSet(false, true)) {
-            this.context.runOnContext(v -> {
-                performClose();
-            });
-        }
-    }
-
-    private void performClose() {
-        if (this.connection != null) {
-            this.connection.close();
-            this.connection = null;
-        }
-
-        // FIXME: flush buffer
-        this.buffer.flush(request -> request.fail("Client closed"));
-    }
-
-    protected void createConnection(final Handler<AsyncResult<ProtonConnection>> handler) {
-
-        final ProtonClient client = ProtonClient.create(this.vertx);
-
-        client.connect(this.hostname, this.port, con -> {
-
-            logger.debug("Connection -> {}", con);
-
-            if (con.failed()) {
-                handler.handle(con);
-                return;
-            }
-
-            con.result()
-                    .setContainer(this.container)
-                    .openHandler(opened -> {
-
-                        logger.debug("Open -> {}", opened);
-                        handler.handle(opened);
-
-                    }).open();
-
-        });
-    }
+    private final Buffer buffer = new Buffer();
 
     private static class Request<R> extends CloseableCompletableFuture<R> {
         private final String address;
@@ -318,7 +210,114 @@ public class AmqpTransport implements Transport<Message> {
         }
     }
 
-    private final Buffer buffer = new Buffer();
+    public AmqpTransport(final Vertx vertx, final String hostname, final int port, final String container,
+            final AmqpSerializer serializer, final AddressProvider addressProvider) {
+
+        logger.debug("Creating AMQP transport - endpoint: {}:{}, container: {}", hostname, port, container);
+
+        this.vertx = vertx;
+        this.hostname = hostname;
+        this.port = port;
+        this.container = container;
+        this.serializer = serializer;
+        this.addressProvider = addressProvider;
+
+        this.context = vertx.getOrCreateContext();
+
+        this.context.runOnContext(v -> startConnection());
+    }
+
+    public boolean isClosed() {
+        return this.closed.get();
+    }
+
+    private void startConnection() {
+        logger.trace("Starting connection...");
+
+        if (isClosed()) {
+            logger.debug("Starting connection... abort, we are closed!");
+            // we are marked closed
+            return;
+        }
+
+        createConnection(this::handleConnection);
+    }
+
+    protected void handleConnection(final AsyncResult<ProtonConnection> result) {
+        if (result.failed()) {
+            if (isClosed()) {
+                // we are closed, nothing to do
+                return;
+            }
+
+            // set up timer for re-connect
+            this.vertx.setTimer(1_000, timer -> startConnection());
+        } else {
+            if (isClosed()) {
+                // we got marked closed in the meantime
+                result.result().close();
+                return;
+            }
+
+            this.connection = result.result();
+            this.connection.disconnectHandler(this::handleDisconnected);
+
+            this.buffer.getAddresses().forEach(this::requestSender);
+        }
+    }
+
+    protected void handleDisconnected(final ProtonConnection connection) {
+
+        logger.debug("Got disconnected: {}", connection);
+
+        this.connection = null;
+        if (!isClosed()) {
+            startConnection();
+        }
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (this.closed.compareAndSet(false, true)) {
+            this.context.runOnContext(v -> {
+                performClose();
+            });
+        }
+    }
+
+    private void performClose() {
+        if (this.connection != null) {
+            this.connection.close();
+            this.connection = null;
+        }
+
+        this.buffer.flush(request -> request.fail("Client closed"));
+    }
+
+    protected void createConnection(final Handler<AsyncResult<ProtonConnection>> handler) {
+
+        final ProtonClient client = ProtonClient.create(this.vertx);
+
+        client.connect(this.hostname, this.port, con -> {
+
+            logger.debug("Connection -> {}", con);
+
+            if (con.failed()) {
+                handler.handle(con);
+                return;
+            }
+
+            con.result()
+            .setContainer(this.container)
+            .openHandler(opened -> {
+
+                logger.debug("Open -> {}", opened);
+                handler.handle(opened);
+
+            }).open();
+
+        });
+    }
 
     @Override
     public <R> CloseableCompletionStage<R> request(final String service, final String verb, final Object requestBody,
