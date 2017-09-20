@@ -13,12 +13,12 @@ import org.junit.Test;
 
 import com.google.common.collect.Maps;
 
-import iot.core.services.device.registry.serialization.Serializer;
+import iot.core.services.device.registry.serialization.ByteSerializer;
 import iotcore.service.device.Device;
 
 public class JsonTest {
 
-    private Serializer serializer;
+    private ByteSerializer serializer;
 
     @Before
     public void setup() {

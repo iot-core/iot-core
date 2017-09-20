@@ -1,10 +1,16 @@
 package iotcore.service.device.binding;
 
+import java.util.Optional;
+
+import org.apache.qpid.proton.message.Message;
+import org.apache.qpid.proton.message.impl.MessageImpl;
+
 import io.vertx.core.Vertx;
 import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonSender;
-import iot.core.services.device.registry.serialization.Serializer;
+import iot.core.services.device.registry.serialization.AmqpByteSerializer;
+import iot.core.services.device.registry.serialization.AmqpSerializer;
 import iot.core.services.device.registry.serialization.jackson.JacksonSerializer;
 import iot.core.utils.address.AddressProvider;
 import iot.core.utils.address.DefaultAddressProvider;
@@ -12,20 +18,13 @@ import iotcore.service.device.AlwaysPassingDeviceSchemaValidator;
 import iotcore.service.device.Device;
 import iotcore.service.device.DeviceRegistry;
 import iotcore.service.device.InMemoryDeviceRegistry;
-import org.apache.qpid.proton.amqp.Binary;
-import org.apache.qpid.proton.amqp.messaging.Data;
-import org.apache.qpid.proton.amqp.messaging.Section;
-import org.apache.qpid.proton.message.Message;
-import org.apache.qpid.proton.message.impl.MessageImpl;
-
-import java.util.Optional;
 
 
 public class DeviceRegistryBinding {
 
     private final DeviceRegistry deviceRegistry;
 
-    private final Serializer serializer = JacksonSerializer.json();
+    private final AmqpSerializer serializer = AmqpByteSerializer.of(JacksonSerializer.json());
     
     private AddressProvider addressProvider = new DefaultAddressProvider();
 
@@ -54,15 +53,11 @@ public class DeviceRegistryBinding {
             ProtonSender sender = connection.createSender(null).open();
             String replyTo = msg.getReplyTo();
             if("save".equals(msg.getProperties().getSubject())) {
-                Section body = msg.getBody();
-                byte[] content = ((Data) body).getValue().asByteBuffer().array();
-                Device device = serializer.decode(content, Device.class);
+                Device device = serializer.decode(msg.getBody(), Device.class);
                 String deviceId = deviceRegistry.create(device);
                 sendReply(sender, replyTo, deviceId);
             } else if("findById".equals(msg.getProperties().getSubject())) {
-                Section body = msg.getBody();
-                byte[] content = ((Data) body).getValue().asByteBuffer().array();
-                String deviceId = serializer.decode(content, String.class);
+                String deviceId = serializer.decode(msg.getBody(), String.class);
                 Optional<Device> device = deviceRegistry.findById(deviceId);
                 sendReply(sender, replyTo, device.get());
             }
@@ -71,7 +66,7 @@ public class DeviceRegistryBinding {
 
     void sendReply(ProtonSender sender, String replyTo, Object reply) {
         Message message = new MessageImpl();
-        message.setBody(new Data(new Binary(serializer.encode(reply))));
+        message.setBody(serializer.encode(reply));
         message.setAddress(replyTo);
 
         sender.send(message);

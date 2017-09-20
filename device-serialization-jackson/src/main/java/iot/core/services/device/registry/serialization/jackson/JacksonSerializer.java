@@ -8,15 +8,15 @@ import java.util.Objects;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import iot.core.services.device.registry.serialization.Serializer;
+import iot.core.services.device.registry.serialization.ByteSerializer;
 
-public class JacksonSerializer implements Serializer {
+public class JacksonSerializer implements ByteSerializer {
 
-    public static Serializer json() {
+    public static ByteSerializer json() {
         return json(false);
     }
 
-    public static Serializer json(final boolean pretty) {
+    public static ByteSerializer json(final boolean pretty) {
         return new JacksonSerializer(ObjectMappers.defaultJson(pretty));
     }
 

@@ -1,5 +1,8 @@
 package iot.core.services.device.registry.client;
 
+import static iot.core.services.device.registry.serialization.AmqpByteSerializer.of;
+import static iot.core.services.device.registry.serialization.jackson.JacksonSerializer.json;
+
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -8,8 +11,7 @@ import io.vertx.core.Vertx;
 import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
 import iot.core.services.device.registry.client.internal.util.AmqpTransport;
 import iot.core.services.device.registry.client.util.CloseableCompletionStage;
-import iot.core.services.device.registry.serialization.Serializer;
-import iot.core.services.device.registry.serialization.jackson.JacksonSerializer;
+import iot.core.services.device.registry.serialization.AmqpSerializer;
 import iot.core.utils.address.DefaultAddressProvider;
 import iotcore.service.device.Device;
 
@@ -70,7 +72,7 @@ public class AmqpClient extends AbstractDefaultClient {
         return new Builder();
     }
 
-    private final Serializer serializer = JacksonSerializer.json();
+    private final AmqpSerializer serializer = of(json());
 
     private final AmqpTransport transport;
 

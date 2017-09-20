@@ -13,8 +13,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.apache.qpid.proton.amqp.Binary;
-import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.message.Message;
 import org.slf4j.Logger;
@@ -30,7 +28,7 @@ import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
 import iot.core.services.device.registry.client.util.CloseableCompletableFuture;
 import iot.core.services.device.registry.client.util.CloseableCompletionStage;
-import iot.core.services.device.registry.serialization.Serializer;
+import iot.core.services.device.registry.serialization.AmqpSerializer;
 import iot.core.utils.address.AddressProvider;
 
 public class AmqpTransport implements Transport<Message> {
@@ -47,7 +45,7 @@ public class AmqpTransport implements Transport<Message> {
 
     private final String container;
 
-    private final Serializer serializer;
+    private final AmqpSerializer serializer;
 
     private final AddressProvider addressProvider;
 
@@ -56,7 +54,7 @@ public class AmqpTransport implements Transport<Message> {
     private final Context context;
 
     public AmqpTransport(final Vertx vertx, final String hostname, final int port, final String container,
-            final Serializer serializer, final AddressProvider addressProvider) {
+            final AmqpSerializer serializer, final AddressProvider addressProvider) {
 
         logger.debug("Creating AMQP transport - endpoint: {}:{}, container: {}", hostname, port, container);
 
@@ -498,7 +496,7 @@ public class AmqpTransport implements Transport<Message> {
         final Message message = Message.Factory.create();
 
         message.setProperties(p);
-        message.setBody(new Data(new Binary(this.serializer.encode(request))));
+        message.setBody(this.serializer.encode(request));
         return message;
     }
 
@@ -509,12 +507,12 @@ public class AmqpTransport implements Transport<Message> {
 
     @Override
     public <T> ReplyHandler<T, Message> bodyAs(final Class<T> clazz) {
-        return msg -> this.serializer.decode(Messages.bodyAsBlob(msg), clazz);
+        return msg -> this.serializer.decode(msg.getBody(), clazz);
     }
 
     @Override
     public <T> ReplyHandler<Optional<T>, Message> bodyAsOptional(final Class<T> clazz) {
-        return msg -> ofNullable(this.serializer.decode(Messages.bodyAsBlob(msg), clazz));
+        return msg -> ofNullable(this.serializer.decode(msg.getBody(), clazz));
     }
 
 }

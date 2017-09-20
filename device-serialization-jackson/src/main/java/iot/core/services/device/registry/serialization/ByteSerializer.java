@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-public interface Serializer {
+public interface ByteSerializer {
     public default byte[] encode(final Object value) {
         if (value == null) {
             return null;
