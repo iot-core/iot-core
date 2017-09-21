@@ -16,6 +16,9 @@ public final class AmqpByteSerializer implements AmqpSerializer {
 
     @Override
     public Section encode(final Object object) {
+        if (object == null) {
+            return null;
+        }
         return new Data(new Binary(this.byteSerializer.encode(object)));
     }
 
