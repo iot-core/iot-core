@@ -12,9 +12,9 @@ import org.junit.Test;
 
 import com.google.common.collect.Maps;
 
-import iotcore.service.device.AlwaysPassingDeviceSchemaValidator;
-import iotcore.service.device.Device;
-import iotcore.service.device.InMemoryDeviceRegistry;
+import iot.core.service.device.AlwaysPassingDeviceSchemaValidator;
+import iot.core.service.device.Device;
+import iot.core.service.device.InMemoryDeviceRegistry;
 
 public class LocalTest {
 

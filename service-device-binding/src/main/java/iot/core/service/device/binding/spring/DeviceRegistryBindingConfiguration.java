@@ -1,11 +1,12 @@
-package iotcore.service.device.binding.spring;
+package iot.core.service.device.binding.spring;
 
-import iotcore.service.device.DeviceRegistry;
-import iotcore.service.device.binding.DeviceRegistryBinding;
-import iotcore.service.device.spring.DeviceRegistryConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import iot.core.service.device.DeviceRegistry;
+import iot.core.service.device.binding.DeviceRegistryBinding;
+import iot.core.service.device.spring.DeviceRegistryConfiguration;
 
 @Configuration
 @Import(DeviceRegistryConfiguration.class)

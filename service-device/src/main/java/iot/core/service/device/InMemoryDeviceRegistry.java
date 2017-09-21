@@ -1,4 +1,4 @@
-package iotcore.service.device;
+package iot.core.service.device;
 
 import java.util.HashMap;
 import java.util.Map;

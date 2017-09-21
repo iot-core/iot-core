@@ -4,10 +4,10 @@ import java.time.Duration;
 import java.util.Optional;
 
 import io.glutamate.util.concurrent.CloseableCompletionStage;
+import iot.core.service.device.Device;
+import iot.core.service.device.DeviceRegistry;
 import iot.core.services.device.registry.client.Client;
 import iot.core.services.device.registry.client.DeviceRegistryAsync;
-import iotcore.service.device.Device;
-import iotcore.service.device.DeviceRegistry;
 
 public abstract class AbstractDefaultClient implements Client {
 

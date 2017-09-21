@@ -1,4 +1,4 @@
-package iotcore.service.device.binding;
+package iot.core.service.device.binding;
 
 import java.util.Optional;
 
@@ -9,15 +9,15 @@ import io.vertx.core.Vertx;
 import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonSender;
+import iot.core.service.device.AlwaysPassingDeviceSchemaValidator;
+import iot.core.service.device.Device;
+import iot.core.service.device.DeviceRegistry;
+import iot.core.service.device.InMemoryDeviceRegistry;
 import iot.core.services.device.registry.serialization.AmqpByteSerializer;
 import iot.core.services.device.registry.serialization.AmqpSerializer;
 import iot.core.services.device.registry.serialization.jackson.JacksonSerializer;
 import iot.core.utils.address.AddressProvider;
 import iot.core.utils.address.DefaultAddressProvider;
-import iotcore.service.device.AlwaysPassingDeviceSchemaValidator;
-import iotcore.service.device.Device;
-import iotcore.service.device.DeviceRegistry;
-import iotcore.service.device.InMemoryDeviceRegistry;
 
 public class DeviceRegistryBinding {
 

@@ -3,10 +3,10 @@ package iot.core.services.device.registry.client.internal;
 import java.time.Duration;
 import java.util.Optional;
 
+import iot.core.service.device.Device;
+import iot.core.service.device.DeviceRegistry;
 import iot.core.services.device.registry.client.DeviceRegistryAsync;
 import iot.core.utils.client.AbstractSyncWrapper;
-import iotcore.service.device.Device;
-import iotcore.service.device.DeviceRegistry;
 
 public class SyncDeviceRegistryWrapper extends AbstractSyncWrapper implements DeviceRegistry {
     private final DeviceRegistryAsync async;

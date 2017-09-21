@@ -1,4 +1,4 @@
-package iotcore.service.device;
+package iot.core.service.device;
 
 public class MockDeviceSchemaValidator implements DeviceSchemaValidator {
 

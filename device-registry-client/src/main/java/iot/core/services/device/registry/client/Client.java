@@ -1,6 +1,6 @@
 package iot.core.services.device.registry.client;
 
-import iotcore.service.device.DeviceRegistry;
+import iot.core.service.device.DeviceRegistry;
 
 public interface Client extends AutoCloseable {
 

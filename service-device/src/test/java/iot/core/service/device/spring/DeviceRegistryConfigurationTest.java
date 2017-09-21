@@ -1,8 +1,10 @@
-package iotcore.service.device.spring;
+package iot.core.service.device.spring;
 
-import iotcore.service.device.DeviceRegistry;
 import org.junit.Test;
 import org.springframework.boot.SpringApplication;
+
+import iot.core.service.device.DeviceRegistry;
+import iot.core.service.device.spring.DeviceRegistryConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

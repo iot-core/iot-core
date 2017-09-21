@@ -9,7 +9,7 @@
         </encoder>
     </appender>
 
-    <logger name="iotcore" level="DEBUG"/>
+    <logger name="iot.core" level="DEBUG"/>
 
     <root level="info">
         <appender-ref ref="STDOUT" />

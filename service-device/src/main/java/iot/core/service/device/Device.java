@@ -1,4 +1,4 @@
-package iotcore.service.device;
+package iot.core.service.device;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 

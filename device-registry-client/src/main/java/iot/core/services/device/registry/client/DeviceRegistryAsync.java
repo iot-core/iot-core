@@ -3,7 +3,7 @@ package iot.core.services.device.registry.client;
 import java.util.Optional;
 
 import io.glutamate.util.concurrent.CloseableCompletionStage;
-import iotcore.service.device.Device;
+import iot.core.service.device.Device;
 
 public interface DeviceRegistryAsync {
     public CloseableCompletionStage<String> save(Device device);

@@ -8,9 +8,9 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import io.vertx.core.Vertx;
-import iotcore.service.device.AlwaysPassingDeviceSchemaValidator;
-import iotcore.service.device.Device;
-import iotcore.service.device.InMemoryDeviceRegistry;
+import iot.core.service.device.AlwaysPassingDeviceSchemaValidator;
+import iot.core.service.device.Device;
+import iot.core.service.device.InMemoryDeviceRegistry;
 
 public class Main {
 
