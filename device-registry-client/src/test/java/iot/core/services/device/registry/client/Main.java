@@ -32,7 +32,9 @@ public class Main {
             asyncSave(client, "id2");
             asyncFind(client, "id2");
 
+            syncCreate(client, "id1");
             syncSave(client, "id1");
+            syncUpdate(client, "id1");
             syncFind(client, "id1");
 
             Thread.sleep(1_000);
@@ -43,11 +45,25 @@ public class Main {
 
     }
 
+    private static void syncCreate(final Client client, final String id) {
+        final Device device = createNewDevice(id);
+
+        final String result = client.sync().create(device);
+        System.out.format("create[sync]: %s -> %s%n", device, result);
+    }
+
     private static void syncSave(final Client client, final String id) {
         final Device device = createNewDevice(id);
 
         final String result = client.sync().save(device);
         System.out.format("save[sync]: %s -> %s%n", device, result);
+    }
+
+    private static void syncUpdate(final Client client, final String id) {
+        final Device device = createNewDevice(id);
+
+        client.sync().update(device);
+        System.out.format("update[sync]: %s%n", device);
     }
 
     private static void syncFind(final Client client, final String id) {
