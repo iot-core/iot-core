@@ -13,7 +13,7 @@
     <artifactId>device-serialization-jackson</artifactId>
 
     <properties>
-        <jackson.version>2.9.1</jackson.version>
+        <jackson.version>2.7.4</jackson.version>
     </properties>
 
     <dependencies>
