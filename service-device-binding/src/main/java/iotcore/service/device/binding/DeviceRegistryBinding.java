@@ -19,13 +19,12 @@ import iotcore.service.device.Device;
 import iotcore.service.device.DeviceRegistry;
 import iotcore.service.device.InMemoryDeviceRegistry;
 
-
 public class DeviceRegistryBinding {
 
     private final DeviceRegistry deviceRegistry;
 
     private final AmqpSerializer serializer = AmqpByteSerializer.of(JacksonSerializer.json());
-    
+
     private AddressProvider addressProvider = new DefaultAddressProvider();
 
     public DeviceRegistryBinding(DeviceRegistry deviceRegistry) {
@@ -52,14 +51,36 @@ public class DeviceRegistryBinding {
         connection.createReceiver(address).handler((delivery, msg) -> {
             ProtonSender sender = connection.createSender(null).open();
             String replyTo = msg.getReplyTo();
-            if("save".equals(msg.getProperties().getSubject())) {
+            String verb = msg.getProperties().getSubject();
+            if (verb == null) {
+                return;
+            }
+
+            switch (verb) {
+            case "create": {
                 Device device = serializer.decode(msg.getBody(), Device.class);
                 String deviceId = deviceRegistry.create(device);
                 sendReply(sender, replyTo, deviceId);
-            } else if("findById".equals(msg.getProperties().getSubject())) {
+                break;
+            }
+            case "save": {
+                Device device = serializer.decode(msg.getBody(), Device.class);
+                String deviceId = deviceRegistry.save(device);
+                sendReply(sender, replyTo, deviceId);
+                break;
+            }
+            case "update": {
+                Device device = serializer.decode(msg.getBody(), Device.class);
+                deviceRegistry.update(device);
+                sendReply(sender, replyTo, null);
+                break;
+            }
+            case "findById": {
                 String deviceId = serializer.decode(msg.getBody(), String.class);
                 Optional<Device> device = deviceRegistry.findById(deviceId);
                 sendReply(sender, replyTo, device.get());
+                break;
+            }
             }
         }).open();
     }
