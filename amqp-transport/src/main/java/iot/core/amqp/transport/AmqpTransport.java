@@ -374,7 +374,10 @@ public class AmqpTransport implements Transport<Message> {
                 if (senderReady.failed()) {
                     senderFailed(address);
                 } else {
-                    senderReady(senderReady.result(), address);
+                    senderReady.result().sendQueueDrainHandler(v -> {
+                        logger.debug("Sender queue can accept");
+                        senderReady(senderReady.result(), address);
+                    });
                 }
             });
             newSender.open();
