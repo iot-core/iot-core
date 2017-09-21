@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.qpid.proton.amqp.messaging.Properties;
+import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -444,7 +445,10 @@ public class AmqpTransport implements Transport<Message> {
 
             logger.debug("Sending message: {}", request);
 
-            sender.send(request.getMessage());
+            sender.send(request.getMessage(), delivery -> {
+                final DeliveryState state = delivery.getRemoteState();
+                logger.debug("Remote state - {} for {}", state, request);
+            });
         });
         receiver.open();
     }
