@@ -26,6 +26,9 @@ public class AmqpClient extends AbstractDefaultClient {
 
         private Duration syncTimeout = Duration.ofSeconds(5);
 
+        private Builder() {
+        }
+
         public Builder hostname(final String hostname) {
             this.hostname = hostname;
             return this;
