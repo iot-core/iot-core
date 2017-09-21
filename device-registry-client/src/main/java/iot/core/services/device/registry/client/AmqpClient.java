@@ -109,7 +109,7 @@ public class AmqpClient extends AbstractDefaultClient {
 
     @Override
     protected CloseableCompletionStage<Void> internalUpdate(final Device device) {
-        return this.transport.request("device", "create", device, this.transport.ignoreBody());
+        return this.transport.request("device", "update", device, this.transport.ignoreBody());
     }
 
 }
