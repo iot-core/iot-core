@@ -1,10 +1,10 @@
-package iotcore.distribution.deviceregistry;
+package iot.core.distribution.deviceregistry;
 
 import com.google.common.collect.ImmutableMap;
 import io.vertx.core.Vertx;
 import iot.core.services.device.registry.client.AmqpClient;
 import iot.core.services.device.registry.client.Client;
-import iotcore.service.device.Device;
+import iot.core.service.device.Device;
 
 import static io.vertx.core.Vertx.vertx;
 import static java.util.UUID.randomUUID;

@@ -1,8 +1,8 @@
-package iotcore.distribution.deviceregistry;
+package iot.core.distribution.deviceregistry;
 
-import iotcore.service.device.AlwaysPassingDeviceSchemaValidator;
-import iotcore.service.device.DeviceSchemaValidator;
-import iotcore.service.device.binding.spring.DeviceRegistryBindingConfiguration;
+import iot.core.service.device.AlwaysPassingDeviceSchemaValidator;
+import iot.core.service.device.DeviceSchemaValidator;
+import iot.core.service.device.binding.spring.DeviceRegistryBindingConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
