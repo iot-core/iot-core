@@ -27,6 +27,14 @@ public abstract class AbstractDefaultClient implements Client {
     }
 
     @Override
+    public DeviceRegistry sync(final Duration timeout) {
+        if (timeout == null) {
+            return sync();
+        }
+        return new SyncDeviceRegistryWrapper(async(), timeout.abs());
+    }
+
+    @Override
     public DeviceRegistryAsync async() {
         return new DeviceRegistryAsync() {
 
