@@ -1,7 +1,6 @@
 package iot.core.service.device.binding;
 
-import java.util.Optional;
-
+import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 
@@ -52,37 +51,39 @@ public class DeviceRegistryBinding {
             ProtonSender sender = connection.createSender(null).open();
             String replyTo = msg.getReplyTo();
             String verb = msg.getProperties().getSubject();
+
             if (verb == null) {
-                return;
+                // FIXME: propagate exceptions
+                throw new IllegalArgumentException(String.format("Verb missing"));
             }
 
-            switch (verb) {
-            case "create": {
-                Device device = serializer.decode(msg.getBody(), Device.class);
-                String deviceId = deviceRegistry.create(device);
-                sendReply(sender, replyTo, deviceId);
-                break;
-            }
-            case "save": {
-                Device device = serializer.decode(msg.getBody(), Device.class);
-                String deviceId = deviceRegistry.save(device);
-                sendReply(sender, replyTo, deviceId);
-                break;
-            }
-            case "update": {
-                Device device = serializer.decode(msg.getBody(), Device.class);
-                deviceRegistry.update(device);
-                sendReply(sender, replyTo, null);
-                break;
-            }
-            case "findById": {
-                String deviceId = serializer.decode(msg.getBody(), String.class);
-                Optional<Device> device = deviceRegistry.findById(deviceId);
-                sendReply(sender, replyTo, device);
-                break;
-            }
-            }
+            Object result = processRequest (verb, msg.getBody(), sender);
+            sendReply(sender, replyTo, result);
         }).open();
+    }
+
+    private Object processRequest(String verb, Section body, ProtonSender sender) {
+        switch (verb) {
+        case "create": {
+            Device device = serializer.decode(body, Device.class);
+            return deviceRegistry.create(device);
+        }
+        case "save": {
+            Device device = serializer.decode(body, Device.class);
+            return deviceRegistry.save(device);
+        }
+        case "update": {
+            Device device = serializer.decode(body, Device.class);
+            deviceRegistry.update(device);
+            return null;
+        }
+        case "findById": {
+            String deviceId = serializer.decode(body, String.class);
+            return deviceRegistry.findById(deviceId);
+        }
+        default:
+            throw new IllegalArgumentException(String.format("Unsupported verb: %s" + verb));
+        }
     }
 
     void sendReply(ProtonSender sender, String replyTo, Object reply) {
