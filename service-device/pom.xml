@@ -13,7 +13,7 @@
     <parent>
         <groupId>iot-core</groupId>
         <artifactId>iot-core</artifactId>
-        <version>0.0-SNAPSHOT</version>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>iot-core-service-device</artifactId>
 
