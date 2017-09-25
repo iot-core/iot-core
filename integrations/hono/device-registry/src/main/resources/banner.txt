@@ -1,0 +1,14 @@
+
+ _____   _______    _____               
+|_   _| |__   __|  / ____|              
+  | |  ___ | |    | |     ___  _ __ ___ 
+  | | / _ \| |    | |    / _ \| '__/ _ \
+ _| || (_) | |    | |___| (_) | | |  __/
+|_____\___/|_|     \_____\___/|_|  \___|
+
+
+IoT Core Device Registry Server ${application.formatted-version}
+using Spring Boot${spring-boot.formatted-version}
+
+Go to https://github.com/iot-core for more information.
+

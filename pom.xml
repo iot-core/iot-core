@@ -38,6 +38,8 @@
         <module>service-device-binding</module>
         <module>device-serialization-jackson</module>
         <module>distribution</module>
+
+        <module>integrations/hono/device-registry</module>
     </modules>
 
     <dependencyManagement>
