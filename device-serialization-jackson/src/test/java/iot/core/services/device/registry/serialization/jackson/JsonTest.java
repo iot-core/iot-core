@@ -45,8 +45,6 @@ public class JsonTest {
         data.put("long1", Long.MAX_VALUE);
         data.put("double1", Double.MAX_VALUE);
         data.put("instant1", Instant.now().toString());
-        data.put("opt1", Optional.<String>empty());
-        data.put("opt2", Optional.<String>of("FooBar"));
 
         device1.setProperties(data);
 
@@ -64,6 +62,19 @@ public class JsonTest {
         assertDevice(device1,
                 this.serializer.decode(encode(device1, ByteBuffer.allocate(1)), Device.class));
 
+    }
+
+    @Test
+    public void testOptional1() {
+        final String result = this.serializer.decode(this.serializer.encode(Optional.<String>empty()), String.class);
+        Assert.assertNull(result);
+    }
+
+    @Test
+    public void testOptional2() {
+        final String result = this.serializer.decode(this.serializer.encode(Optional.<String>of("FooBar")),
+                String.class);
+        Assert.assertEquals("FooBar", result);
     }
 
     private ByteBuffer encode(final Object value, final ByteBuffer buffer) {

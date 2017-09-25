@@ -78,7 +78,7 @@ public class DeviceRegistryBinding {
             case "findById": {
                 String deviceId = serializer.decode(msg.getBody(), String.class);
                 Optional<Device> device = deviceRegistry.findById(deviceId);
-                sendReply(sender, replyTo, device.get());
+                sendReply(sender, replyTo, device);
                 break;
             }
             }
