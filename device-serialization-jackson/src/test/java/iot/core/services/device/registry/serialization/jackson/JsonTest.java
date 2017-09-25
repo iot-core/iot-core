@@ -1,13 +1,23 @@
 package iot.core.services.device.registry.serialization.jackson;
 
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FilterOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,7 +36,7 @@ public class JsonTest {
     }
 
     @Test
-    public void test1() {
+    public void test1() throws IOException {
         final Device device1 = new Device();
         device1.setDeviceId("id1");
 
@@ -35,8 +45,15 @@ public class JsonTest {
         data.put("long1", Long.MAX_VALUE);
         data.put("double1", Double.MAX_VALUE);
         data.put("instant1", Instant.now().toString());
+        data.put("opt1", Optional.<String>empty());
+        data.put("opt2", Optional.<String>of("FooBar"));
 
         device1.setProperties(data);
+
+        this.serializer.encodeTo(device1, System.out);
+        System.out.println();
+        this.serializer.encodeTo(this.serializer.decode(this.serializer.encode(device1), Device.class), System.out);
+        System.out.println();
 
         assertDevice(device1, this.serializer.decode(this.serializer.encode(device1), Device.class));
 
@@ -64,6 +81,33 @@ public class JsonTest {
         assertEquals(expected.getUpdated(), actual.getUpdated());
 
         assertTrue(Maps.difference(expected.getProperties(), actual.getProperties()).areEqual());
+    }
+
+    @Test
+    public void testEnsureNotClosed() throws IOException {
+        final Device device = new Device();
+
+        final AtomicBoolean closeCheck = new AtomicBoolean();
+
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final FilterOutputStream assertOut = new FilterOutputStream(out) {
+            @Override
+            public void close() throws IOException {
+                closeCheck.set(true);
+                super.close();
+            }
+        };
+
+        this.serializer.encodeTo(device, assertOut);
+        assertFalse(closeCheck.get());
+        final byte[] array1 = out.toByteArray();
+
+        this.serializer.encodeTo(device, assertOut);
+        assertFalse(closeCheck.get());
+        final byte[] array2 = out.toByteArray();
+
+        Assert.assertTrue(array2.length > array1.length);
+        assertThat(array1, not(equalTo(array2)));
     }
 
 }

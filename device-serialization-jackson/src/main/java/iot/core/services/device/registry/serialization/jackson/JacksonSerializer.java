@@ -1,5 +1,7 @@
 package iot.core.services.device.registry.serialization.jackson;
 
+import java.io.FilterInputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -32,7 +34,7 @@ public class JacksonSerializer implements ByteSerializer {
 
         if (value != null) {
             try {
-                this.mapper.writeValue(stream, value);
+                this.mapper.writeValue(closeShield(stream), value);
             } catch (final JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
@@ -49,10 +51,26 @@ public class JacksonSerializer implements ByteSerializer {
         Objects.requireNonNull(clazz);
 
         try {
-            return this.mapper.readValue(stream, clazz);
+            return this.mapper.readValue(closeShield(stream), clazz);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static OutputStream closeShield(final OutputStream stream) {
+        return new FilterOutputStream(stream) {
+            @Override
+            public void close() {
+            }
+        };
+    }
+
+    private static InputStream closeShield(final InputStream stream) {
+        return new FilterInputStream(stream) {
+            @Override
+            public void close() {
+            }
+        };
     }
 
 }
