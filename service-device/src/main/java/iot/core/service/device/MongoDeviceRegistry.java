@@ -2,9 +2,10 @@ package iot.core.service.device;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
 
 import java.util.Map;
 import java.util.Optional;
@@ -13,13 +14,13 @@ import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKN
 
 public class MongoDeviceRegistry implements DeviceRegistry {
 
-    private final Mongo mongo;
+    private final MongoClient mongo;
 
     private final DeviceSchemaValidator schemaValidator;
 
     private final ObjectMapper objectMapper = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    public MongoDeviceRegistry(Mongo mongo, DeviceSchemaValidator schemaValidator) {
+    public MongoDeviceRegistry(MongoClient mongo, DeviceSchemaValidator schemaValidator) {
         this.mongo = mongo;
         this.schemaValidator = schemaValidator;
     }
@@ -27,16 +28,12 @@ public class MongoDeviceRegistry implements DeviceRegistry {
     @Override public String create(Device device) {
         schemaValidator.validate(device);
 
-        BasicDBObject deviceQuery = new BasicDBObject();
-        deviceQuery.put("deviceId", device.getDeviceId());
-        boolean deviceExists = devices().find(deviceQuery).hasNext();
-        if(deviceExists) {
+        if(deviceExists(device.getDeviceId())) {
             throw new IllegalArgumentException("Device with given ID already exists.");
         }
 
-        BasicDBObject mongoDevice = new BasicDBObject();
-        mongoDevice.putAll(objectMapper.convertValue(device, Map.class));
-        devices().save(mongoDevice);
+        Document deviceDocument = new Document(deviceToMap(device));
+        devices().insertOne(deviceDocument);
 
         return device.getDeviceId();
     }
@@ -44,25 +41,20 @@ public class MongoDeviceRegistry implements DeviceRegistry {
     @Override public void update(Device device) {
         schemaValidator.validate(device);
 
-        BasicDBObject deviceQuery = new BasicDBObject();
-        deviceQuery.put("deviceId", device.getDeviceId());
-        boolean deviceExists = devices().find(deviceQuery).hasNext();
-        if(!deviceExists) {
+        if(!deviceExists(device.getDeviceId())) {
             throw new IllegalArgumentException("Device with given ID does not exist.");
         }
 
-        BasicDBObject mongoDevice = new BasicDBObject();
-        mongoDevice.putAll(objectMapper.convertValue(device, Map.class));
-        devices().save(mongoDevice);
+        Document mongoDevice = new Document(deviceToMap(device));
+        BasicDBObject deviceQuery = new BasicDBObject();
+        deviceQuery.put("deviceId", device.getDeviceId());
+        devices().replaceOne(deviceQuery, mongoDevice);
     }
 
     @Override public String save(Device device) {
         schemaValidator.validate(device);
 
-        BasicDBObject deviceQuery = new BasicDBObject();
-        deviceQuery.put("deviceId", device.getDeviceId());
-        boolean deviceExists = devices().find(deviceQuery).hasNext();
-        if(deviceExists) {
+        if(deviceExists(device.getDeviceId())) {
             update(device);
             return device.getDeviceId();
         } else {
@@ -73,14 +65,25 @@ public class MongoDeviceRegistry implements DeviceRegistry {
     @Override public Optional<Device> findById(String deviceId) {
         BasicDBObject deviceQuery = new BasicDBObject();
         deviceQuery.put("deviceId", deviceId);
-        DBCursor collection = devices().find(deviceQuery);
+        MongoCursor collection = devices().find(deviceQuery).iterator();
         return collection.hasNext() ? Optional.of(objectMapper.convertValue(collection.next(), Device.class)) : Optional.empty();
     }
 
     // Helpers
 
-    private DBCollection devices() {
-        return mongo.getDB("device-registry").getCollection("devices");
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> deviceToMap(Device device) {
+        return objectMapper.convertValue(device, Map.class);
+    }
+
+    private MongoCollection<Document> devices() {
+        return mongo.getDatabase("device-registry").getCollection("devices");
+    }
+
+    private boolean deviceExists(String deviceId) {
+        BasicDBObject deviceQuery = new BasicDBObject();
+        deviceQuery.put("deviceId", deviceId);
+        return devices().find(deviceQuery).iterator().hasNext();
     }
 
 }

@@ -36,5 +36,19 @@ public class DeviceRegistryConfigurationTest {
         assertThat(loadedDevice.get()).isNotNull();
     }
 
+    @Test
+    public void shouldUpdateDevice() {
+        Device device = new Device();
+        device.setDeviceId(randomUUID().toString());
+        deviceRegistry.create(device);
+
+        Optional<Device> loadedDevice = deviceRegistry.findById(device.getDeviceId());
+        loadedDevice.get().setType("newType");
+        deviceRegistry.update(loadedDevice.get());
+        loadedDevice = deviceRegistry.findById(device.getDeviceId());
+
+        assertThat(loadedDevice.get().getType()).isEqualTo("newType");
+    }
+
 
 }
