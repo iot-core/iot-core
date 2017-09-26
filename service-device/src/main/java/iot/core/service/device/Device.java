@@ -1,17 +1,17 @@
 package iot.core.service.device;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import java.util.Date;
+import java.time.Instant;
 import java.util.Map;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class Device {
 
     private String deviceId;
 
-    private Date created;
+    private Instant created;
 
-    private Date updated;
+    private Instant updated;
 
     private String type;
 
@@ -20,7 +20,7 @@ public class Device {
     public Device() {
     }
 
-    public Device(String deviceId, Date created, Date updated, String type, Map<String, Object> properties) {
+    public Device(String deviceId, Instant created, Instant updated, String type, Map<String, Object> properties) {
         this.deviceId = deviceId;
         this.created = created;
         this.updated = updated;
@@ -36,19 +36,19 @@ public class Device {
         this.deviceId = deviceId;
     }
 
-    public Date getCreated() {
+    public Instant getCreated() {
         return created;
     }
 
-    public void setCreated(Date created) {
+    public void setCreated(Instant created) {
         this.created = created;
     }
 
-    public Date getUpdated() {
+    public Instant getUpdated() {
         return updated;
     }
 
-    public void setUpdated(Date updated) {
+    public void setUpdated(Instant updated) {
         this.updated = updated;
     }
 

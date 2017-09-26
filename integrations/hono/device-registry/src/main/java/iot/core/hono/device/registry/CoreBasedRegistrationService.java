@@ -18,7 +18,7 @@ import static org.eclipse.hono.util.RegistrationResult.from;
 import static org.eclipse.hono.util.RequestResponseApiConstants.FIELD_DEVICE_ID;
 
 import java.net.HttpURLConnection;
-import java.util.Date;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
@@ -110,9 +110,11 @@ public class CoreBasedRegistrationService extends BaseRegistrationService<Client
     public void addDevice(final String tenantId, final String deviceId, final JsonObject otherKeys,
             final Handler<AsyncResult<RegistrationResult>> resultHandler) {
 
+        final Instant now = Instant.now();
+
         this.client
                 .async()
-                .create(new Device(makeId(tenantId, deviceId), new Date(), new Date(), "hono", otherKeys.getMap()))
+                .create(new Device(makeId(tenantId, deviceId), now, now, "hono", otherKeys.getMap()))
                 .handle((result, error) -> {
                     if (error == null) {
                         return from(HttpURLConnection.HTTP_CREATED);

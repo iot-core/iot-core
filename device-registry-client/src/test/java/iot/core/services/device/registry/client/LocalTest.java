@@ -1,10 +1,9 @@
 package iot.core.services.device.registry.client;
 
+import static java.time.Instant.now;
 import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
-import java.util.Date;
 
 import org.junit.After;
 import org.junit.Before;
@@ -33,7 +32,7 @@ public class LocalTest {
     @Test
     public void test1() {
 
-        final Device device1 = new Device("id1", new Date(), new Date(), "type1", emptyMap());
+        final Device device1 = new Device("id1", now(), now(), "type1", emptyMap());
 
         this.client.sync().save(device1);
 

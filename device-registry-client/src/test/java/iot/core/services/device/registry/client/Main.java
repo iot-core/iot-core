@@ -1,6 +1,6 @@
 package iot.core.services.device.registry.client;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
@@ -123,7 +123,7 @@ public class Main {
     }
 
     private static Device createNewDevice(final String id) {
-        final Date now = new Date();
+        final Instant now = Instant.now();
         final Device device = new Device(id, now, now, "my:device", new HashMap<>());
         return device;
     }
