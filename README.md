@@ -5,7 +5,7 @@
 ### Common data structures    
 
     Device
-    JSON {"deviceId": string, "created": string, "updated": string, "properties": map}
+    JSON {"deviceId": string, "created": string, "updated": string, "type": string, "properties": map}
 
 ### Operations
 
