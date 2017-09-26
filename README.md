@@ -31,7 +31,7 @@
     Payload: Device
     Return value: ID of a device.
 
-    Find device by ID
+    Find device by ID operation
     Description: Finds device in a device registry by "deviceId" field.
     Address: device
     Subject: findById
