@@ -32,33 +32,27 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import iot.core.service.device.Device;
-import iot.core.services.device.registry.client.AmqpClient;
 import iot.core.services.device.registry.client.Client;
 
 @Component
-public class CoreBasedRegistrationService extends BaseRegistrationService<CoreBasedRegistrationConfigProperties> {
+public class CoreBasedRegistrationService extends BaseRegistrationService<ClientBuilding> {
 
     private Client client;
 
     @Autowired
     @Override
-    public void setConfig(final CoreBasedRegistrationConfigProperties configuration) {
+    public void setConfig(final ClientBuilding configuration) {
         setSpecificConfig(configuration);
     }
 
     @Override
     protected void doStart(final Future<Void> startFuture) {
         try {
-            this.client = AmqpClient.create()
-                    .hostname(getConfig().getHostname())
-                    .port(getConfig().getPort())
-                    .build(this.vertx);
-
+            this.client = getConfig().createClient(this.vertx);
             startFuture.complete();
         } catch (final Exception e) {
             startFuture.fail(e);
         }
-
     }
 
     @Override
@@ -69,7 +63,6 @@ public class CoreBasedRegistrationService extends BaseRegistrationService<CoreBa
         } catch (final Exception e) {
             stopFuture.fail(e);
         }
-
     }
 
     private String makeId(final String tenantId, final String deviceId) {
@@ -94,10 +87,10 @@ public class CoreBasedRegistrationService extends BaseRegistrationService<CoreBa
             final Handler<AsyncResult<RegistrationResult>> resultHandler) {
 
         this.client
-        .async()
-        .findById(makeId(tenantId, deviceId))
-        .thenApply(this::getDeviceResult)
-        .whenComplete(completer(resultHandler));
+                .async()
+                .findById(makeId(tenantId, deviceId))
+                .thenApply(this::getDeviceResult)
+                .whenComplete(completer(resultHandler));
 
     }
 
@@ -118,15 +111,15 @@ public class CoreBasedRegistrationService extends BaseRegistrationService<CoreBa
             final Handler<AsyncResult<RegistrationResult>> resultHandler) {
 
         this.client
-        .async()
-        .create(new Device(makeId(tenantId, deviceId), new Date(), new Date(), "hono", otherKeys.getMap()))
-        .handle((result, error) -> {
-            if (error == null) {
-                return from(HttpURLConnection.HTTP_CREATED);
-            } else {
-                return from(HttpURLConnection.HTTP_INTERNAL_ERROR);
-            }
-        }).whenComplete(completer(resultHandler));
+                .async()
+                .create(new Device(makeId(tenantId, deviceId), new Date(), new Date(), "hono", otherKeys.getMap()))
+                .handle((result, error) -> {
+                    if (error == null) {
+                        return from(HttpURLConnection.HTTP_CREATED);
+                    } else {
+                        return from(HttpURLConnection.HTTP_INTERNAL_ERROR);
+                    }
+                }).whenComplete(completer(resultHandler));
 
     }
 

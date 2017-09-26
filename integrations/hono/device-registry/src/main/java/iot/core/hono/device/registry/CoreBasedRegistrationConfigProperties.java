@@ -15,7 +15,11 @@ package iot.core.hono.device.registry;
 import org.eclipse.hono.config.SignatureSupportingConfigProperties;
 import org.eclipse.hono.deviceregistry.SignatureSupporting;
 
-public final class CoreBasedRegistrationConfigProperties implements SignatureSupporting {
+import io.vertx.core.Vertx;
+import iot.core.services.device.registry.client.AmqpClient;
+import iot.core.services.device.registry.client.Client;
+
+public final class CoreBasedRegistrationConfigProperties implements SignatureSupporting, ClientBuilding {
 
     private final SignatureSupportingConfigProperties registrationAssertionProperties = new SignatureSupportingConfigProperties();
 
@@ -42,6 +46,14 @@ public final class CoreBasedRegistrationConfigProperties implements SignatureSup
     @Override
     public SignatureSupportingConfigProperties getSigning() {
         return this.registrationAssertionProperties;
+    }
+
+    @Override
+    public Client createClient(final Vertx vertx) {
+        return AmqpClient.create()
+                .hostname(this.hostname)
+                .port(this.port)
+                .build(vertx);
     }
 
 }

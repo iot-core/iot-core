@@ -23,8 +23,8 @@ import org.springframework.context.annotation.Configuration;
 public class CoreBasedConfig {
 
     /**
-     * Gets properties for configuring {@code FileBasedRegistrationService} which implements
-     * the <em>Device Registration</em> API.
+     * Gets properties for configuring {@code FileBasedRegistrationService} which
+     * implements the <em>Device Registration</em> API.
      *
      * @return The properties.
      */
