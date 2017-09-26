@@ -12,7 +12,6 @@
 
 package iot.core.hono.device.registry;
 
-
 public final class KeycloakBasedCredentialsConfigProperties {
 
     private String clientId;

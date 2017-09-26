@@ -46,7 +46,7 @@ import io.vertx.core.json.JsonObject;
  */
 @Repository
 public final class KeycloakBasedCredentialsService
-extends BaseCredentialsService<KeycloakBasedCredentialsConfigProperties> {
+        extends BaseCredentialsService<KeycloakBasedCredentialsConfigProperties> {
 
     private Keycloak keycloak;
 
@@ -118,7 +118,6 @@ extends BaseCredentialsService<KeycloakBasedCredentialsConfigProperties> {
 
         }, true, resultHandler);
     }
-
 
     private CredentialsResult getCredentials(final String realm, final String type, final String authId) {
 
