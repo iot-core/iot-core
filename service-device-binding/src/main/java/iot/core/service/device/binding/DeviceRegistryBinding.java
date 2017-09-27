@@ -1,13 +1,19 @@
 package iot.core.service.device.binding;
 
-import org.apache.qpid.proton.amqp.messaging.Section;
-import org.apache.qpid.proton.message.Message;
-import org.apache.qpid.proton.message.impl.MessageImpl;
+import static iot.core.utils.binding.ErrorCondition.DECODE_ERROR;
+
+import java.util.Optional;
 
 import io.vertx.core.Vertx;
 import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonSender;
+import iot.core.service.binding.amqp.AmqpRejectResponseHandler;
+import iot.core.service.binding.amqp.AmqpRequestContext;
+import iot.core.service.binding.common.DefaultErrorTranslator;
+import iot.core.service.binding.common.MessageResponseHandler;
+import iot.core.service.binding.proton.ProtonRequestContext;
+import iot.core.service.binding.proton.ProtonRequestProcessor;
 import iot.core.service.device.AlwaysPassingDeviceSchemaValidator;
 import iot.core.service.device.Device;
 import iot.core.service.device.DeviceRegistry;
@@ -17,6 +23,7 @@ import iot.core.services.device.registry.serialization.AmqpSerializer;
 import iot.core.services.device.registry.serialization.jackson.JacksonSerializer;
 import iot.core.utils.address.AddressProvider;
 import iot.core.utils.address.DefaultAddressProvider;
+import iot.core.utils.binding.RequestException;
 
 public class DeviceRegistryBinding {
 
@@ -45,53 +52,58 @@ public class DeviceRegistryBinding {
 
     private void bindServiceToConnection(ProtonConnection connection) {
         connection.open();
-        String address = addressProvider.requestAddress("device");
 
-        connection.createReceiver(address).handler((delivery, msg) -> {
-            ProtonSender sender = connection.createSender(null).open();
-            String replyTo = msg.getReplyTo();
-            String verb = msg.getProperties().getSubject();
+        final String address = addressProvider.requestAddress("device");
 
-            if (verb == null) {
-                // FIXME: propagate exceptions
-                throw new IllegalArgumentException(String.format("Verb missing"));
-            }
+        final ProtonSender sender = connection.createSender(null);
+        sender.openHandler(senderReady -> {
 
-            Object result = processRequest (verb, msg.getBody(), sender);
-            sendReply(sender, replyTo, result);
-        }).open();
+            final ProtonRequestProcessor processor = new ProtonRequestProcessor(
+                    this.serializer,
+                    sender,
+                    new MessageResponseHandler<>(AmqpRequestContext::getReplyToAddress),
+                    new AmqpRejectResponseHandler(),
+                    new DefaultErrorTranslator(),
+                    this::processRequest);
+
+            connection
+                    .createReceiver(address)
+                    .handler(processor.messageHandler())
+                    .open();
+        })
+
+                .open();
     }
 
-    private Object processRequest(String verb, Section body, ProtonSender sender) {
-        switch (verb) {
+    private Object processRequest(final ProtonRequestContext context) throws Exception {
+
+        final Optional<String> verb = context.getVerb();
+
+        if (!verb.isPresent()) {
+            throw new RequestException(DECODE_ERROR, "Verb missing");
+        }
+
+        switch (verb.get()) {
         case "create": {
-            Device device = serializer.decode(body, Device.class);
+            Device device = context.decodeRequest(Device.class);
             return deviceRegistry.create(device);
         }
         case "save": {
-            Device device = serializer.decode(body, Device.class);
+            Device device = context.decodeRequest(Device.class);
             return deviceRegistry.save(device);
         }
         case "update": {
-            Device device = serializer.decode(body, Device.class);
+            Device device = context.decodeRequest(Device.class);
             deviceRegistry.update(device);
             return null;
         }
         case "findById": {
-            String deviceId = serializer.decode(body, String.class);
+            String deviceId = context.decodeRequest(String.class);
             return deviceRegistry.findById(deviceId);
         }
         default:
-            throw new IllegalArgumentException(String.format("Unsupported verb: %s" + verb));
+            throw new RequestException(DECODE_ERROR, String.format("Unsupported verb: %s", verb));
         }
-    }
-
-    void sendReply(ProtonSender sender, String replyTo, Object reply) {
-        Message message = new MessageImpl();
-        message.setBody(serializer.encode(reply));
-        message.setAddress(replyTo);
-
-        sender.send(message);
     }
 
     public static void main(String[] args) {
