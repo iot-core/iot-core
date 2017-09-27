@@ -144,8 +144,14 @@ public class AmqpTransport implements Transport<Message> {
     private class Buffer {
 
         private Set<Request<?>> requests = new LinkedHashSet<>();
+        private final int limit;
 
         public Buffer() {
+            this(-1);
+        }
+
+        public Buffer(final int limit) {
+            this.limit = limit <= 0 ? Integer.MAX_VALUE : limit;
         }
 
         public void append(final Request<?> request) {
@@ -154,14 +160,18 @@ public class AmqpTransport implements Transport<Message> {
             final ProtonSender sender = requestSender(address);
 
             if (sender != null) {
-                logger.debug("Sender is already available - {} -> {}", address, sender);
+                logger.debug("Sender is available - {} -> {}", address, sender);
                 sendRequest(sender, request);
                 return;
             }
 
             logger.debug("Waiting for sender: {}", address);
 
-            this.requests.add(request);
+            if (this.requests.size() < this.limit) {
+                this.requests.add(request);
+            } else {
+                request.fail("Local send buffer is full");
+            }
         }
 
         public void remove(final Request<?> request) {
