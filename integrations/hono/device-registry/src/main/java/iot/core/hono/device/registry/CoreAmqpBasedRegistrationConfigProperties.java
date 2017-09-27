@@ -19,7 +19,7 @@ import io.vertx.core.Vertx;
 import iot.core.services.device.registry.client.AmqpClient;
 import iot.core.services.device.registry.client.Client;
 
-public final class CoreBasedRegistrationConfigProperties implements SignatureSupporting, ClientBuilding {
+public final class CoreAmqpBasedRegistrationConfigProperties implements SignatureSupporting, ClientBuilding {
 
     private final SignatureSupportingConfigProperties registrationAssertionProperties = new SignatureSupportingConfigProperties();
 
