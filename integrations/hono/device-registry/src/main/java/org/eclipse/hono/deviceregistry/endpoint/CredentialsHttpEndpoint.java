@@ -126,6 +126,7 @@ public final class CredentialsHttpEndpoint extends AbstractHttpEndpoint<ServiceC
                         .putHeader(
                                 HttpHeaders.LOCATION,
                                 String.format("/%s/%s/%s/%s", CredentialsConstants.CREDENTIALS_ENDPOINT, tenantId, authId, type));
+                        //$FALL-THROUGH$
                     default:
                         response.end();
                     }
