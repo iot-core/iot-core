@@ -65,7 +65,7 @@ public class MongoDeviceRegistry implements DeviceRegistry {
     @Override public Optional<Device> findById(String deviceId) {
         BasicDBObject deviceQuery = new BasicDBObject();
         deviceQuery.put("deviceId", deviceId);
-        MongoCursor collection = devices().find(deviceQuery).iterator();
+        MongoCursor<Document> collection = devices().find(deviceQuery).iterator();
         return collection.hasNext() ? Optional.of(objectMapper.convertValue(collection.next(), Device.class)) : Optional.empty();
     }
 
