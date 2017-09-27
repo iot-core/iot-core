@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>iot-core</groupId>
+        <groupId>iotbricks</groupId>
         <artifactId>iot-core</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../../..</relativePath>
