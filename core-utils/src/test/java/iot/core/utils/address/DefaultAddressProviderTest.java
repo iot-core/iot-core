@@ -6,11 +6,11 @@ import org.junit.Test;
 
 public class DefaultAddressProviderTest {
 
-    private DefaultAddressProvider addressProvider;
+    private AddressProvider addressProvider;
 
     @Before
     public void setup() {
-        this.addressProvider = new DefaultAddressProvider();
+        this.addressProvider = DefaultAddressProvider.instance();
     }
 
     @Test

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -33,34 +34,14 @@ import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
 import iot.core.services.device.registry.serialization.AmqpSerializer;
 import iot.core.utils.address.AddressProvider;
+import iot.core.utils.address.DefaultAddressProvider;
 import iot.core.utils.binding.RequestException;
 import iot.core.utils.binding.amqp.AmqpErrorConditionTranslator;
+import iot.core.utils.binding.amqp.DefaultAmqpErrorConditionTranslator;
 
 public class AmqpTransport implements Transport<Message> {
 
     private static final Logger logger = LoggerFactory.getLogger(AmqpTransport.class);
-
-    private final AtomicBoolean closed = new AtomicBoolean();
-
-    private final Vertx vertx;
-
-    private final String hostname;
-
-    private final int port;
-
-    private final String container;
-
-    private final AmqpSerializer serializer;
-
-    private final AddressProvider addressProvider;
-
-    private ProtonConnection connection;
-
-    private final Context context;
-
-    private final Buffer buffer = new Buffer();
-
-    private final AmqpErrorConditionTranslator errorConditionTranslator;
 
     private static class Request<R> extends CloseableCompletableFuture<R> {
         private final String address;
@@ -146,10 +127,6 @@ public class AmqpTransport implements Transport<Message> {
         private Set<Request<?>> requests = new LinkedHashSet<>();
         private final int limit;
 
-        public Buffer() {
-            this(-1);
-        }
-
         public Buffer(final int limit) {
             this.limit = limit <= 0 ? Integer.MAX_VALUE : limit;
         }
@@ -227,19 +204,125 @@ public class AmqpTransport implements Transport<Message> {
         }
     }
 
-    public AmqpTransport(final Vertx vertx, final String hostname, final int port, final String container,
-            final AmqpSerializer serializer, final AddressProvider addressProvider,
-            final AmqpErrorConditionTranslator errorConditionTranslator) {
+    public static class Builder {
 
-        logger.debug("Creating AMQP transport - endpoint: {}:{}, container: {}", hostname, port, container);
+        private String hostname = "localhost";
+        private int port = 5762;
+        private String container;
+        private AmqpSerializer serializer;
+        private AddressProvider addressProvider = DefaultAddressProvider.instance();
+        private AmqpErrorConditionTranslator errorConditionTranslator = DefaultAmqpErrorConditionTranslator.instance();
+        private int requestBufferSize = -1;
+
+        private Builder() {
+        }
+
+        public Builder(final Builder other) {
+            this.hostname = other.hostname;
+            this.port = other.port;
+            this.container = other.container;
+            this.serializer = other.serializer;
+            this.addressProvider = other.addressProvider;
+            this.errorConditionTranslator = other.errorConditionTranslator;
+        }
+
+        public Builder hostname(final String hostname) {
+            this.hostname = hostname;
+            return this;
+        }
+
+        public String hostname() {
+            return this.hostname;
+        }
+
+        public Builder port(final int port) {
+            this.port = port;
+            return this;
+        }
+
+        public int port() {
+            return this.port;
+        }
+
+        public Builder container(final String container) {
+            this.container = container;
+            return this;
+        }
+
+        public String container() {
+            return this.container;
+        }
+
+        public Builder serializer(final AmqpSerializer serializer) {
+            this.serializer = serializer;
+            return this;
+        }
+
+        public AmqpSerializer serializer() {
+            return this.serializer;
+        }
+
+        public Builder addressProvider(final AddressProvider addressProvider) {
+            this.addressProvider = addressProvider;
+            return this;
+        }
+
+        public AddressProvider addressProvider() {
+            return this.addressProvider;
+        }
+
+        public Builder errorConditionTranslator(final AmqpErrorConditionTranslator errorConditionTranslator) {
+            this.errorConditionTranslator = errorConditionTranslator;
+            return this;
+        }
+
+        public AmqpErrorConditionTranslator errorConditionTranslator() {
+            return this.errorConditionTranslator;
+        }
+
+        public Builder requestBufferSize(final int requestBufferSize) {
+            this.requestBufferSize = requestBufferSize;
+            return this;
+        }
+
+        public int requestBufferSize() {
+            return this.requestBufferSize;
+        }
+
+        public AmqpTransport build(final Vertx vertx) {
+            return new AmqpTransport(vertx, new Builder(this));
+        }
+    }
+
+    public static Builder newTransport() {
+        return new Builder();
+    }
+
+    public static Builder newTransport(final Builder other) {
+        Objects.requireNonNull(other);
+        return new Builder(other);
+    }
+
+    private final AtomicBoolean closed = new AtomicBoolean();
+
+    private final Vertx vertx;
+
+    private final Builder options;
+
+    private ProtonConnection connection;
+
+    private final Context context;
+
+    private final Buffer buffer;
+
+    public AmqpTransport(final Vertx vertx, final Builder options) {
+
+        logger.debug("Creating AMQP transport - {}", options);
 
         this.vertx = vertx;
-        this.hostname = hostname;
-        this.port = port;
-        this.container = container;
-        this.serializer = serializer;
-        this.addressProvider = addressProvider;
-        this.errorConditionTranslator = errorConditionTranslator;
+        this.options = options;
+
+        this.buffer = new Buffer(options.requestBufferSize());
 
         this.context = vertx.getOrCreateContext();
 
@@ -298,9 +381,7 @@ public class AmqpTransport implements Transport<Message> {
     @Override
     public void close() throws Exception {
         if (this.closed.compareAndSet(false, true)) {
-            this.context.runOnContext(v -> {
-                performClose();
-            });
+            this.context.runOnContext(v -> performClose());
         }
     }
 
@@ -317,7 +398,7 @@ public class AmqpTransport implements Transport<Message> {
 
         final ProtonClient client = ProtonClient.create(this.vertx);
 
-        client.connect(this.hostname, this.port, con -> {
+        client.connect(this.options.hostname(), this.options.port(), con -> {
 
             logger.debug("Connection -> {}", con);
 
@@ -327,13 +408,13 @@ public class AmqpTransport implements Transport<Message> {
             }
 
             con.result()
-            .setContainer(this.container)
-            .openHandler(opened -> {
+                    .setContainer(this.options.container())
+                    .openHandler(opened -> {
 
-                logger.debug("Open -> {}", opened);
-                handler.handle(opened);
+                        logger.debug("Open -> {}", opened);
+                        handler.handle(opened);
 
-            }).open();
+                    }).open();
 
         });
     }
@@ -349,8 +430,8 @@ public class AmqpTransport implements Transport<Message> {
             return result;
         }
 
-        final String address = this.addressProvider.requestAddress(service);
-        final String replyToAddress = this.addressProvider.replyAddress(service, createReplyToken());
+        final String address = this.options.addressProvider().requestAddress(service);
+        final String replyToAddress = this.options.addressProvider().replyAddress(service, createReplyToken());
         final Message message = createMessage(verb, requestBody, replyToAddress);
 
         final Request<R> request = new Request<>(address, message, replyHandler);
@@ -488,7 +569,7 @@ public class AmqpTransport implements Transport<Message> {
             return new RuntimeException("Unknown remote exception");
         }
 
-        final iot.core.utils.binding.ErrorCondition condition = this.errorConditionTranslator
+        final iot.core.utils.binding.ErrorCondition condition = this.options.errorConditionTranslator()
                 .fromAmqp(error.getCondition().toString());
         final String message = state.getError().getDescription();
 
@@ -503,7 +584,7 @@ public class AmqpTransport implements Transport<Message> {
         final Message message = Message.Factory.create();
 
         message.setProperties(p);
-        message.setBody(this.serializer.encode(request));
+        message.setBody(this.options.serializer().encode(request));
         return message;
     }
 
@@ -514,12 +595,12 @@ public class AmqpTransport implements Transport<Message> {
 
     @Override
     public <T> ReplyHandler<T, Message> bodyAs(final Class<T> clazz) {
-        return msg -> this.serializer.decode(msg.getBody(), clazz);
+        return msg -> this.options.serializer().decode(msg.getBody(), clazz);
     }
 
     @Override
     public <T> ReplyHandler<Optional<T>, Message> bodyAsOptional(final Class<T> clazz) {
-        return msg -> ofNullable(this.serializer.decode(msg.getBody(), clazz));
+        return msg -> ofNullable(this.options.serializer().decode(msg.getBody(), clazz));
     }
 
 }

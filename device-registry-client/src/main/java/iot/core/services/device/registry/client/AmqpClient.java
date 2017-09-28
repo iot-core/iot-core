@@ -6,14 +6,12 @@ import static iot.core.services.device.registry.serialization.jackson.JacksonSer
 import java.time.Duration;
 import java.util.Optional;
 
+import org.iotbricks.service.device.registry.api.Device;
+
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.Vertx;
 import iot.core.amqp.transport.AmqpTransport;
 import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
-import iot.core.services.device.registry.serialization.AmqpSerializer;
-import iot.core.utils.address.DefaultAddressProvider;
-import iot.core.utils.binding.amqp.DefaultAmqpErrorConditionTranslator;
-import org.iotbricks.service.device.registry.api.Device;
 
 public class AmqpClient extends AbstractDefaultClient {
 
@@ -75,16 +73,19 @@ public class AmqpClient extends AbstractDefaultClient {
         return new Builder();
     }
 
-    private final AmqpSerializer serializer = of(json());
-
     private final AmqpTransport transport;
 
     private AmqpClient(final Vertx vertx, final String hostname, final int port, final String container,
             final Duration syncTimeout) {
+
         super(syncTimeout.abs());
 
-        this.transport = new AmqpTransport(vertx, hostname, port, container, this.serializer,
-                new DefaultAddressProvider(), DefaultAmqpErrorConditionTranslator.instance());
+        this.transport = AmqpTransport.newTransport()
+                .hostname(hostname)
+                .port(port)
+                .container(container)
+                .serializer(of(json()))
+                .build(vertx);
     }
 
     @Override
