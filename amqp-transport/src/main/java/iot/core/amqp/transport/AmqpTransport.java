@@ -350,7 +350,7 @@ public class AmqpTransport implements Transport<Message> {
         }
 
         final String address = this.addressProvider.requestAddress(service);
-        final String replyToAddress = this.addressProvider.replyAddress(service, UUID.randomUUID().toString());
+        final String replyToAddress = this.addressProvider.replyAddress(service, createReplyToken());
         final Message message = createMessage(verb, requestBody, replyToAddress);
 
         final Request<R> request = new Request<>(address, message, replyHandler);
@@ -360,6 +360,10 @@ public class AmqpTransport implements Transport<Message> {
         });
 
         return request;
+    }
+
+    protected String createReplyToken() {
+        return UUID.randomUUID().toString();
     }
 
     private <R> void startRequest(final Request<R> request) {
