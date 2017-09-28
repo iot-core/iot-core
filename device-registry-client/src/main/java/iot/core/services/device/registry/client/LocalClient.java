@@ -9,10 +9,11 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import io.glutamate.util.concurrent.CloseableCompletionStage;
-import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
 import org.iotbricks.service.device.registry.api.Device;
 import org.iotbricks.service.device.registry.api.DeviceRegistryService;
+
+import io.glutamate.util.concurrent.CloseableCompletionStage;
+import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
 
 public class LocalClient extends AbstractDefaultClient {
 
@@ -30,6 +31,7 @@ public class LocalClient extends AbstractDefaultClient {
 
     @Override
     public void close() throws Exception {
+        super.close();
         this.executionService.shutdown();
     }
 
