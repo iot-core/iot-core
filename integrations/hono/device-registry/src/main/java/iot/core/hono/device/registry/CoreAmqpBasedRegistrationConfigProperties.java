@@ -50,7 +50,7 @@ public final class CoreAmqpBasedRegistrationConfigProperties implements Signatur
 
     @Override
     public Client createClient(final Vertx vertx) {
-        return AmqpClient.create()
+        return AmqpClient.newClient()
                 .hostname(this.hostname)
                 .port(this.port)
                 .build(vertx);

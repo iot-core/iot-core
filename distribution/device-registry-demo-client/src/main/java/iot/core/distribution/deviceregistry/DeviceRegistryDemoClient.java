@@ -18,7 +18,7 @@ public final class DeviceRegistryDemoClient {
         Vertx vertx = null;
         try {
             vertx = vertx();
-            Client client = AmqpClient.create().build(vertx);
+            Client client = AmqpClient.newClient().build(vertx);
 
             String deviceId = randomUUID().toString();
             Device device = new Device();

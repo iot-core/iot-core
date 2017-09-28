@@ -19,7 +19,7 @@ public class Main {
     }
 
     static Client createAmqpClient(final Vertx vertx) {
-        return AmqpClient.create()
+        return AmqpClient.newClient()
                 .build(vertx);
     }
 

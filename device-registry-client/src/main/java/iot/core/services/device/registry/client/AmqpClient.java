@@ -69,7 +69,7 @@ public class AmqpClient extends AbstractDefaultClient {
         }
     }
 
-    public static Builder create() {
+    public static Builder newClient() {
         return new Builder();
     }
 
