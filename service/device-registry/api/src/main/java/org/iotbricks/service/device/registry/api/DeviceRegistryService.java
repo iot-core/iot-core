@@ -2,7 +2,10 @@ package org.iotbricks.service.device.registry.api;
 
 import java.util.Optional;
 
-public interface DeviceRegistry {
+/**
+ * Service providing access to a basic list of devices and their state.
+ */
+public interface DeviceRegistryService {
 
     String create(Device device);
 

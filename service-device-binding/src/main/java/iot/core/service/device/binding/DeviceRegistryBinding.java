@@ -11,7 +11,7 @@ import iot.core.service.binding.common.MessageResponseHandler;
 import iot.core.service.binding.proton.ProtonRequestContext;
 import iot.core.service.binding.proton.ProtonRequestProcessor;
 import iot.core.service.device.AlwaysPassingDeviceSchemaValidator;
-import iot.core.service.device.InMemoryDeviceRegistry;
+import iot.core.service.device.InMemoryDeviceRegistryService;
 import iot.core.services.device.registry.serialization.AmqpByteSerializer;
 import iot.core.services.device.registry.serialization.AmqpSerializer;
 import iot.core.services.device.registry.serialization.jackson.JacksonSerializer;
@@ -19,7 +19,7 @@ import iot.core.utils.address.AddressProvider;
 import iot.core.utils.address.DefaultAddressProvider;
 import iot.core.utils.binding.RequestException;
 import org.iotbricks.service.device.registry.api.Device;
-import org.iotbricks.service.device.registry.api.DeviceRegistry;
+import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 
 import java.util.Optional;
 
@@ -27,14 +27,14 @@ import static iot.core.utils.binding.ErrorCondition.DECODE_ERROR;
 
 public class DeviceRegistryBinding {
 
-    private final DeviceRegistry deviceRegistry;
+    private final DeviceRegistryService deviceRegistryService;
 
     private final AmqpSerializer serializer = AmqpByteSerializer.of(JacksonSerializer.json());
 
     private AddressProvider addressProvider = new DefaultAddressProvider();
 
-    public DeviceRegistryBinding(DeviceRegistry deviceRegistry) {
-        this.deviceRegistry = deviceRegistry;
+    public DeviceRegistryBinding(DeviceRegistryService deviceRegistryService) {
+        this.deviceRegistryService = deviceRegistryService;
     }
 
     public void start() {
@@ -86,20 +86,20 @@ public class DeviceRegistryBinding {
         switch (verb.get()) {
         case "create": {
             Device device = context.decodeRequest(Device.class);
-            return deviceRegistry.create(device);
+            return deviceRegistryService.create(device);
         }
         case "save": {
             Device device = context.decodeRequest(Device.class);
-            return deviceRegistry.save(device);
+            return deviceRegistryService.save(device);
         }
         case "update": {
             Device device = context.decodeRequest(Device.class);
-            deviceRegistry.update(device);
+            deviceRegistryService.update(device);
             return null;
         }
         case "findById": {
             String deviceId = context.decodeRequest(String.class);
-            return deviceRegistry.findById(deviceId);
+            return deviceRegistryService.findById(deviceId);
         }
         default:
             throw new RequestException(DECODE_ERROR, String.format("Unsupported verb: %s", verb));
@@ -107,7 +107,7 @@ public class DeviceRegistryBinding {
     }
 
     public static void main(String[] args) {
-        new DeviceRegistryBinding(new InMemoryDeviceRegistry(new AlwaysPassingDeviceSchemaValidator())).start();
+        new DeviceRegistryBinding(new InMemoryDeviceRegistryService(new AlwaysPassingDeviceSchemaValidator())).start();
     }
 
 }

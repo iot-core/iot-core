@@ -23,6 +23,6 @@ public final class DeviceRegistryAmqpServer extends AmqpServiceBase<ServiceConfi
 
     @Override
     protected String getServiceName() {
-        return "Hono-DeviceRegistry";
+        return "Hono-DeviceRegistryService";
     }
 }

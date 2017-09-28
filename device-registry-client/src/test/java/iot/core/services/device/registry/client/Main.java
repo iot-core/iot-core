@@ -9,13 +9,13 @@ import java.util.concurrent.TimeUnit;
 
 import io.vertx.core.Vertx;
 import iot.core.service.device.AlwaysPassingDeviceSchemaValidator;
-import iot.core.service.device.InMemoryDeviceRegistry;
+import iot.core.service.device.InMemoryDeviceRegistryService;
 import org.iotbricks.service.device.registry.api.Device;
 
 public class Main {
 
     static Client createLocalClient() {
-        return new LocalClient(new InMemoryDeviceRegistry(new AlwaysPassingDeviceSchemaValidator()));
+        return new LocalClient(new InMemoryDeviceRegistryService(new AlwaysPassingDeviceSchemaValidator()));
     }
 
     static Client createAmqpClient(final Vertx vertx) {

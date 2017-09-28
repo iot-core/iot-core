@@ -1,7 +1,7 @@
 package iot.core.service.device.spring;
 
 import org.iotbricks.service.device.registry.api.Device;
-import org.iotbricks.service.device.registry.api.DeviceRegistry;
+import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,23 +15,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class DeviceRegistryConfigurationTest {
+public class DeviceRegistryServiceConfigurationTest {
 
     @Autowired
-    DeviceRegistry deviceRegistry;
+    DeviceRegistryService deviceRegistryService;
 
     @Test
     public void shouldStartDeviceRegistry() {
-        assertThat(deviceRegistry).isNotNull();
+        assertThat(deviceRegistryService).isNotNull();
     }
 
     @Test
     public void shouldLoadDevice() {
         Device device = new Device();
         device.setDeviceId(randomUUID().toString());
-        deviceRegistry.create(device);
+        deviceRegistryService.create(device);
 
-        Optional<Device> loadedDevice = deviceRegistry.findById(device.getDeviceId());
+        Optional<Device> loadedDevice = deviceRegistryService.findById(device.getDeviceId());
 
         assertThat(loadedDevice.get()).isNotNull();
     }
@@ -40,12 +40,12 @@ public class DeviceRegistryConfigurationTest {
     public void shouldUpdateDevice() {
         Device device = new Device();
         device.setDeviceId(randomUUID().toString());
-        deviceRegistry.create(device);
+        deviceRegistryService.create(device);
 
-        Optional<Device> loadedDevice = deviceRegistry.findById(device.getDeviceId());
+        Optional<Device> loadedDevice = deviceRegistryService.findById(device.getDeviceId());
         loadedDevice.get().setType("newType");
-        deviceRegistry.update(loadedDevice.get());
-        loadedDevice = deviceRegistry.findById(device.getDeviceId());
+        deviceRegistryService.update(loadedDevice.get());
+        loadedDevice = deviceRegistryService.findById(device.getDeviceId());
 
         assertThat(loadedDevice.get().getType()).isEqualTo("newType");
     }

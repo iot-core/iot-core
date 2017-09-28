@@ -6,12 +6,12 @@ import java.util.Optional;
 import iot.core.services.device.registry.client.DeviceRegistryAsync;
 import iot.core.utils.client.AbstractSyncWrapper;
 import org.iotbricks.service.device.registry.api.Device;
-import org.iotbricks.service.device.registry.api.DeviceRegistry;
+import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 
-public class SyncDeviceRegistryWrapper extends AbstractSyncWrapper implements DeviceRegistry {
+public class SyncDeviceRegistryServiceWrapper extends AbstractSyncWrapper implements DeviceRegistryService {
     private final DeviceRegistryAsync async;
 
-    public SyncDeviceRegistryWrapper(final DeviceRegistryAsync async, final Duration timeout) {
+    public SyncDeviceRegistryServiceWrapper(final DeviceRegistryAsync async, final Duration timeout) {
         super(timeout);
         this.async = async;
     }

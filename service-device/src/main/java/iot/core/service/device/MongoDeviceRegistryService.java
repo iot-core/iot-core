@@ -7,14 +7,14 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import org.iotbricks.service.device.registry.api.Device;
-import org.iotbricks.service.device.registry.api.DeviceRegistry;
+import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 
 import java.util.Map;
 import java.util.Optional;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 
-public class MongoDeviceRegistry implements DeviceRegistry {
+public class MongoDeviceRegistryService implements DeviceRegistryService {
 
     private final MongoClient mongo;
 
@@ -22,7 +22,7 @@ public class MongoDeviceRegistry implements DeviceRegistry {
 
     private final ObjectMapper objectMapper = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    public MongoDeviceRegistry(MongoClient mongo, DeviceSchemaValidator schemaValidator) {
+    public MongoDeviceRegistryService(MongoClient mongo, DeviceSchemaValidator schemaValidator) {
         this.mongo = mongo;
         this.schemaValidator = schemaValidator;
     }

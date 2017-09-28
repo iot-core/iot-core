@@ -13,7 +13,7 @@ import org.junit.Test;
 import com.google.common.collect.Maps;
 
 import iot.core.service.device.AlwaysPassingDeviceSchemaValidator;
-import iot.core.service.device.InMemoryDeviceRegistry;
+import iot.core.service.device.InMemoryDeviceRegistryService;
 
 public class LocalTest {
 
@@ -21,7 +21,7 @@ public class LocalTest {
 
     @Before
     public void setup() {
-        this.client = new LocalClient(new InMemoryDeviceRegistry(new AlwaysPassingDeviceSchemaValidator()));
+        this.client = new LocalClient(new InMemoryDeviceRegistryService(new AlwaysPassingDeviceSchemaValidator()));
     }
 
     @After

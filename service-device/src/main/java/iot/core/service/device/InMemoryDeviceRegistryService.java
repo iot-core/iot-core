@@ -1,7 +1,7 @@
 package iot.core.service.device;
 
 import org.iotbricks.service.device.registry.api.Device;
-import org.iotbricks.service.device.registry.api.DeviceRegistry;
+import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,13 +9,13 @@ import java.util.Optional;
 
 import static java.util.UUID.randomUUID;
 
-public class InMemoryDeviceRegistry implements DeviceRegistry {
+public class InMemoryDeviceRegistryService implements DeviceRegistryService {
 
     private final DeviceSchemaValidator schemaValidator;
 
     private final Map<String, Device> devices = new HashMap<>();
 
-    public InMemoryDeviceRegistry(DeviceSchemaValidator schemaValidator) {
+    public InMemoryDeviceRegistryService(DeviceSchemaValidator schemaValidator) {
         this.schemaValidator = schemaValidator;
     }
 

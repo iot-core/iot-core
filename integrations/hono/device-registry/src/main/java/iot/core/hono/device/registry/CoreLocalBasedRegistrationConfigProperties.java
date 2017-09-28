@@ -14,7 +14,7 @@ package iot.core.hono.device.registry;
 
 import org.eclipse.hono.config.SignatureSupportingConfigProperties;
 import org.eclipse.hono.deviceregistry.SignatureSupporting;
-import org.iotbricks.service.device.registry.api.DeviceRegistry;
+import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.Vertx;
@@ -30,10 +30,10 @@ public final class CoreLocalBasedRegistrationConfigProperties implements Signatu
         return this.registrationAssertionProperties;
     }
 
-    private DeviceRegistry registry;
+    private DeviceRegistryService registry;
 
     @Autowired
-    public void setRegistry(final DeviceRegistry registry) {
+    public void setRegistry(final DeviceRegistryService registry) {
         this.registry = registry;
     }
 

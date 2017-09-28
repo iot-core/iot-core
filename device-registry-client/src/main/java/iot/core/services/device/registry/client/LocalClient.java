@@ -12,14 +12,14 @@ import java.util.concurrent.Executors;
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
 import org.iotbricks.service.device.registry.api.Device;
-import org.iotbricks.service.device.registry.api.DeviceRegistry;
+import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 
 public class LocalClient extends AbstractDefaultClient {
 
-    private final DeviceRegistry registry;
+    private final DeviceRegistryService registry;
     private final ExecutorService executionService;
 
-    public LocalClient(final DeviceRegistry registry) {
+    public LocalClient(final DeviceRegistryService registry) {
         super(null);
 
         Objects.requireNonNull(registry);
