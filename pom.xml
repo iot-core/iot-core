@@ -144,7 +144,7 @@
                     <version>${checkstyle-maven-plugin.version}</version>
                     <dependencies>
                         <dependency>
-                            <groupId>iot-core</groupId>
+                            <groupId>iotbricks</groupId>
                             <artifactId>build-tools</artifactId>
                             <version>${project.version}</version>
                         </dependency>
