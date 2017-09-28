@@ -469,8 +469,6 @@ public class AmqpTransport implements Transport<Message> {
                 logger.debug("Remote state - {} for {}", state, request);
 
                 if (state instanceof Rejected) {
-
-                    // FIXME: properly convert back
                     request.fail(unwrapRemoteException((Rejected) state));
                 }
 
