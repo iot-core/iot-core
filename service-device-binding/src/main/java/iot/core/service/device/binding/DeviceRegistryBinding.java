@@ -31,7 +31,7 @@ public class DeviceRegistryBinding {
 
     private final AmqpSerializer serializer = AmqpByteSerializer.of(JacksonSerializer.json());
 
-    private AddressProvider addressProvider = new DefaultAddressProvider();
+    private AddressProvider addressProvider = DefaultAddressProvider.instance();
 
     public DeviceRegistryBinding(DeviceRegistryService deviceRegistryService) {
         this.deviceRegistryService = deviceRegistryService;
