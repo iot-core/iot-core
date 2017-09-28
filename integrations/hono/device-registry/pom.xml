@@ -51,7 +51,6 @@
         <dependency>
             <groupId>io.glutamate</groupId>
             <artifactId>glutamate</artifactId>
-            <version>0.0.2</version>
         </dependency>
 
         <dependency>
@@ -112,6 +111,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -14,7 +14,9 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.qpid.proton.amqp.messaging.Properties;
+import org.apache.qpid.proton.amqp.messaging.Rejected;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
+import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,8 @@ import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
 import iot.core.services.device.registry.serialization.AmqpSerializer;
 import iot.core.utils.address.AddressProvider;
+import iot.core.utils.binding.RequestException;
+import iot.core.utils.binding.amqp.AmqpErrorConditionTranslator;
 
 public class AmqpTransport implements Transport<Message> {
 
@@ -55,6 +59,8 @@ public class AmqpTransport implements Transport<Message> {
     private final Context context;
 
     private final Buffer buffer = new Buffer();
+
+    private final AmqpErrorConditionTranslator errorConditionTranslator;
 
     private static class Request<R> extends CloseableCompletableFuture<R> {
         private final String address;
@@ -138,8 +144,14 @@ public class AmqpTransport implements Transport<Message> {
     private class Buffer {
 
         private Set<Request<?>> requests = new LinkedHashSet<>();
+        private final int limit;
 
         public Buffer() {
+            this(-1);
+        }
+
+        public Buffer(final int limit) {
+            this.limit = limit <= 0 ? Integer.MAX_VALUE : limit;
         }
 
         public void append(final Request<?> request) {
@@ -148,14 +160,18 @@ public class AmqpTransport implements Transport<Message> {
             final ProtonSender sender = requestSender(address);
 
             if (sender != null) {
-                logger.debug("Sender is already available - {} -> {}", address, sender);
+                logger.debug("Sender is available - {} -> {}", address, sender);
                 sendRequest(sender, request);
                 return;
             }
 
             logger.debug("Waiting for sender: {}", address);
 
-            this.requests.add(request);
+            if (this.requests.size() < this.limit) {
+                this.requests.add(request);
+            } else {
+                request.fail("Local send buffer is full");
+            }
         }
 
         public void remove(final Request<?> request) {
@@ -212,7 +228,8 @@ public class AmqpTransport implements Transport<Message> {
     }
 
     public AmqpTransport(final Vertx vertx, final String hostname, final int port, final String container,
-            final AmqpSerializer serializer, final AddressProvider addressProvider) {
+            final AmqpSerializer serializer, final AddressProvider addressProvider,
+            final AmqpErrorConditionTranslator errorConditionTranslator) {
 
         logger.debug("Creating AMQP transport - endpoint: {}:{}, container: {}", hostname, port, container);
 
@@ -222,6 +239,7 @@ public class AmqpTransport implements Transport<Message> {
         this.container = container;
         this.serializer = serializer;
         this.addressProvider = addressProvider;
+        this.errorConditionTranslator = errorConditionTranslator;
 
         this.context = vertx.getOrCreateContext();
 
@@ -447,10 +465,32 @@ public class AmqpTransport implements Transport<Message> {
 
             sender.send(request.getMessage(), delivery -> {
                 final DeliveryState state = delivery.getRemoteState();
+
                 logger.debug("Remote state - {} for {}", state, request);
+
+                if (state instanceof Rejected) {
+
+                    // FIXME: properly convert back
+                    request.fail(unwrapRemoteException((Rejected) state));
+                }
+
             });
         });
         receiver.open();
+    }
+
+    private Exception unwrapRemoteException(final Rejected state) {
+
+        final ErrorCondition error = state.getError();
+        if (error == null || error.getCondition() == null) {
+            return new RuntimeException("Unknown remote exception");
+        }
+
+        final iot.core.utils.binding.ErrorCondition condition = this.errorConditionTranslator
+                .fromAmqp(error.getCondition().toString());
+        final String message = state.getError().getDescription();
+
+        return new RequestException(condition, message);
     }
 
     private Message createMessage(final String verb, final Object request, final String replyToAddress) {

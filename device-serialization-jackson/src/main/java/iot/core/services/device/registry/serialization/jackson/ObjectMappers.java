@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-public class ObjectMappers {
+public final class ObjectMappers {
+
+    private ObjectMappers() {
+    }
 
     public static final ObjectMapper defaultJson(final boolean pretty) {
         final ObjectMapper mapper = new ObjectMapper();

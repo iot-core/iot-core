@@ -25,13 +25,20 @@
 
         <!-- Dependencies versions -->
         <commons-lang3.version>3.6</commons-lang3.version>
+        <guava.version>22.0</guava.version>
         <jackson.version>2.8.8</jackson.version>
         <junit4.version>4.12</junit4.version>
         <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
         <vertx.version>3.4.2</vertx.version>
+
+        <!-- Plugin versions -->
+        <checkstyle-maven-plugin.version>2.17</checkstyle-maven-plugin.version>
+        <checkstyle.version>7.6.1</checkstyle.version>
     </properties>
 
     <modules>
+        <module>build-tools</module>
+
         <module>core-utils</module>
         <module>amqp-transport</module>
         <module>service-device</module>
@@ -69,6 +76,18 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons-lang3.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.glutamate</groupId>
+                <artifactId>glutamate</artifactId>
+                <version>0.0.3</version>
             </dependency>
 
             <dependency>
@@ -116,6 +135,33 @@
                     <artifactId>jacoco-extras</artifactId>
                     <version>0.1.1</version>
                 </plugin>
+
+                <!-- checkstyle -->
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${checkstyle-maven-plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>iot-core</groupId>
+                            <artifactId>build-tools</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>${checkstyle.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <configLocation>checkstyle/default.xml</configLocation>
+                        <suppressionsLocation>checkstyle/suppressions.xml</suppressionsLocation>
+
+                        <includeResources>true</includeResources>
+                        <includeTestResources>true</includeTestResources>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -149,6 +195,21 @@
                     <execution>
                         <goals>
                             <goal>xml</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- checkstyle -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>checkstyle-check</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>

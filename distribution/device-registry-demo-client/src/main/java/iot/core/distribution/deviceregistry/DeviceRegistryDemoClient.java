@@ -9,7 +9,10 @@ import iot.core.service.device.Device;
 import static io.vertx.core.Vertx.vertx;
 import static java.util.UUID.randomUUID;
 
-public class DeviceRegistryDemoClient {
+public final class DeviceRegistryDemoClient {
+
+    private DeviceRegistryDemoClient() {
+    }
 
     public static void main(final String[] args) throws Exception {
         Vertx vertx = null;

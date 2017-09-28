@@ -21,7 +21,11 @@
         <dependency>
             <groupId>io.glutamate</groupId>
             <artifactId>glutamate</artifactId>
-            <version>0.0.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
 
         <dependency>
