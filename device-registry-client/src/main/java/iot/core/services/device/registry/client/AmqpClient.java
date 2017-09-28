@@ -1,9 +1,7 @@
 package iot.core.services.device.registry.client;
 
-import static iot.core.services.device.registry.serialization.AmqpByteSerializer.of;
-import static iot.core.services.device.registry.serialization.jackson.JacksonSerializer.json;
-
 import java.time.Duration;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.iotbricks.service.device.registry.api.Device;
@@ -17,42 +15,39 @@ public class AmqpClient extends AbstractDefaultClient {
 
     public static class Builder {
 
-        private String hostname = "localhost";
-
-        private int port = 5672;
-
-        private String container;
+        private AmqpTransport.Builder transport;
 
         private Duration syncTimeout = Duration.ofSeconds(5);
 
-        private Builder() {
+        private Builder(final AmqpTransport.Builder transport) {
+            this.transport = transport;
+        }
+
+        public Builder transport(final AmqpTransport.Builder transport) {
+            this.transport = transport;
+            return this;
+        }
+
+        public AmqpTransport.Builder transport() {
+            return this.transport;
         }
 
         public Builder hostname(final String hostname) {
-            this.hostname = hostname;
+            this.transport.hostname(hostname);
             return this;
         }
 
         public String hostname() {
-            return this.hostname;
+            return this.transport.hostname();
         }
 
         public Builder port(final int port) {
-            this.port = port;
+            this.transport.port(port);
             return this;
         }
 
         public int port() {
-            return this.port;
-        }
-
-        public Builder container(final String container) {
-            this.container = container;
-            return this;
-        }
-
-        public String container() {
-            return this.container;
+            return this.transport.port();
         }
 
         public Builder syncTimeout(final Duration syncTimeout) {
@@ -65,27 +60,26 @@ public class AmqpClient extends AbstractDefaultClient {
         }
 
         public Client build(final Vertx vertx) {
-            return new AmqpClient(vertx, this.hostname, this.port, this.container, this.syncTimeout);
+            return new AmqpClient(vertx, new AmqpTransport.Builder(this.transport), this.syncTimeout);
         }
     }
 
     public static Builder newClient() {
-        return new Builder();
+        return new Builder(AmqpTransport.newTransport());
+    }
+
+    public static Builder newClient(final AmqpTransport.Builder transport) {
+        Objects.requireNonNull(transport);
+        return new Builder(transport);
     }
 
     private final AmqpTransport transport;
 
-    private AmqpClient(final Vertx vertx, final String hostname, final int port, final String container,
-            final Duration syncTimeout) {
+    private AmqpClient(final Vertx vertx, final AmqpTransport.Builder transport, final Duration syncTimeout) {
 
         super(syncTimeout.abs());
 
-        this.transport = AmqpTransport.newTransport()
-                .hostname(hostname)
-                .port(port)
-                .container(container)
-                .serializer(of(json()))
-                .build(vertx);
+        this.transport = transport.build(vertx);
     }
 
     @Override
