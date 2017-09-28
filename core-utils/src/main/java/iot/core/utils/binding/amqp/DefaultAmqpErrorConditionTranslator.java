@@ -8,7 +8,7 @@ import iot.core.utils.binding.ErrorCondition;
 
 public final class DefaultAmqpErrorConditionTranslator implements AmqpErrorConditionTranslator {
 
-    private static final String INTERNAL_ERROR = "amqp:internal-error";
+    static final String INTERNAL_ERROR = "amqp:internal-error";
 
     private static final AmqpErrorConditionTranslator INSTANCE = new DefaultAmqpErrorConditionTranslator();
 
@@ -43,12 +43,12 @@ public final class DefaultAmqpErrorConditionTranslator implements AmqpErrorCondi
 
     @Override
     public ErrorCondition fromAmqp(final String errorCondition) {
-        return map.inverse().getOrDefault(errorCondition, ErrorCondition.INTERNAL_ERROR);
+        return this.map.inverse().getOrDefault(errorCondition, ErrorCondition.INTERNAL_ERROR);
     }
 
     @Override
     public String toAmqp(final ErrorCondition errorCondition) {
-        return map.getOrDefault(errorCondition, INTERNAL_ERROR);
+        return this.map.getOrDefault(errorCondition, INTERNAL_ERROR);
     }
 
 }
