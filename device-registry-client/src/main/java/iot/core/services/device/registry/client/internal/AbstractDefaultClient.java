@@ -7,7 +7,7 @@ import io.glutamate.util.concurrent.CloseableCompletionStage;
 import iot.core.services.device.registry.client.Client;
 import iot.core.services.device.registry.client.DeviceRegistryAsync;
 import org.iotbricks.service.device.registry.api.Device;
-import org.iotbricks.service.device.registry.api.DeviceRegistry;
+import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 
 public abstract class AbstractDefaultClient implements Client {
 
@@ -22,16 +22,16 @@ public abstract class AbstractDefaultClient implements Client {
     }
 
     @Override
-    public DeviceRegistry sync() {
-        return new SyncDeviceRegistryWrapper(async(), this.timeout);
+    public DeviceRegistryService sync() {
+        return new SyncDeviceRegistryServiceWrapper(async(), this.timeout);
     }
 
     @Override
-    public DeviceRegistry sync(final Duration timeout) {
+    public DeviceRegistryService sync(final Duration timeout) {
         if (timeout == null) {
             return sync();
         }
-        return new SyncDeviceRegistryWrapper(async(), timeout.abs());
+        return new SyncDeviceRegistryServiceWrapper(async(), timeout.abs());
     }
 
     @Override
