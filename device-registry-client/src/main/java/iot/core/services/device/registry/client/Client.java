@@ -1,8 +1,8 @@
 package iot.core.services.device.registry.client;
 
-import org.iotbricks.service.device.registry.api.DeviceRegistryService;
-
 import java.time.Duration;
+
+import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 
 public interface Client extends AutoCloseable {
 
@@ -11,4 +11,9 @@ public interface Client extends AutoCloseable {
     DeviceRegistryService sync(Duration timeout);
 
     DeviceRegistryAsync async();
+
+    @Override
+    public default void close() throws Exception {
+    }
+
 }

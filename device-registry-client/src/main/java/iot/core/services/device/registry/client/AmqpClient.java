@@ -9,77 +9,26 @@ import org.iotbricks.service.device.registry.api.Device;
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.Vertx;
 import iot.core.amqp.transport.AmqpTransport;
+import iot.core.services.device.registry.client.internal.AbstractAmqpClientBuilder;
 import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
 
 public class AmqpClient extends AbstractDefaultClient {
 
-    public static class Builder {
+    public static final class Builder extends AbstractAmqpClientBuilder<Builder> {
 
-        private AmqpTransport.Builder transport;
-
-        private Duration syncTimeout = Duration.ofSeconds(5);
-
-        private Builder(final AmqpTransport.Builder transport) {
-            this.transport = transport;
+        public Builder(final AmqpTransport.Builder builder) {
+            super(builder);
         }
 
-        public Builder transport(final AmqpTransport.Builder transport) {
-            this.transport = transport;
+        @Override
+        protected Builder builder() {
             return this;
-        }
-
-        public AmqpTransport.Builder transport() {
-            return this.transport;
-        }
-
-        public Builder hostname(final String hostname) {
-            this.transport.hostname(hostname);
-            return this;
-        }
-
-        public String hostname() {
-            return this.transport.hostname();
-        }
-
-        public Builder username(final String username) {
-            this.transport.username(username);
-            return this;
-        }
-
-        public String username() {
-            return this.transport.username();
-        }
-
-        public Builder password(final String password) {
-            this.transport.password(password);
-            return this;
-        }
-
-        public String password() {
-            return this.transport.password();
-        }
-
-        public Builder port(final int port) {
-            this.transport.port(port);
-            return this;
-        }
-
-        public int port() {
-            return this.transport.port();
-        }
-
-        public Builder syncTimeout(final Duration syncTimeout) {
-            this.syncTimeout = syncTimeout;
-            return this;
-        }
-
-        public Duration syncTimeout() {
-            return this.syncTimeout;
         }
 
         public Client build(final Vertx vertx) {
-            return new AmqpClient(vertx, new AmqpTransport.Builder(this.transport), this.syncTimeout);
+            return new AmqpClient(vertx, new AmqpTransport.Builder(transport()), syncTimeout());
         }
+
     }
 
     public static Builder newClient() {
@@ -94,9 +43,7 @@ public class AmqpClient extends AbstractDefaultClient {
     private final AmqpTransport transport;
 
     private AmqpClient(final Vertx vertx, final AmqpTransport.Builder transport, final Duration syncTimeout) {
-
         super(syncTimeout.abs());
-
         this.transport = transport.build(vertx);
     }
 

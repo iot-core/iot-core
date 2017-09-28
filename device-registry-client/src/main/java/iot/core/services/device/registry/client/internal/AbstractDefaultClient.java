@@ -3,11 +3,12 @@ package iot.core.services.device.registry.client.internal;
 import java.time.Duration;
 import java.util.Optional;
 
+import org.iotbricks.service.device.registry.api.Device;
+import org.iotbricks.service.device.registry.api.DeviceRegistryService;
+
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import iot.core.services.device.registry.client.Client;
 import iot.core.services.device.registry.client.DeviceRegistryAsync;
-import org.iotbricks.service.device.registry.api.Device;
-import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 
 public abstract class AbstractDefaultClient implements Client {
 
@@ -15,10 +16,6 @@ public abstract class AbstractDefaultClient implements Client {
 
     public AbstractDefaultClient(final Duration timeout) {
         this.timeout = timeout;
-    }
-
-    @Override
-    public void close() throws Exception {
     }
 
     @Override
@@ -31,7 +28,7 @@ public abstract class AbstractDefaultClient implements Client {
         if (timeout == null) {
             return sync();
         }
-        return new SyncDeviceRegistryServiceWrapper(async(), timeout.abs());
+        return new SyncDeviceRegistryServiceWrapper(async(), timeout);
     }
 
     @Override
