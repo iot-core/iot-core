@@ -41,6 +41,24 @@ public class AmqpClient extends AbstractDefaultClient {
             return this.transport.hostname();
         }
 
+        public Builder username(final String username) {
+            this.transport.username(username);
+            return this;
+        }
+
+        public String username() {
+            return this.transport.username();
+        }
+
+        public Builder password(final String password) {
+            this.transport.password(password);
+            return this;
+        }
+
+        public String password() {
+            return this.transport.password();
+        }
+
         public Builder port(final int port) {
             this.transport.port(port);
             return this;

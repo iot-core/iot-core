@@ -208,6 +208,8 @@ public class AmqpTransport implements Transport<Message> {
 
         private String hostname = "localhost";
         private int port = 5762;
+        private String username;
+        private String password;
         private String container;
         private AmqpSerializer serializer;
         private AddressProvider addressProvider = DefaultAddressProvider.instance();
@@ -220,6 +222,8 @@ public class AmqpTransport implements Transport<Message> {
         public Builder(final Builder other) {
             this.hostname = other.hostname;
             this.port = other.port;
+            this.username = other.username;
+            this.password = other.password;
             this.container = other.container;
             this.serializer = other.serializer;
             this.addressProvider = other.addressProvider;
@@ -242,6 +246,24 @@ public class AmqpTransport implements Transport<Message> {
 
         public int port() {
             return this.port;
+        }
+
+        public Builder username(final String username) {
+            this.username = username;
+            return this;
+        }
+
+        public String username() {
+            return this.username;
+        }
+
+        public Builder password(final String password) {
+            this.password = password;
+            return this;
+        }
+
+        public String password() {
+            return this.password;
         }
 
         public Builder container(final String container) {
@@ -329,6 +351,12 @@ public class AmqpTransport implements Transport<Message> {
         this.context.runOnContext(v -> startConnection());
     }
 
+    /**
+     * Return if the transport is marked closed.
+     *
+     * @return {@code true} if the transport is marked closed, {@code false}
+     *         otherwise
+     */
     public boolean isClosed() {
         return this.closed.get();
     }
@@ -398,25 +426,27 @@ public class AmqpTransport implements Transport<Message> {
 
         final ProtonClient client = ProtonClient.create(this.vertx);
 
-        client.connect(this.options.hostname(), this.options.port(), con -> {
+        client.connect(this.options.hostname(), this.options.port(),
+                this.options.username(), this.options.password(),
+                con -> {
 
-            logger.debug("Connection -> {}", con);
+                    logger.debug("Connection -> {}", con);
 
-            if (con.failed()) {
-                handler.handle(con);
-                return;
-            }
+                    if (con.failed()) {
+                        handler.handle(con);
+                        return;
+                    }
 
-            con.result()
-                    .setContainer(this.options.container())
-                    .openHandler(opened -> {
+                    con.result()
+                            .setContainer(this.options.container())
+                            .openHandler(opened -> {
 
-                        logger.debug("Open -> {}", opened);
-                        handler.handle(opened);
+                                logger.debug("Open -> {}", opened);
+                                handler.handle(opened);
 
-                    }).open();
+                            }).open();
 
-        });
+                });
     }
 
     @Override
