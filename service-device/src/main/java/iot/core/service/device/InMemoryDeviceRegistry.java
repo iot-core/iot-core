@@ -1,5 +1,8 @@
 package iot.core.service.device;
 
+import org.iotbricks.service.device.registry.api.Device;
+import org.iotbricks.service.device.registry.api.DeviceRegistry;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.vertx.core.Vertx;
 import iot.core.services.device.registry.client.AmqpClient;
 import iot.core.services.device.registry.client.Client;
-import iot.core.service.device.Device;
+import org.iotbricks.service.device.registry.api.Device;
 
 import static io.vertx.core.Vertx.vertx;
 import static java.util.UUID.randomUUID;

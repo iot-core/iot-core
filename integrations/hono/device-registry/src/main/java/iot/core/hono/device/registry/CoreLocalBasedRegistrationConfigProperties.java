@@ -14,10 +14,10 @@ package iot.core.hono.device.registry;
 
 import org.eclipse.hono.config.SignatureSupportingConfigProperties;
 import org.eclipse.hono.deviceregistry.SignatureSupporting;
+import org.iotbricks.service.device.registry.api.DeviceRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.Vertx;
-import iot.core.service.device.DeviceRegistry;
 import iot.core.services.device.registry.client.Client;
 import iot.core.services.device.registry.client.LocalClient;
 

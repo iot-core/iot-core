@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit;
 
 import io.vertx.core.Vertx;
 import iot.core.service.device.AlwaysPassingDeviceSchemaValidator;
-import iot.core.service.device.Device;
 import iot.core.service.device.InMemoryDeviceRegistry;
+import org.iotbricks.service.device.registry.api.Device;
 
 public class Main {
 

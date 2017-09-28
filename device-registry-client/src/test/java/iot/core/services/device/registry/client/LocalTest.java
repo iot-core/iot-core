@@ -5,6 +5,7 @@ import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.iotbricks.service.device.registry.api.Device;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +13,6 @@ import org.junit.Test;
 import com.google.common.collect.Maps;
 
 import iot.core.service.device.AlwaysPassingDeviceSchemaValidator;
-import iot.core.service.device.Device;
 import iot.core.service.device.InMemoryDeviceRegistry;
 
 public class LocalTest {

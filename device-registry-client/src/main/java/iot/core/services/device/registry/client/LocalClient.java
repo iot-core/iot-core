@@ -10,9 +10,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import io.glutamate.util.concurrent.CloseableCompletionStage;
-import iot.core.service.device.Device;
-import iot.core.service.device.DeviceRegistry;
 import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
+import org.iotbricks.service.device.registry.api.Device;
+import org.iotbricks.service.device.registry.api.DeviceRegistry;
 
 public class LocalClient extends AbstractDefaultClient {
 

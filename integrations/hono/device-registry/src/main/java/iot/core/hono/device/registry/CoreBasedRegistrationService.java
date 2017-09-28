@@ -24,6 +24,7 @@ import java.util.function.BiConsumer;
 
 import org.eclipse.hono.service.registration.BaseRegistrationService;
 import org.eclipse.hono.util.RegistrationResult;
+import org.iotbricks.service.device.registry.api.Device;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +32,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import iot.core.service.device.Device;
 import iot.core.services.device.registry.client.Client;
 
 @Component

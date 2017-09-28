@@ -1,8 +1,8 @@
 package iot.core.services.device.registry.client;
 
-import java.time.Duration;
+import org.iotbricks.service.device.registry.api.DeviceRegistry;
 
-import iot.core.service.device.DeviceRegistry;
+import java.time.Duration;
 
 public interface Client extends AutoCloseable {
 

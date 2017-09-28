@@ -1,11 +1,11 @@
 package iot.core.services.device.registry.serialization.jackson;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import com.google.common.collect.Maps;
+import iot.core.services.device.registry.serialization.ByteSerializer;
+import org.iotbricks.service.device.registry.api.Device;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FilterOutputStream;
@@ -17,14 +17,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.google.common.collect.Maps;
-
-import iot.core.service.device.Device;
-import iot.core.services.device.registry.serialization.ByteSerializer;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNot.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class JsonTest {
 
@@ -74,7 +72,7 @@ public class JsonTest {
     public void testOptional2() {
         final String result = this.serializer.decode(this.serializer.encode(Optional.<String>of("FooBar")),
                 String.class);
-        Assert.assertEquals("FooBar", result);
+        assertEquals("FooBar", result);
     }
 
     private ByteBuffer encode(final Object value, final ByteBuffer buffer) {

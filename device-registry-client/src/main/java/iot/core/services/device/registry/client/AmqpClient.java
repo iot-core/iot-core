@@ -9,11 +9,11 @@ import java.util.Optional;
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.Vertx;
 import iot.core.amqp.transport.AmqpTransport;
-import iot.core.service.device.Device;
 import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
 import iot.core.services.device.registry.serialization.AmqpSerializer;
 import iot.core.utils.address.DefaultAddressProvider;
 import iot.core.utils.binding.amqp.DefaultAmqpErrorConditionTranslator;
+import org.iotbricks.service.device.registry.api.Device;
 
 public class AmqpClient extends AbstractDefaultClient {
 

@@ -6,6 +6,8 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
+import org.iotbricks.service.device.registry.api.Device;
+import org.iotbricks.service.device.registry.api.DeviceRegistry;
 
 import java.util.Map;
 import java.util.Optional;

@@ -1,9 +1,5 @@
 package iot.core.service.device.binding;
 
-import static iot.core.utils.binding.ErrorCondition.DECODE_ERROR;
-
-import java.util.Optional;
-
 import io.vertx.core.Vertx;
 import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
@@ -15,8 +11,6 @@ import iot.core.service.binding.common.MessageResponseHandler;
 import iot.core.service.binding.proton.ProtonRequestContext;
 import iot.core.service.binding.proton.ProtonRequestProcessor;
 import iot.core.service.device.AlwaysPassingDeviceSchemaValidator;
-import iot.core.service.device.Device;
-import iot.core.service.device.DeviceRegistry;
 import iot.core.service.device.InMemoryDeviceRegistry;
 import iot.core.services.device.registry.serialization.AmqpByteSerializer;
 import iot.core.services.device.registry.serialization.AmqpSerializer;
@@ -24,6 +18,12 @@ import iot.core.services.device.registry.serialization.jackson.JacksonSerializer
 import iot.core.utils.address.AddressProvider;
 import iot.core.utils.address.DefaultAddressProvider;
 import iot.core.utils.binding.RequestException;
+import org.iotbricks.service.device.registry.api.Device;
+import org.iotbricks.service.device.registry.api.DeviceRegistry;
+
+import java.util.Optional;
+
+import static iot.core.utils.binding.ErrorCondition.DECODE_ERROR;
 
 public class DeviceRegistryBinding {
 

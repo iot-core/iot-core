@@ -1,5 +1,7 @@
 package iot.core.service.device;
 
+import org.iotbricks.service.device.registry.api.Device;
+
 public class MockDeviceSchemaValidator implements DeviceSchemaValidator {
 
     @Override public void validate(Device device) {
