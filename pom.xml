@@ -12,8 +12,8 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>iotbricks</groupId>
-    <artifactId>iot-core</artifactId>
+    <groupId>org.iotbricks</groupId>
+    <artifactId>iotbricks</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -144,7 +144,7 @@
                     <version>${checkstyle-maven-plugin.version}</version>
                     <dependencies>
                         <dependency>
-                            <groupId>iotbricks</groupId>
+                            <groupId>org.iotbricks</groupId>
                             <artifactId>build-tools</artifactId>
                             <version>${project.version}</version>
                         </dependency>

@@ -12,25 +12,25 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>iotbricks</groupId>
-        <artifactId>iot-core</artifactId>
+        <groupId>org.iotbricks</groupId>
+        <artifactId>iotbricks</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>iot-core-service-device-binding</artifactId>
+    <artifactId>iotbricks-service-device-binding</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>iotbricks</groupId>
-            <artifactId>iot-core-service-device</artifactId>
+            <groupId>org.iotbricks</groupId>
+            <artifactId>iotbricks-service-device</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>iotbricks</groupId>
+            <groupId>org.iotbricks</groupId>
             <artifactId>device-serialization-jackson</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>iotbricks</groupId>
+            <groupId>org.iotbricks</groupId>
             <artifactId>core-utils</artifactId>
             <version>${project.version}</version>
         </dependency>

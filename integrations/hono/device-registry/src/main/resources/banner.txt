@@ -10,5 +10,5 @@
 IoT Core Device Registry Server ${application.formatted-version}
 using Spring Boot${spring-boot.formatted-version}
 
-Go to https://github.com/iot-core for more information.
+Go to https://github.com/iotbricks for more information.
 

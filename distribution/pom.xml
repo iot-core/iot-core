@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>iotbricks</groupId>
-        <artifactId>iot-core</artifactId>
+        <groupId>org.iotbricks</groupId>
+        <artifactId>iotbricks</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>iot-core-distribution</artifactId>
+    <artifactId>iotbricks-distribution</artifactId>
     <packaging>pom</packaging>
 
     <modules>

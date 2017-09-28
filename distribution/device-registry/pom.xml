@@ -5,16 +5,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>iotbricks</groupId>
-        <artifactId>iot-core-distribution</artifactId>
+        <groupId>org.iotbricks</groupId>
+        <artifactId>iotbricks-distribution</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>iot-core-distribution-device-registry</artifactId>
+    <artifactId>iotbricks-distribution-device-registry</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>iotbricks</groupId>
-            <artifactId>iot-core-service-device-binding</artifactId>
+            <groupId>org.iotbricks</groupId>
+            <artifactId>iotbricks-service-device-binding</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
