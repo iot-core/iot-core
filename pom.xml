@@ -20,8 +20,6 @@
     <properties>
         <!-- General build rules -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- Dependencies versions -->
         <commons-lang3.version>3.6</commons-lang3.version>
@@ -38,6 +36,9 @@
 
     <modules>
         <module>build-tools</module>
+
+        <module>common/annotations</module>
+        <module>common/annotations-processor</module>
 
         <module>service</module>
         <module>core-utils</module>
@@ -138,6 +139,18 @@
 
         <pluginManagement>
             <plugins>
+
+                <!-- core maven -->
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.6.2</version>
+                    <configuration>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                    </configuration>
+                </plugin>
 
                 <!-- code coverage -->
 

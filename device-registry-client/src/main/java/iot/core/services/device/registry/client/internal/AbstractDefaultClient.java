@@ -8,7 +8,7 @@ import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import iot.core.services.device.registry.client.Client;
-import iot.core.services.device.registry.client.DeviceRegistryAsync;
+import iot.core.services.device.registry.client.DeviceRegistryServiceAsync;
 
 public abstract class AbstractDefaultClient implements Client {
 
@@ -32,8 +32,8 @@ public abstract class AbstractDefaultClient implements Client {
     }
 
     @Override
-    public DeviceRegistryAsync async() {
-        return new DeviceRegistryAsync() {
+    public DeviceRegistryServiceAsync async() {
+        return new DeviceRegistryServiceAsync() {
 
             @Override
             public CloseableCompletionStage<String> save(final Device device) {
