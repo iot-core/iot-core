@@ -32,7 +32,9 @@ import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
+import iot.core.services.device.registry.serialization.AmqpByteSerializer;
 import iot.core.services.device.registry.serialization.AmqpSerializer;
+import iot.core.services.device.registry.serialization.jackson.JacksonSerializer;
 import iot.core.utils.address.AddressProvider;
 import iot.core.utils.address.DefaultAddressProvider;
 import iot.core.utils.binding.RequestException;
@@ -206,14 +208,19 @@ public class AmqpTransport implements Transport<Message> {
 
     public static class Builder {
 
+        private static final AmqpSerializer DEFAULT_SERIALIZER = AmqpByteSerializer.of(JacksonSerializer.json());
+        private static final AmqpErrorConditionTranslator DEFAULT_ERROR_CONDITION_TRANSLATOR = DefaultAmqpErrorConditionTranslator
+                .instance();
+        private static final AddressProvider DEFAULT_ADDRESS_PROVIDER = DefaultAddressProvider.instance();
+
         private String hostname = "localhost";
         private int port = 5762;
         private String username;
         private String password;
         private String container;
-        private AmqpSerializer serializer;
-        private AddressProvider addressProvider = DefaultAddressProvider.instance();
-        private AmqpErrorConditionTranslator errorConditionTranslator = DefaultAmqpErrorConditionTranslator.instance();
+        private AmqpSerializer serializer = DEFAULT_SERIALIZER;
+        private AddressProvider addressProvider = DEFAULT_ADDRESS_PROVIDER;
+        private AmqpErrorConditionTranslator errorConditionTranslator = DEFAULT_ERROR_CONDITION_TRANSLATOR;
         private int requestBufferSize = -1;
 
         private Builder() {
@@ -276,7 +283,7 @@ public class AmqpTransport implements Transport<Message> {
         }
 
         public Builder serializer(final AmqpSerializer serializer) {
-            this.serializer = serializer;
+            this.serializer = serializer != null ? serializer : DEFAULT_SERIALIZER;
             return this;
         }
 
@@ -285,7 +292,7 @@ public class AmqpTransport implements Transport<Message> {
         }
 
         public Builder addressProvider(final AddressProvider addressProvider) {
-            this.addressProvider = addressProvider;
+            this.addressProvider = addressProvider != null ? addressProvider : DEFAULT_ADDRESS_PROVIDER;
             return this;
         }
 
@@ -294,7 +301,8 @@ public class AmqpTransport implements Transport<Message> {
         }
 
         public Builder errorConditionTranslator(final AmqpErrorConditionTranslator errorConditionTranslator) {
-            this.errorConditionTranslator = errorConditionTranslator;
+            this.errorConditionTranslator = errorConditionTranslator != null ? errorConditionTranslator
+                    : DEFAULT_ERROR_CONDITION_TRANSLATOR;
             return this;
         }
 
