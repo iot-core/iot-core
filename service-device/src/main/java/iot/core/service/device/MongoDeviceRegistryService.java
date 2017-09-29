@@ -8,6 +8,7 @@ import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import org.iotbricks.service.device.registry.api.Device;
 import org.iotbricks.service.device.registry.api.DeviceRegistryService;
+import org.iotbricks.service.device.registry.spi.DeviceSchemaValidator;
 
 import java.util.Map;
 import java.util.Optional;

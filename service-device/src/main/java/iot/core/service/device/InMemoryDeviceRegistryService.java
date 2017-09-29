@@ -2,6 +2,7 @@ package iot.core.service.device;
 
 import org.iotbricks.service.device.registry.api.Device;
 import org.iotbricks.service.device.registry.api.DeviceRegistryService;
+import org.iotbricks.service.device.registry.spi.DeviceSchemaValidator;
 
 import java.util.HashMap;
 import java.util.Map;

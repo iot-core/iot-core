@@ -14,12 +14,11 @@ package iot.core.hono.device.registry;
 
 import iot.core.service.device.InMemoryDeviceRegistryService;
 import org.iotbricks.service.device.registry.api.DeviceRegistryService;
+import org.iotbricks.service.device.registry.spi.AlwaysPassingDeviceSchemaValidator;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-
-import iot.core.service.device.AlwaysPassingDeviceSchemaValidator;
 
 /**
  * Spring Boot configuration for the Device Registry application.

@@ -1,4 +1,4 @@
-package iot.core.service.device;
+package org.iotbricks.service.device.registry.spi;
 
 import org.iotbricks.service.device.registry.api.Device;
 
