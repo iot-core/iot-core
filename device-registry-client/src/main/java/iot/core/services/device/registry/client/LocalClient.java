@@ -13,7 +13,6 @@ import org.iotbricks.service.device.registry.api.Device;
 import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 
 import io.glutamate.util.concurrent.CloseableCompletionStage;
-import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
 
 public class LocalClient extends AbstractDefaultClient {
 

@@ -10,7 +10,6 @@ import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.Vertx;
 import iot.core.amqp.transport.AmqpTransport;
 import iot.core.services.device.registry.client.internal.AbstractAmqpClientBuilder;
-import iot.core.services.device.registry.client.internal.AbstractDefaultClient;
 
 public class AmqpClient extends AbstractDefaultClient {
 

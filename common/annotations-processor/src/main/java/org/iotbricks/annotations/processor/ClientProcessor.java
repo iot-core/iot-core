@@ -2,6 +2,8 @@ package org.iotbricks.annotations.processor;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,7 +18,6 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Name;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -29,6 +30,8 @@ import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
 import org.iotbricks.annotations.Client;
+import org.iotbricks.annotations.processor.ServiceMethod.Parameter;
+import org.iotbricks.annotations.processor.ServiceMethod.TypeName;
 
 @SupportedAnnotationTypes("org.iotbricks.annotations.Client")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
@@ -63,14 +66,53 @@ public class ClientProcessor extends AbstractProcessor {
                             "Annotation must be on named package. Unnamed packages are not supported!");
                 }
 
-                createAsyncApi((PackageElement) element, element.toString(), serviceName);
-                createClient((PackageElement) element, element.toString(), serviceName);
+                createAsyncApi(packageElement, element.toString(), serviceName);
+                createClient(packageElement, element.toString(), serviceName);
+                createSyncWrapper(packageElement, element.toString(), serviceName);
+                createAbstractDefaultClient(packageElement, element.toString(), serviceName);
             }
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
 
         return true;
+    }
+
+    private List<ServiceMethod> getServiceMethods(final Element serviceType) {
+
+        final Types types = this.processingEnv.getTypeUtils();
+        final List<ServiceMethod> result = new ArrayList<>();
+
+        for (final Element child : serviceType.getEnclosedElements()) {
+            if (child.getKind() != ElementKind.METHOD) {
+                // methods only
+                continue;
+            }
+
+            final ExecutableElement method = (ExecutableElement) child;
+
+            final TypeName returnType;
+
+            final TypeMirror ret = method.getReturnType();
+            if (ret instanceof PrimitiveType) {
+                returnType = new TypeName(types.boxedClass((PrimitiveType) ret).toString());
+            } else if (ret.getKind() == TypeKind.VOID) {
+                returnType = new TypeName("Void");
+            } else {
+                returnType = new TypeName(ret.toString());
+            }
+
+            final List<Parameter> parameters = new ArrayList<>(method.getParameters().size());
+
+            for (final VariableElement parameter : method.getParameters()) {
+                parameters.add(new Parameter(new TypeName(parameter.asType().toString()),
+                        evalParameterName(parameter)));
+            }
+
+            result.add(new ServiceMethod(method.getSimpleName().toString(), returnType, parameters));
+        }
+
+        return result;
     }
 
     private void createAsyncApi(final PackageElement element, final String packageName, final String serviceName)
@@ -83,8 +125,6 @@ public class ClientProcessor extends AbstractProcessor {
 
         final JavaFileObject file = this.filer.createSourceFile(asyncTypeName, element);
 
-        final Types types = this.processingEnv.getTypeUtils();
-
         try (final PrintWriter out = new PrintWriter(file.openWriter())) {
             out.println("package " + packageName + ";");
             out.println();
@@ -92,51 +132,10 @@ public class ClientProcessor extends AbstractProcessor {
             out.println();
             out.format("public interface %s {%n", simpleName(asyncTypeName));
 
-            // process direct children
-
-            for (final Element child : serviceType.getEnclosedElements()) {
-                if (child.getKind() != ElementKind.METHOD) {
-                    // methods only
-                    continue;
-                }
-
-                final ExecutableElement method = (ExecutableElement) child;
-
-                // return type : Wrap in CloseableCompletableFuture
-
-                out.print("    CloseableCompletionStage<");
-
-                final TypeMirror ret = method.getReturnType();
-                if (ret instanceof PrimitiveType) {
-                    out.print(types.boxedClass((PrimitiveType) ret));
-                } else if (ret.getKind() == TypeKind.VOID) {
-                    out.print("Void");
-                } else {
-                    out.print(ret);
-                }
-
-                out.print("> ");
-
-                // method name
-
-                out.print(method.getSimpleName());
-
-                // parameters
-
-                out.print(" (");
-
-                out.print(method.getParameters().stream()
-                        .map(parameter -> {
-                            return parameter.asType().toString() + " " + evalParameterName(parameter);
-                        })
-                        .collect(Collectors.joining(", ")));
-
-                out.print(");");
-
-                // finish up
-
-                out.println();
-                out.println();
+            for (final ServiceMethod method : getServiceMethods(serviceType)) {
+                out.format("    CloseableCompletionStage<%s> %s (", method.getReturnType(), method.getName());
+                out.print(parameterList(method));
+                out.format(");%n");
             }
 
             out.println("}");
@@ -144,18 +143,8 @@ public class ClientProcessor extends AbstractProcessor {
 
     }
 
-    private Name evalParameterName(final VariableElement parameter) {
-        // FIXME: we need an alternate way to figure out the parameter name
-        return parameter.getSimpleName();
-    }
-
-    private static String fullAsyncName(final String packageName, final String simpleSyncName) {
-        return packageName + "." + simpleSyncName + "Async";
-    }
-
     private void createClient(final PackageElement element, final String packageName, final String serviceName)
             throws IOException {
-        System.out.format("Creating client in %s for service %s%n", packageName, serviceName);
 
         // FIXME: consider using JDT AST for doing all this
 
@@ -177,6 +166,136 @@ public class ClientProcessor extends AbstractProcessor {
                     "\n" +
                     "}");
         }
+    }
+
+    private void createAbstractDefaultClient(final PackageElement element, final String packageName,
+            final String serviceName) throws IOException {
+
+        final TypeElement serviceType = this.processingEnv.getElementUtils().getTypeElement(serviceName);
+
+        // FIXME: we should really, really consider use JDT AST for this
+
+        final String name = packageName + ".AbstractDefaultClient";
+        final String asyncTypeName = fullAsyncName(packageName, serviceType.getSimpleName().toString());
+
+        final JavaFileObject file = this.filer.createSourceFile(name, element);
+
+        try (final PrintWriter out = new PrintWriter(file.openWriter())) {
+            out.println("package " + packageName + ";");
+            out.println();
+            out.println("import java.time.Duration;");
+            out.println();
+            out.println("import io.glutamate.util.concurrent.CloseableCompletionStage;");
+            out.println();
+            out.println("public abstract class AbstractDefaultClient implements Client {");
+            out.println();
+            out.println("    private final Duration timeout;");
+            out.println();
+            out.println("    public AbstractDefaultClient(final Duration timeout) { this.timeout = timeout; }");
+            out.println();
+            out.format(
+                    "    @Override public %s sync() { return new SyncDeviceRegistryServiceWrapper(async(), this.timeout); }%n%n",
+                    serviceName);
+
+            out.format("    @Override public %s sync(final Duration timeout) {%n", serviceName);
+            out.println("        if (timeout == null) { return sync(); }");
+            out.println("        return new SyncDeviceRegistryServiceWrapper(async(), timeout);");
+            out.println("    }");
+            out.println();
+
+            out.format("    @Override public %s async() {%n", asyncTypeName);
+            out.format("        return new %s() {%n", asyncTypeName);
+
+            for (final ServiceMethod method : getServiceMethods(serviceType)) {
+
+                // @Override public CloseableCompletionStage<String> save(final Device device) {
+                // return internalSave(device); }
+
+                out.format("            @Override public CloseableCompletionStage<%s> %s (",
+                        method.getReturnType(), method.getName());
+                out.print(method.getParameters().stream().map(Object::toString).collect(Collectors.joining(", ")));
+                out.format(") { return %s(", method.getInternalName());
+                out.print(parameterNames(method));
+                out.format(");}%n");
+            }
+
+            out.println("        };");
+            out.println("    }");
+            out.println();
+
+            for (final ServiceMethod method : getServiceMethods(serviceType)) {
+                out.format("    protected abstract CloseableCompletionStage<%s> %s (", method.getReturnType(),
+                        method.getInternalName());
+                out.print(parameterList(method));
+                out.format(");%n");
+            }
+
+            out.println("}");
+        }
+
+    }
+
+    private String parameterList(final ServiceMethod method) {
+        return method.getParameters().stream().map(Object::toString).collect(Collectors.joining(", "));
+    }
+
+    private String parameterNames(final ServiceMethod method) {
+        return method.getParameters().stream().map(Parameter::getName).collect(Collectors.joining(", "));
+    }
+
+    private void createSyncWrapper(final PackageElement element, final String packageName,
+            final String serviceName) throws IOException {
+
+        final TypeElement serviceType = this.processingEnv.getElementUtils().getTypeElement(serviceName);
+
+        // FIXME: we should really, really consider use JDT AST for this
+
+        final String name = packageName + ".SyncDeviceRegistryServiceWrapper";
+        final String asyncTypeName = fullAsyncName(packageName, serviceType.getSimpleName().toString());
+
+        final JavaFileObject file = this.filer.createSourceFile(name, element);
+
+        try (final PrintWriter out = new PrintWriter(file.openWriter())) {
+            out.println("package " + packageName + ";");
+            out.println();
+            out.println("import java.time.Duration;");
+            out.println();
+            out.format(
+                    "public class SyncDeviceRegistryServiceWrapper extends iot.core.utils.client.AbstractSyncWrapper implements %s {%n",
+                    serviceName);
+            out.println();
+            out.format("    private final %s async;%n", asyncTypeName);
+            out.println();
+            out.format(
+                    "    public SyncDeviceRegistryServiceWrapper(final %s async, final Duration timeout) { super(timeout); this.async = async; }%n%n",
+                    asyncTypeName);
+
+            for (final ServiceMethod method : getServiceMethods(serviceType)) {
+
+                if (!method.getReturnType().getName().equals("Void")) {
+                    out.format(
+                            "@Override public %4$s %1$s(%2$s) { return await(this.async.%1$s(%3$s)); }%n",
+                            method.getName(), parameterList(method), parameterNames(method), method.getReturnType());
+                } else {
+                    out.format(
+                            "@Override public void %1$s(%2$s) { await(this.async.%1$s(%3$s)); }%n",
+                            method.getName(), parameterList(method), parameterNames(method));
+                }
+
+            }
+
+            out.println("}");
+        }
+
+    }
+
+    private String evalParameterName(final VariableElement parameter) {
+        // FIXME: we need an alternate way to figure out the parameter name
+        return parameter.getSimpleName().toString();
+    }
+
+    private static String fullAsyncName(final String packageName, final String simpleSyncName) {
+        return packageName + "." + simpleSyncName + "Async";
     }
 
     private static String simpleName(final String name) {
