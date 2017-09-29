@@ -15,7 +15,7 @@ public class ServiceMethodTest {
 
     private static void assertTypeName(final String typeName, final String expectedPackageName,
             final String expectedSimpleName) {
-        final TypeName type = new ServiceMethod.TypeName(typeName);
+        final TypeName type = new ServiceMethod.TypeName(typeName, null);
 
         Assert.assertEquals(expectedSimpleName, type.getSimpleName());
         Assert.assertEquals(expectedPackageName, type.getPackageName());
