@@ -3,15 +3,15 @@ package iot.core.services.device.registry.client.internal;
 import java.time.Duration;
 import java.util.Optional;
 
-import iot.core.services.device.registry.client.DeviceRegistryAsync;
+import iot.core.services.device.registry.client.DeviceRegistryServiceAsync;
 import iot.core.utils.client.AbstractSyncWrapper;
 import org.iotbricks.service.device.registry.api.Device;
 import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 
 public class SyncDeviceRegistryServiceWrapper extends AbstractSyncWrapper implements DeviceRegistryService {
-    private final DeviceRegistryAsync async;
+    private final DeviceRegistryServiceAsync async;
 
-    public SyncDeviceRegistryServiceWrapper(final DeviceRegistryAsync async, final Duration timeout) {
+    public SyncDeviceRegistryServiceWrapper(final DeviceRegistryServiceAsync async, final Duration timeout) {
         super(timeout);
         this.async = async;
     }
