@@ -214,7 +214,7 @@ public class AmqpTransport implements Transport<Message> {
         private static final AddressProvider DEFAULT_ADDRESS_PROVIDER = DefaultAddressProvider.instance();
 
         private String hostname = "localhost";
-        private int port = 5762;
+        private int port = 5672;
         private String username;
         private String password;
         private String container;

@@ -1,118 +1,42 @@
 package org.iotbricks.annotations.processor;
 
+import static org.iotbricks.annotations.processor.ServiceMethod.getServiceMethods;
+
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.Messager;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.MirroredTypeException;
-import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Types;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
 import org.iotbricks.annotations.Client;
-import org.iotbricks.annotations.processor.ServiceMethod.Parameter;
-import org.iotbricks.annotations.processor.ServiceMethod.TypeName;
 
 @SupportedAnnotationTypes("org.iotbricks.annotations.Client")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-public class ClientProcessor extends AbstractProcessor {
+public class ClientProcessor extends AbstractClientProcessor {
 
-    private Messager messager;
-    private Filer filer;
-
-    @Override
-    public synchronized void init(final ProcessingEnvironment processingEnv) {
-        super.init(processingEnv);
-        this.messager = processingEnv.getMessager();
-        this.filer = processingEnv.getFiler();
+    public ClientProcessor() {
+        super(Client.class);
     }
 
     @Override
-    public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
+    protected void processClient(final PackageElement packageElement, final TypeElement serviceType,
+            final RoundEnvironment roundEnv)
+            throws Exception {
 
-        try {
-            for (final Element element : roundEnv.getElementsAnnotatedWith(Client.class)) {
-                final Client client = element.getAnnotation(Client.class);
-                final String serviceName = getServiceType(client);
-                this.messager.printMessage(Kind.NOTE, String.format("Creating client for: %s", serviceName), element);
+        this.messager.printMessage(Kind.NOTE, String.format("Creating client for: %s", serviceType), packageElement);
 
-                if (!(element instanceof PackageElement)) {
-                    throw new IllegalStateException("Annotation must be on package level");
-                }
-
-                final PackageElement packageElement = (PackageElement) element;
-                if (packageElement.isUnnamed()) {
-                    throw new IllegalStateException(
-                            "Annotation must be on named package. Unnamed packages are not supported!");
-                }
-
-                createAsyncApi(packageElement, element.toString(), serviceName);
-                createClient(packageElement, element.toString(), serviceName);
-                createSyncWrapper(packageElement, element.toString(), serviceName);
-                createAbstractDefaultClient(packageElement, element.toString(), serviceName);
-            }
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return true;
-    }
-
-    private List<ServiceMethod> getServiceMethods(final Element serviceType) {
-
-        final Types types = this.processingEnv.getTypeUtils();
-        final List<ServiceMethod> result = new ArrayList<>();
-
-        for (final Element child : serviceType.getEnclosedElements()) {
-            if (child.getKind() != ElementKind.METHOD) {
-                // methods only
-                continue;
-            }
-
-            final ExecutableElement method = (ExecutableElement) child;
-
-            final TypeName returnType;
-
-            final TypeMirror ret = method.getReturnType();
-            if (ret instanceof PrimitiveType) {
-                returnType = new TypeName(types.boxedClass((PrimitiveType) ret).toString());
-            } else if (ret.getKind() == TypeKind.VOID) {
-                returnType = new TypeName("Void");
-            } else {
-                returnType = new TypeName(ret.toString());
-            }
-
-            final List<Parameter> parameters = new ArrayList<>(method.getParameters().size());
-
-            for (final VariableElement parameter : method.getParameters()) {
-                parameters.add(new Parameter(new TypeName(parameter.asType().toString()),
-                        evalParameterName(parameter)));
-            }
-
-            result.add(new ServiceMethod(method.getSimpleName().toString(), returnType, parameters));
-        }
-
-        return result;
+        createAsyncApi(packageElement, packageElement.toString(), serviceType.getQualifiedName().toString());
+        createClient(packageElement, packageElement.toString(), serviceType.getQualifiedName().toString());
+        createSyncWrapper(packageElement, packageElement.toString(), serviceType.getQualifiedName().toString());
+        createAbstractDefaultClient(packageElement, packageElement.toString(),
+                serviceType.getQualifiedName().toString());
     }
 
     private void createAsyncApi(final PackageElement element, final String packageName, final String serviceName)
@@ -132,9 +56,9 @@ public class ClientProcessor extends AbstractProcessor {
             out.println();
             out.format("public interface %s {%n", simpleName(asyncTypeName));
 
-            for (final ServiceMethod method : getServiceMethods(serviceType)) {
+            for (final ServiceMethod method : ServiceMethod.getServiceMethods(this.types, serviceType)) {
                 out.format("    CloseableCompletionStage<%s> %s (", method.getReturnType(), method.getName());
-                out.print(parameterList(method));
+                out.print(method.parameterList());
                 out.format(");%n");
             }
 
@@ -206,7 +130,7 @@ public class ClientProcessor extends AbstractProcessor {
             out.format("    @Override public %s async() {%n", asyncTypeName);
             out.format("        return new %s() {%n", asyncTypeName);
 
-            for (final ServiceMethod method : getServiceMethods(serviceType)) {
+            for (final ServiceMethod method : getServiceMethods(this.types, serviceType)) {
 
                 // @Override public CloseableCompletionStage<String> save(final Device device) {
                 // return internalSave(device); }
@@ -215,7 +139,7 @@ public class ClientProcessor extends AbstractProcessor {
                         method.getReturnType(), method.getName());
                 out.print(method.getParameters().stream().map(Object::toString).collect(Collectors.joining(", ")));
                 out.format(") { return %s(", method.getInternalName());
-                out.print(parameterNames(method));
+                out.print(method.parameterNames());
                 out.format(");}%n");
             }
 
@@ -223,24 +147,16 @@ public class ClientProcessor extends AbstractProcessor {
             out.println("    }");
             out.println();
 
-            for (final ServiceMethod method : getServiceMethods(serviceType)) {
+            for (final ServiceMethod method : getServiceMethods(this.types, serviceType)) {
                 out.format("    protected abstract CloseableCompletionStage<%s> %s (", method.getReturnType(),
                         method.getInternalName());
-                out.print(parameterList(method));
+                out.print(method.parameterList());
                 out.format(");%n");
             }
 
             out.println("}");
         }
 
-    }
-
-    private String parameterList(final ServiceMethod method) {
-        return method.getParameters().stream().map(Object::toString).collect(Collectors.joining(", "));
-    }
-
-    private String parameterNames(final ServiceMethod method) {
-        return method.getParameters().stream().map(Parameter::getName).collect(Collectors.joining(", "));
     }
 
     private void createSyncWrapper(final PackageElement element, final String packageName,
@@ -270,16 +186,16 @@ public class ClientProcessor extends AbstractProcessor {
                     "    public SyncDeviceRegistryServiceWrapper(final %s async, final Duration timeout) { super(timeout); this.async = async; }%n%n",
                     asyncTypeName);
 
-            for (final ServiceMethod method : getServiceMethods(serviceType)) {
+            for (final ServiceMethod method : getServiceMethods(this.types, serviceType)) {
 
-                if (!method.getReturnType().getName().equals("Void")) {
+                if (!method.getReturnType().getName().equals("java.lang.Void")) {
                     out.format(
-                            "@Override public %4$s %1$s(%2$s) { return await(this.async.%1$s(%3$s)); }%n",
-                            method.getName(), parameterList(method), parameterNames(method), method.getReturnType());
+                            "    @Override public %4$s %1$s(%2$s) { return await(this.async.%1$s(%3$s)); }%n",
+                            method.getName(), method.parameterList(), method.parameterNames(), method.getReturnType());
                 } else {
                     out.format(
-                            "@Override public void %1$s(%2$s) { await(this.async.%1$s(%3$s)); }%n",
-                            method.getName(), parameterList(method), parameterNames(method));
+                            "    @Override public void %1$s(%2$s) { await(this.async.%1$s(%3$s)); }%n",
+                            method.getName(), method.parameterList(), method.parameterNames());
                 }
 
             }
@@ -289,11 +205,6 @@ public class ClientProcessor extends AbstractProcessor {
 
     }
 
-    private String evalParameterName(final VariableElement parameter) {
-        // FIXME: we need an alternate way to figure out the parameter name
-        return parameter.getSimpleName().toString();
-    }
-
     private static String fullAsyncName(final String packageName, final String simpleSyncName) {
         return packageName + "." + simpleSyncName + "Async";
     }
@@ -301,15 +212,6 @@ public class ClientProcessor extends AbstractProcessor {
     private static String simpleName(final String name) {
         final String[] toks = name.split("\\.");
         return toks[toks.length - 1];
-    }
-
-    private static String getServiceType(final Client client) {
-        try {
-            client.value();
-            throw new IllegalStateException("Unable to get service type");
-        } catch (final MirroredTypeException e) {
-            return e.getTypeMirror().toString();
-        }
     }
 
 }
