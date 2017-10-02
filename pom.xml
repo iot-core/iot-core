@@ -57,12 +57,17 @@
             <dependency>
                 <groupId>org.iotbricks</groupId>
                 <artifactId>iotbricks-service-device-registry-api</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.iotbricks</groupId>
                 <artifactId>iotbricks-service-device-registry-spi</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.iotbricks</groupId>
+                <artifactId>iotbricks-service-device-registry-inmemory</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>

@@ -8,8 +8,8 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import io.vertx.core.Vertx;
-import iot.core.service.device.InMemoryDeviceRegistryService;
 import org.iotbricks.service.device.registry.api.Device;
+import org.iotbricks.service.device.registry.inmemory.InMemoryDeviceRegistryService;
 import org.iotbricks.service.device.registry.spi.AlwaysPassingDeviceSchemaValidator;
 
 public class Main {

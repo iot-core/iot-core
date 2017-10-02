@@ -1,4 +1,4 @@
-package iot.core.service.device;
+package org.iotbricks.service.device.registry.inmemory;
 
 import org.iotbricks.service.device.registry.api.Device;
 import org.iotbricks.service.device.registry.api.DeviceRegistryService;

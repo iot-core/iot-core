@@ -15,6 +15,7 @@
     <modules>
         <module>api</module>
         <module>spi</module>
+        <module>inmemory</module>
     </modules>
 
 </project>

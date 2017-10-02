@@ -10,7 +10,6 @@ import iot.core.service.binding.common.DefaultErrorTranslator;
 import iot.core.service.binding.common.MessageResponseHandler;
 import iot.core.service.binding.proton.ProtonRequestContext;
 import iot.core.service.binding.proton.ProtonRequestProcessor;
-import iot.core.service.device.InMemoryDeviceRegistryService;
 import iot.core.services.device.registry.serialization.AmqpByteSerializer;
 import iot.core.services.device.registry.serialization.AmqpSerializer;
 import iot.core.services.device.registry.serialization.jackson.JacksonSerializer;
@@ -19,6 +18,7 @@ import iot.core.utils.address.DefaultAddressProvider;
 import iot.core.utils.binding.RequestException;
 import org.iotbricks.service.device.registry.api.Device;
 import org.iotbricks.service.device.registry.api.DeviceRegistryService;
+import org.iotbricks.service.device.registry.inmemory.InMemoryDeviceRegistryService;
 import org.iotbricks.service.device.registry.spi.AlwaysPassingDeviceSchemaValidator;
 
 import java.util.Optional;

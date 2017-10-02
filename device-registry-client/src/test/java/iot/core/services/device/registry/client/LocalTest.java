@@ -6,14 +6,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.iotbricks.service.device.registry.api.Device;
+import org.iotbricks.service.device.registry.inmemory.InMemoryDeviceRegistryService;
 import org.iotbricks.service.device.registry.spi.AlwaysPassingDeviceSchemaValidator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.collect.Maps;
-
-import iot.core.service.device.InMemoryDeviceRegistryService;
 
 public class LocalTest {
 

@@ -21,8 +21,7 @@
     <dependencies>
         <dependency>
             <groupId>org.iotbricks</groupId>
-            <artifactId>iotbricks-service-device</artifactId>
-            <version>${project.version}</version>
+            <artifactId>iotbricks-service-device-registry-inmemory</artifactId>
         </dependency>
         <dependency>
             <groupId>org.iotbricks</groupId>

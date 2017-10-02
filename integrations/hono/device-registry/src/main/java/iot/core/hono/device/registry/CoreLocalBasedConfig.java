@@ -12,8 +12,8 @@
 
 package iot.core.hono.device.registry;
 
-import iot.core.service.device.InMemoryDeviceRegistryService;
 import org.iotbricks.service.device.registry.api.DeviceRegistryService;
+import org.iotbricks.service.device.registry.inmemory.InMemoryDeviceRegistryService;
 import org.iotbricks.service.device.registry.spi.AlwaysPassingDeviceSchemaValidator;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
