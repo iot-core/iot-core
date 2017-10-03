@@ -11,11 +11,22 @@
     </parent>
     <artifactId>iotbricks-distribution-device-registry</artifactId>
 
+    <properties>
+        <checkstyle.skip>true</checkstyle.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.iotbricks</groupId>
             <artifactId>iotbricks-service-device-binding</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.iotbricks</groupId>
+            <artifactId>iotbricks-service-device-registry-inmemory</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.iotbricks</groupId>
+            <artifactId>iotbricks-service-device-registry-mongo</artifactId>
         </dependency>
 
         <dependency>

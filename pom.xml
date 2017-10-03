@@ -74,6 +74,11 @@
                 <artifactId>iotbricks-service-device-registry-mongo</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.iotbricks</groupId>
+                <artifactId>iotbricks-service-device-binding</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
