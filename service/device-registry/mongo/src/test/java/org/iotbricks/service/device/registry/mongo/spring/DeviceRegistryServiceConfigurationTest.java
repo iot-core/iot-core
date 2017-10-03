@@ -1,4 +1,4 @@
-package iot.core.service.device.spring;
+package org.iotbricks.service.device.registry.mongo.spring;
 
 import org.iotbricks.service.device.registry.api.Device;
 import org.iotbricks.service.device.registry.api.DeviceRegistryService;

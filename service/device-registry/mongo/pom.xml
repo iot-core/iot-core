@@ -12,10 +12,10 @@
 
     <parent>
         <groupId>org.iotbricks</groupId>
-        <artifactId>iotbricks</artifactId>
+        <artifactId>iotbricks-service-device-registry</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>iotbricks-service-device</artifactId>
+    <artifactId>iotbricks-service-device-registry-mongo</artifactId>
 
     <dependencies>
         <dependency>

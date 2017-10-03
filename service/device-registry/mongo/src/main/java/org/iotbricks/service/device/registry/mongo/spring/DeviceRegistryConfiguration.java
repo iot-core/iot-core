@@ -1,8 +1,8 @@
-package iot.core.service.device.spring;
+package org.iotbricks.service.device.registry.mongo.spring;
 
 import com.mongodb.MongoClient;
 import de.flapdoodle.embed.mongo.config.IMongodConfig;
-import iot.core.service.device.MongoDeviceRegistryService;
+import org.iotbricks.service.device.registry.mongo.MongoDeviceRegistryService;
 import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 import org.iotbricks.service.device.registry.spi.DeviceSchemaValidator;
 import org.iotbricks.service.device.registry.spi.spring.DeviceRegistryServiceSpiConfiguration;

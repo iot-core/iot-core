@@ -1,4 +1,4 @@
-package iot.core.service.device;
+package org.iotbricks.service.device.registry.mongo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;

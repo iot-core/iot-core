@@ -44,7 +44,6 @@
         <module>service</module>
         <module>core-utils</module>
         <module>amqp-transport</module>
-        <module>service-device</module>
         <module>device-registry-client</module>
         <module>service-device-binding</module>
         <module>device-serialization-jackson</module>
@@ -68,6 +67,11 @@
             <dependency>
                 <groupId>org.iotbricks</groupId>
                 <artifactId>iotbricks-service-device-registry-inmemory</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.iotbricks</groupId>
+                <artifactId>iotbricks-service-device-registry-mongo</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

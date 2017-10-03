@@ -16,6 +16,7 @@
         <module>api</module>
         <module>spi</module>
         <module>inmemory</module>
+        <module>mongo</module>
     </modules>
 
 </project>
