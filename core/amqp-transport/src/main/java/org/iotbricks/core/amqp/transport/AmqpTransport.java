@@ -10,7 +10,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -33,18 +32,24 @@ import org.slf4j.LoggerFactory;
 import io.glutamate.util.concurrent.CloseableCompletableFuture;
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
 
-public class AmqpTransport implements Transport<Message> {
+public class AmqpTransport extends AbstractProtonConnection implements Transport<Message> {
 
     private static final Logger logger = LoggerFactory.getLogger(AmqpTransport.class);
 
+    /**
+     * A request.
+     * <p>
+     * A request may be closed, which is a request to abort the request. The request
+     * to abort is only processed locally and not propagated to the server.
+     *
+     * @param <R>
+     *            the return type of the request
+     */
     private static class Request<R> extends CloseableCompletableFuture<R> {
         private final String address;
         private final Message message;
@@ -124,6 +129,9 @@ public class AmqpTransport implements Transport<Message> {
         }
     }
 
+    /**
+     * A buffer for {@link Request}s.
+     */
     private class Buffer {
 
         private Set<Request<?>> requests = new LinkedHashSet<>();
@@ -206,18 +214,13 @@ public class AmqpTransport implements Transport<Message> {
         }
     }
 
-    public static class Builder {
+    public static class Builder extends AbstractProtonConnection.Builder<AmqpTransport> {
 
         private static final AmqpSerializer DEFAULT_SERIALIZER = AmqpByteSerializer.of(JacksonSerializer.json());
         private static final AmqpErrorConditionTranslator DEFAULT_ERROR_CONDITION_TRANSLATOR = DefaultAmqpErrorConditionTranslator
                 .instance();
         private static final AddressProvider DEFAULT_ADDRESS_PROVIDER = DefaultAddressProvider.instance();
 
-        private String hostname = "localhost";
-        private int port = 5672;
-        private String username;
-        private String password;
-        private String container;
         private AmqpSerializer serializer = DEFAULT_SERIALIZER;
         private AddressProvider addressProvider = DEFAULT_ADDRESS_PROVIDER;
         private AmqpErrorConditionTranslator errorConditionTranslator = DEFAULT_ERROR_CONDITION_TRANSLATOR;
@@ -226,60 +229,12 @@ public class AmqpTransport implements Transport<Message> {
         private Builder() {
         }
 
-        public Builder(final Builder other) {
-            this.hostname = other.hostname;
-            this.port = other.port;
-            this.username = other.username;
-            this.password = other.password;
-            this.container = other.container;
+        private Builder(final Builder other) {
+            super(other);
+
             this.serializer = other.serializer;
             this.addressProvider = other.addressProvider;
             this.errorConditionTranslator = other.errorConditionTranslator;
-        }
-
-        public Builder hostname(final String hostname) {
-            this.hostname = hostname;
-            return this;
-        }
-
-        public String hostname() {
-            return this.hostname;
-        }
-
-        public Builder port(final int port) {
-            this.port = port;
-            return this;
-        }
-
-        public int port() {
-            return this.port;
-        }
-
-        public Builder username(final String username) {
-            this.username = username;
-            return this;
-        }
-
-        public String username() {
-            return this.username;
-        }
-
-        public Builder password(final String password) {
-            this.password = password;
-            return this;
-        }
-
-        public String password() {
-            return this.password;
-        }
-
-        public Builder container(final String container) {
-            this.container = container;
-            return this;
-        }
-
-        public String container() {
-            return this.container;
         }
 
         public Builder serializer(final AmqpSerializer serializer) {
@@ -319,6 +274,7 @@ public class AmqpTransport implements Transport<Message> {
             return this.requestBufferSize;
         }
 
+        @Override
         public AmqpTransport build(final Vertx vertx) {
             return new AmqpTransport(vertx, new Builder(this));
         }
@@ -333,128 +289,34 @@ public class AmqpTransport implements Transport<Message> {
         return new Builder(other);
     }
 
-    private final AtomicBoolean closed = new AtomicBoolean();
-
-    private final Vertx vertx;
-
     private final Builder options;
-
-    private ProtonConnection connection;
-
-    private final Context context;
 
     private final Buffer buffer;
 
     public AmqpTransport(final Vertx vertx, final Builder options) {
+        super(vertx, options);
 
         logger.debug("Creating AMQP transport - {}", options);
 
-        this.vertx = vertx;
         this.options = options;
 
         this.buffer = new Buffer(options.requestBufferSize());
 
-        this.context = vertx.getOrCreateContext();
-
-        this.context.runOnContext(v -> startConnection());
-    }
-
-    /**
-     * Return if the transport is marked closed.
-     *
-     * @return {@code true} if the transport is marked closed, {@code false}
-     *         otherwise
-     */
-    public boolean isClosed() {
-        return this.closed.get();
-    }
-
-    private void startConnection() {
-        logger.trace("Starting connection...");
-
-        if (isClosed()) {
-            logger.debug("Starting connection... abort, we are closed!");
-            // we are marked closed
-            return;
-        }
-
-        createConnection(this::handleConnection);
-    }
-
-    protected void handleConnection(final AsyncResult<ProtonConnection> result) {
-        if (result.failed()) {
-            if (isClosed()) {
-                // we are closed, nothing to do
-                return;
-            }
-
-            // set up timer for re-connect
-            this.vertx.setTimer(1_000, timer -> startConnection());
-        } else {
-            if (isClosed()) {
-                // we got marked closed in the meantime
-                result.result().close();
-                return;
-            }
-
-            this.connection = result.result();
-            this.connection.disconnectHandler(this::handleDisconnected);
-
-            this.buffer.getAddresses().forEach(this::requestSender);
-        }
-    }
-
-    protected void handleDisconnected(final ProtonConnection connection) {
-
-        logger.debug("Got disconnected: {}", connection);
-
-        this.connection = null;
-        if (!isClosed()) {
-            startConnection();
-        }
+        open();
     }
 
     @Override
-    public void close() throws Exception {
-        if (this.closed.compareAndSet(false, true)) {
-            this.context.runOnContext(v -> performClose());
-        }
+    protected void performEstablished(final AsyncResult<ProtonConnection> result) {
+        super.performEstablished(result);
+
+        this.buffer.getAddresses().forEach(this::requestSender);
     }
 
-    private void performClose() {
-        if (this.connection != null) {
-            this.connection.close();
-            this.connection = null;
-        }
+    @Override
+    protected void performClose() {
+        super.performClose();
 
         this.buffer.flush(request -> request.fail("Client closed"));
-    }
-
-    protected void createConnection(final Handler<AsyncResult<ProtonConnection>> handler) {
-
-        final ProtonClient client = ProtonClient.create(this.vertx);
-
-        client.connect(this.options.hostname(), this.options.port(),
-                this.options.username(), this.options.password(),
-                con -> {
-
-                    logger.debug("Connection -> {}", con);
-
-                    if (con.failed()) {
-                        handler.handle(con);
-                        return;
-                    }
-
-                    con.result()
-                            .setContainer(this.options.container())
-                            .openHandler(opened -> {
-
-                                logger.debug("Open -> {}", opened);
-                                handler.handle(opened);
-
-                            }).open();
-
-                });
     }
 
     @Override
