@@ -213,7 +213,7 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
         }
     }
 
-    public static class Builder extends AbstractProtonConnection.Builder<AmqpTransport> {
+    public static class Builder extends AbstractProtonConnection.Builder<AmqpTransport, Builder> {
 
         private static final AmqpErrorConditionTranslator DEFAULT_ERROR_CONDITION_TRANSLATOR = DefaultAmqpErrorConditionTranslator
                 .instance();
@@ -233,6 +233,11 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
             this.serializer = other.serializer;
             this.addressProvider = other.addressProvider;
             this.errorConditionTranslator = other.errorConditionTranslator;
+        }
+
+        @Override
+        protected Builder builder() {
+            return this;
         }
 
         public Builder serializer(final AmqpSerializer serializer) {

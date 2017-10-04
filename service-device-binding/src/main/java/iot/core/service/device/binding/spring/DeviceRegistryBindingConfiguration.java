@@ -12,7 +12,7 @@ import iot.core.service.device.binding.DeviceRegistryBinding;
 @Import(DeviceRegistryServiceSpiConfiguration.class)
 public class DeviceRegistryBindingConfiguration {
 
-    @Bean(initMethod = "start")
+    @Bean(initMethod = "start", destroyMethod="stop")
     public DeviceRegistryBinding deviceRegistryBinding(DeviceRegistryService deviceRegistryService) {
         return new DeviceRegistryBinding(deviceRegistryService);
     }

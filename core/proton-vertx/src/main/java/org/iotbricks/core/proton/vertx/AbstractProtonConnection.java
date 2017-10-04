@@ -12,11 +12,18 @@ import io.vertx.core.Vertx;
 import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
 
+/**
+ * An abstract class working with proton connections.
+ * <p>
+ * This class is intended to help build functionality which requires an
+ * established AMQP connection. It takes a set of connection parameters and
+ * tried to keep an open AMQP connection, reconnecting when necessary.
+ */
 public abstract class AbstractProtonConnection implements AutoCloseable {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractProtonConnection.class);
 
-    public abstract static class Builder<T extends AbstractProtonConnection> {
+    public abstract static class Builder<C extends AbstractProtonConnection, B extends AbstractProtonConnection.Builder<C, B>> {
 
         private String hostname = "localhost";
         private int port = 5672;
@@ -27,72 +34,74 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
         protected Builder() {
         }
 
-        protected Builder(final Builder<T> other) {
-            this.hostname = other.hostname;
-            this.port = other.port;
-            this.username = other.username;
-            this.password = other.password;
-            this.container = other.container;
+        protected Builder(final B other) {
+            this.hostname = other.hostname();
+            this.port = other.port();
+            this.username = other.username();
+            this.password = other.password();
+            this.container = other.container();
         }
 
-        public Builder<T> hostname(final String hostname) {
+        protected abstract B builder();
+
+        public B hostname(final String hostname) {
             this.hostname = hostname;
-            return this;
+            return builder();
         }
 
         public String hostname() {
             return this.hostname;
         }
 
-        public Builder<T> port(final int port) {
+        public B port(final int port) {
             this.port = port;
-            return this;
+            return builder();
         }
 
         public int port() {
             return this.port;
         }
 
-        public Builder<T> username(final String username) {
+        public B username(final String username) {
             this.username = username;
-            return this;
+            return builder();
         }
 
         public String username() {
             return this.username;
         }
 
-        public Builder<T> password(final String password) {
+        public B password(final String password) {
             this.password = password;
-            return this;
+            return builder();
         }
 
         public String password() {
             return this.password;
         }
 
-        public Builder<T> container(final String container) {
+        public B container(final String container) {
             this.container = container;
-            return this;
+            return builder();
         }
 
         public String container() {
             return this.container;
         }
 
-        public abstract T build(final Vertx vertx);
+        public abstract C build(final Vertx vertx);
     }
 
     private final AtomicBoolean closed = new AtomicBoolean();
 
     protected final Vertx vertx;
-    private final Builder<? extends AbstractProtonConnection> options;
+    private final Builder<? extends AbstractProtonConnection, ?> options;
 
     protected final Context context;
 
     protected ProtonConnection connection;
 
-    public AbstractProtonConnection(final Vertx vertx, final Builder<? extends AbstractProtonConnection> options) {
+    public AbstractProtonConnection(final Vertx vertx, final Builder<? extends AbstractProtonConnection, ?> options) {
         this.vertx = vertx;
         this.options = options;
 
