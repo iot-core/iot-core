@@ -23,7 +23,7 @@
         
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>device-serialization-jackson</artifactId>
+            <artifactId>iotbricks-common-device-serialization-jackson</artifactId>
             <version>${project.version}</version>
         </dependency>
 

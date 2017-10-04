@@ -8,9 +8,10 @@
         <groupId>org.iotbricks</groupId>
         <artifactId>iotbricks</artifactId>
         <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../..</relativePath>
     </parent>
 
-    <artifactId>device-serialization-jackson</artifactId>
+    <artifactId>iotbricks-common-device-serialization-jackson</artifactId>
 
     <dependencies>
         <dependency>

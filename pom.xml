@@ -43,11 +43,14 @@
         <module>core/annotations-processor</module>
         <module>core/utils</module>
 
+        <module>common/device-serialization-jackson</module>
+
+        <module>client/device-registry</module>
+
         <module>service</module>
 
-        <module>device-registry-client</module>
         <module>service-device-binding</module>
-        <module>device-serialization-jackson</module>
+
         <module>distribution</module>
 
         <module>integrations/hono/device-registry</module>
