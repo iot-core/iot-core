@@ -26,6 +26,7 @@ import org.iotbricks.core.utils.address.DefaultAddressProvider;
 import org.iotbricks.core.utils.binding.RequestException;
 import org.iotbricks.core.utils.binding.amqp.AmqpErrorConditionTranslator;
 import org.iotbricks.core.utils.binding.amqp.DefaultAmqpErrorConditionTranslator;
+import org.iotbricks.core.utils.proton.AbstractProtonConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

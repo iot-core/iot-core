@@ -1,4 +1,4 @@
-package org.iotbricks.core.amqp.transport;
+package org.iotbricks.core.utils.proton;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
