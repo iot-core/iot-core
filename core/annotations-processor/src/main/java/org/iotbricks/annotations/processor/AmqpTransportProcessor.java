@@ -21,6 +21,8 @@ import org.iotbricks.annotations.AmqpTransport;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class AmqpTransportProcessor extends AbstractClientProcessor {
 
+    private static final String PKG_CORE_AMQP_TRANSPORT = "org.iotbricks.core.amqp.transport";
+
     public AmqpTransportProcessor() {
         super(AmqpTransport.class);
     }
@@ -59,8 +61,8 @@ public class AmqpTransportProcessor extends AbstractClientProcessor {
             out.println("import io.glutamate.util.concurrent.CloseableCompletionStage;");
             out.println("import io.vertx.core.Vertx;");
             out.println();
-            out.println("import iot.core.amqp.transport.AmqpTransport;");
-            out.println("import iot.core.services.device.registry.client.internal.AbstractAmqpClientBuilder;");
+            out.format("import %s.AmqpTransport;%n", PKG_CORE_AMQP_TRANSPORT);
+            out.format("import %s.AbstractAmqpClientBuilder;%n", PKG_CORE_AMQP_TRANSPORT);
             out.println();
 
             out.println("public class AmqpClient extends AbstractDefaultClient {");

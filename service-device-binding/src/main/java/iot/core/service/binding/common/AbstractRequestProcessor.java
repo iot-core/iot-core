@@ -2,13 +2,14 @@ package iot.core.service.binding.common;
 
 import java.util.Objects;
 
+import org.iotbricks.core.utils.binding.ErrorResult;
+import org.iotbricks.core.utils.binding.ErrorTranslator;
+
 import iot.core.service.binding.RequestContext;
 import iot.core.service.binding.RequestHandler;
 import iot.core.service.binding.RequestProcessor;
 import iot.core.service.binding.ResponseContext;
 import iot.core.service.binding.ResponseHandler;
-import iot.core.utils.binding.ErrorResult;
-import iot.core.utils.binding.ErrorTranslator;
 
 public abstract class AbstractRequestProcessor<C1 extends RequestContext, C2 extends ResponseContext>
         implements RequestProcessor<C1, C2> {

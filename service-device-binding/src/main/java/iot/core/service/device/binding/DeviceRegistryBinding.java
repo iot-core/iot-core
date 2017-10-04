@@ -1,5 +1,20 @@
 package iot.core.service.device.binding;
 
+import static org.iotbricks.core.utils.binding.ErrorCondition.DECODE_ERROR;
+
+import java.util.Optional;
+
+import org.iotbricks.common.device.registry.serialization.jackson.JacksonSerializer;
+import org.iotbricks.core.amqp.transport.serializer.AmqpByteSerializer;
+import org.iotbricks.core.amqp.transport.serializer.AmqpSerializer;
+import org.iotbricks.core.utils.address.AddressProvider;
+import org.iotbricks.core.utils.address.DefaultAddressProvider;
+import org.iotbricks.core.utils.binding.RequestException;
+import org.iotbricks.service.device.registry.api.Device;
+import org.iotbricks.service.device.registry.api.DeviceRegistryService;
+import org.iotbricks.service.device.registry.inmemory.InMemoryDeviceRegistryService;
+import org.iotbricks.service.device.registry.spi.AlwaysPassingDeviceSchemaValidator;
+
 import io.vertx.core.Vertx;
 import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
@@ -10,20 +25,6 @@ import iot.core.service.binding.common.DefaultErrorTranslator;
 import iot.core.service.binding.common.MessageResponseHandler;
 import iot.core.service.binding.proton.ProtonRequestContext;
 import iot.core.service.binding.proton.ProtonRequestProcessor;
-import iot.core.services.device.registry.serialization.AmqpByteSerializer;
-import iot.core.services.device.registry.serialization.AmqpSerializer;
-import iot.core.services.device.registry.serialization.jackson.JacksonSerializer;
-import iot.core.utils.address.AddressProvider;
-import iot.core.utils.address.DefaultAddressProvider;
-import iot.core.utils.binding.RequestException;
-import org.iotbricks.service.device.registry.api.Device;
-import org.iotbricks.service.device.registry.api.DeviceRegistryService;
-import org.iotbricks.service.device.registry.inmemory.InMemoryDeviceRegistryService;
-import org.iotbricks.service.device.registry.spi.AlwaysPassingDeviceSchemaValidator;
-
-import java.util.Optional;
-
-import static iot.core.utils.binding.ErrorCondition.DECODE_ERROR;
 
 public class DeviceRegistryBinding {
 

@@ -3,6 +3,9 @@ package iot.core.service.binding.proton;
 import java.util.Objects;
 
 import org.apache.qpid.proton.message.Message;
+import org.iotbricks.core.amqp.transport.serializer.AmqpSerializer;
+import org.iotbricks.core.utils.binding.ErrorResult;
+import org.iotbricks.core.utils.binding.ErrorTranslator;
 
 import io.vertx.proton.ProtonDelivery;
 import io.vertx.proton.ProtonMessageHandler;
@@ -10,9 +13,6 @@ import io.vertx.proton.ProtonSender;
 import iot.core.service.binding.RequestHandler;
 import iot.core.service.binding.ResponseHandler;
 import iot.core.service.binding.common.AbstractRequestProcessor;
-import iot.core.services.device.registry.serialization.AmqpSerializer;
-import iot.core.utils.binding.ErrorResult;
-import iot.core.utils.binding.ErrorTranslator;
 
 public class ProtonRequestProcessor extends AbstractRequestProcessor<ProtonRequestContext, ProtonResponseContext> {
 

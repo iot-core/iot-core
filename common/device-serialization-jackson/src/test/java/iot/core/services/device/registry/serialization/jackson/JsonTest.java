@@ -1,7 +1,9 @@
 package iot.core.services.device.registry.serialization.jackson;
 
 import com.google.common.collect.Maps;
-import iot.core.services.device.registry.serialization.ByteSerializer;
+
+import org.iotbricks.common.device.registry.serialization.jackson.JacksonSerializer;
+import org.iotbricks.core.utils.serializer.ByteSerializer;
 import org.iotbricks.service.device.registry.api.Device;
 import org.junit.Assert;
 import org.junit.Before;

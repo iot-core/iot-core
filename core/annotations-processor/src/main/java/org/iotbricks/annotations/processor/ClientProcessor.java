@@ -21,6 +21,8 @@ import org.iotbricks.annotations.Client;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class ClientProcessor extends AbstractClientProcessor {
 
+    private static final String PKG_CORE_UTILS_CLIENT = "org.iotbricks.core.utils.client";
+
     public ClientProcessor() {
         super(Client.class);
     }
@@ -177,8 +179,8 @@ public class ClientProcessor extends AbstractClientProcessor {
             out.println("import java.time.Duration;");
             out.println();
             out.format(
-                    "public class SyncDeviceRegistryServiceWrapper extends iot.core.utils.client.AbstractSyncWrapper implements %s {%n",
-                    serviceName);
+                    "public class SyncDeviceRegistryServiceWrapper extends %s.AbstractSyncWrapper implements %s {%n",
+                    PKG_CORE_UTILS_CLIENT, serviceName);
             out.println();
             out.format("    private final %s async;%n", asyncTypeName);
             out.println();

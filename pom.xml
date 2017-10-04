@@ -38,10 +38,7 @@
     <modules>
         <module>build-tools</module>
 
-        <module>core/amqp-transport</module>
-        <module>core/annotations</module>
-        <module>core/annotations-processor</module>
-        <module>core/utils</module>
+        <module>core</module>
 
         <module>common/device-serialization-jackson</module>
 

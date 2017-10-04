@@ -14,10 +14,10 @@ package iot.core.hono.device.registry;
 
 import org.eclipse.hono.config.SignatureSupportingConfigProperties;
 import org.eclipse.hono.deviceregistry.SignatureSupporting;
+import org.iotbricks.client.device.registry.AmqpClient;
+import org.iotbricks.client.device.registry.Client;
 
 import io.vertx.core.Vertx;
-import iot.core.services.device.registry.client.AmqpClient;
-import iot.core.services.device.registry.client.Client;
 
 public final class CoreAmqpBasedRegistrationConfigProperties implements SignatureSupporting, ClientBuilding {
 

@@ -24,6 +24,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>iotbricks-service-device-registry-inmemory</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

@@ -1,15 +1,16 @@
 package iot.core.service.binding.common;
 
-import static iot.core.utils.binding.ErrorCondition.DECODE_ERROR;
+import static org.iotbricks.core.utils.binding.ErrorCondition.DECODE_ERROR;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.iotbricks.core.utils.binding.RequestException;
+
 import iot.core.service.binding.RequestContext;
 import iot.core.service.binding.ResponseContext;
 import iot.core.service.binding.ResponseHandler;
-import iot.core.utils.binding.RequestException;
 
 public class MessageResponseHandler<C extends RequestContext> implements ResponseHandler<Object, C, ResponseContext> {
 

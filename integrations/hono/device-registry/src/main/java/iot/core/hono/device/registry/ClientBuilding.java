@@ -11,8 +11,9 @@
  */
 package iot.core.hono.device.registry;
 
+import org.iotbricks.client.device.registry.Client;
+
 import io.vertx.core.Vertx;
-import iot.core.services.device.registry.client.Client;
 
 public interface ClientBuilding {
 

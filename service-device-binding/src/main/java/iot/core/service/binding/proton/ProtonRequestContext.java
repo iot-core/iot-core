@@ -5,10 +5,10 @@ import static java.util.Optional.ofNullable;
 import java.util.Optional;
 
 import org.apache.qpid.proton.message.Message;
+import org.iotbricks.core.amqp.transport.serializer.AmqpSerializer;
 
 import io.vertx.proton.ProtonDelivery;
 import iot.core.service.binding.amqp.AmqpRequestContext;
-import iot.core.services.device.registry.serialization.AmqpSerializer;
 
 public class ProtonRequestContext implements AmqpRequestContext {
 

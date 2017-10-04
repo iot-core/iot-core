@@ -1,14 +1,15 @@
 package iot.core.service.binding.amqp;
 
-import static iot.core.utils.binding.amqp.DefaultAmqpErrorConditionTranslator.instance;
+import static org.iotbricks.core.utils.binding.amqp.DefaultAmqpErrorConditionTranslator.instance;
 
 import java.util.Objects;
 
+import org.iotbricks.core.utils.binding.ErrorCondition;
+import org.iotbricks.core.utils.binding.ErrorResult;
+import org.iotbricks.core.utils.binding.amqp.AmqpErrorConditionTranslator;
+
 import iot.core.service.binding.RequestContext;
 import iot.core.service.binding.ResponseHandler;
-import iot.core.utils.binding.ErrorCondition;
-import iot.core.utils.binding.ErrorResult;
-import iot.core.utils.binding.amqp.AmqpErrorConditionTranslator;
 
 /**
  * Handle error as AMQP delivery rejection.

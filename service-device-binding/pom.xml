@@ -21,6 +21,11 @@
     <dependencies>
         <dependency>
             <groupId>org.iotbricks</groupId>
+            <artifactId>iotbricks-core-amqp-transport</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.iotbricks</groupId>
             <artifactId>iotbricks-service-device-registry-inmemory</artifactId>
         </dependency>
         <dependency>

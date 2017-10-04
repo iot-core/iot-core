@@ -1,13 +1,15 @@
 package iot.core.distribution.deviceregistry;
 
-import com.google.common.collect.ImmutableMap;
-import io.vertx.core.Vertx;
-import iot.core.services.device.registry.client.AmqpClient;
-import iot.core.services.device.registry.client.Client;
-import org.iotbricks.service.device.registry.api.Device;
-
 import static io.vertx.core.Vertx.vertx;
 import static java.util.UUID.randomUUID;
+
+import org.iotbricks.client.device.registry.AmqpClient;
+import org.iotbricks.client.device.registry.Client;
+import org.iotbricks.service.device.registry.api.Device;
+
+import com.google.common.collect.ImmutableMap;
+
+import io.vertx.core.Vertx;
 
 public final class DeviceRegistryDemoClient {
 
