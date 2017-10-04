@@ -1,4 +1,4 @@
-# IoT Core Services [![Build status](https://api.travis-ci.org/iot-core/iot-core.svg)](https://travis-ci.org/iot-core/iot-core) 
+# IoT Core Services [![Build status](https://api.travis-ci.org/iotbricks/iotbricks.svg)](https://travis-ci.org/iotbricks/iotbricks) 
 
 ## AMQP API
 
