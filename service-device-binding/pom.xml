@@ -26,16 +26,11 @@
             <artifactId>iotbricks-common-device-serialization-jackson</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.iotbricks</groupId>
-            <artifactId>iotbricks-core-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-proton</artifactId>
-            <version>3.4.2</version>
+            <groupId>org.iotbricks</groupId>
+            <artifactId>iotbricks-core-binding-proton</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

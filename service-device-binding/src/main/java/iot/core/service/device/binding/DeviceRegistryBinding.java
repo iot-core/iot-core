@@ -7,6 +7,12 @@ import java.util.Optional;
 import org.iotbricks.common.device.registry.serialization.jackson.JacksonSerializer;
 import org.iotbricks.core.amqp.transport.serializer.AmqpByteSerializer;
 import org.iotbricks.core.amqp.transport.serializer.AmqpSerializer;
+import org.iotbricks.core.binding.amqp.AmqpRejectResponseHandler;
+import org.iotbricks.core.binding.amqp.AmqpRequestContext;
+import org.iotbricks.core.binding.common.DefaultErrorTranslator;
+import org.iotbricks.core.binding.common.MessageResponseHandler;
+import org.iotbricks.core.binding.proton.ProtonRequestContext;
+import org.iotbricks.core.binding.proton.ProtonRequestProcessor;
 import org.iotbricks.core.utils.address.AddressProvider;
 import org.iotbricks.core.utils.address.DefaultAddressProvider;
 import org.iotbricks.core.utils.binding.RequestException;
@@ -19,12 +25,6 @@ import io.vertx.core.Vertx;
 import io.vertx.proton.ProtonClient;
 import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonSender;
-import iot.core.service.binding.amqp.AmqpRejectResponseHandler;
-import iot.core.service.binding.amqp.AmqpRequestContext;
-import iot.core.service.binding.common.DefaultErrorTranslator;
-import iot.core.service.binding.common.MessageResponseHandler;
-import iot.core.service.binding.proton.ProtonRequestContext;
-import iot.core.service.binding.proton.ProtonRequestProcessor;
 
 public class DeviceRegistryBinding {
 

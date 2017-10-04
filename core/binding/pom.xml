@@ -6,24 +6,17 @@
 
     <parent>
         <groupId>org.iotbricks</groupId>
-        <artifactId>iotbricks</artifactId>
+        <artifactId>iotbricks-core</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>iotbricks-core</artifactId>
+    <artifactId>iotbricks-core-binding</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-
-        <module>amqp-transport</module>
-
-        <module>binding</module>
-
-        <module>annotations</module>
-        <module>annotations-processor</module>
-
-        <module>utils</module>
-
+        <module>common</module>
+        <module>amqp</module>
+        <module>proton</module>
     </modules>
 
 </project>
