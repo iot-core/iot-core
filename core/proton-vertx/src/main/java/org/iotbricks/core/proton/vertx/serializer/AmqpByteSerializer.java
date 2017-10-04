@@ -7,6 +7,12 @@ import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Section;
 import org.iotbricks.core.utils.serializer.ByteSerializer;
 
+/**
+ * Use a {@link ByteSerializer} to serialize into an AMQP data section.
+ * <p>
+ * This serializes will delegate serialization to a {@link ByteSerializer} and
+ * use the resulting BLOB to create an AMQP data section.
+ */
 public final class AmqpByteSerializer implements AmqpSerializer {
 
     private final ByteSerializer byteSerializer;
