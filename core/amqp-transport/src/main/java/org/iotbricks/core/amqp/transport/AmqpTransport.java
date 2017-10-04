@@ -19,14 +19,14 @@ import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.message.Message;
 import org.iotbricks.common.device.registry.serialization.jackson.JacksonSerializer;
-import org.iotbricks.core.amqp.transport.serializer.AmqpByteSerializer;
-import org.iotbricks.core.amqp.transport.serializer.AmqpSerializer;
+import org.iotbricks.core.proton.vertx.AbstractProtonConnection;
+import org.iotbricks.core.proton.vertx.serializer.AmqpByteSerializer;
+import org.iotbricks.core.proton.vertx.serializer.AmqpSerializer;
 import org.iotbricks.core.utils.address.AddressProvider;
 import org.iotbricks.core.utils.address.DefaultAddressProvider;
 import org.iotbricks.core.utils.binding.RequestException;
 import org.iotbricks.core.utils.binding.amqp.AmqpErrorConditionTranslator;
 import org.iotbricks.core.utils.binding.amqp.DefaultAmqpErrorConditionTranslator;
-import org.iotbricks.core.utils.proton.AbstractProtonConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

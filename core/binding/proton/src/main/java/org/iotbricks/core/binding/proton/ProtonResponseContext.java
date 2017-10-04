@@ -6,9 +6,8 @@ import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Rejected;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.message.Message;
-import org.iotbricks.core.amqp.transport.serializer.AmqpSerializer;
 import org.iotbricks.core.binding.amqp.AmqpResponseContext;
-
+import org.iotbricks.core.proton.vertx.serializer.AmqpSerializer;
 
 import io.vertx.proton.ProtonDelivery;
 import io.vertx.proton.ProtonSender;

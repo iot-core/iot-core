@@ -5,8 +5,8 @@ import static java.util.Optional.ofNullable;
 import java.util.Optional;
 
 import org.apache.qpid.proton.message.Message;
-import org.iotbricks.core.amqp.transport.serializer.AmqpSerializer;
 import org.iotbricks.core.binding.amqp.AmqpRequestContext;
+import org.iotbricks.core.proton.vertx.serializer.AmqpSerializer;
 
 import io.vertx.proton.ProtonDelivery;
 

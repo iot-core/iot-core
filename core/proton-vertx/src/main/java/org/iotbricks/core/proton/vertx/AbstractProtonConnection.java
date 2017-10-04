@@ -1,4 +1,4 @@
-package org.iotbricks.core.utils.proton;
+package org.iotbricks.core.proton.vertx;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

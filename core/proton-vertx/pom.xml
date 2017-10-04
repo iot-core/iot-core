@@ -6,29 +6,40 @@
 
     <parent>
         <groupId>org.iotbricks</groupId>
-        <artifactId>iotbricks-core-binding</artifactId>
+        <artifactId>iotbricks-core</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>iotbricks-core-binding-proton</artifactId>
+    <artifactId>iotbricks-core-proton-vertx</artifactId>
 
     <dependencies>
 
         <dependency>
-            <groupId>org.iotbricks</groupId>
-            <artifactId>iotbricks-core-amqp-transport</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>iotbricks-core-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.iotbricks</groupId>
-            <artifactId>iotbricks-core-binding-amqp</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
 
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-proton</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
         </dependency>
 
     </dependencies>

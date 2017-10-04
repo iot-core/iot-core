@@ -3,10 +3,10 @@ package org.iotbricks.core.binding.proton;
 import java.util.Objects;
 
 import org.apache.qpid.proton.message.Message;
-import org.iotbricks.core.amqp.transport.serializer.AmqpSerializer;
 import org.iotbricks.core.binding.RequestHandler;
 import org.iotbricks.core.binding.ResponseHandler;
 import org.iotbricks.core.binding.common.AbstractRequestProcessor;
+import org.iotbricks.core.proton.vertx.serializer.AmqpSerializer;
 import org.iotbricks.core.utils.binding.ErrorResult;
 import org.iotbricks.core.utils.binding.ErrorTranslator;
 

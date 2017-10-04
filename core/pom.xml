@@ -24,6 +24,8 @@
 
         <module>utils</module>
 
+        <module>proton-vertx</module>
+
     </modules>
 
 </project>

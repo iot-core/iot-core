@@ -5,14 +5,14 @@ import static org.iotbricks.core.utils.binding.ErrorCondition.DECODE_ERROR;
 import java.util.Optional;
 
 import org.iotbricks.common.device.registry.serialization.jackson.JacksonSerializer;
-import org.iotbricks.core.amqp.transport.serializer.AmqpByteSerializer;
-import org.iotbricks.core.amqp.transport.serializer.AmqpSerializer;
 import org.iotbricks.core.binding.amqp.AmqpRejectResponseHandler;
 import org.iotbricks.core.binding.amqp.AmqpRequestContext;
 import org.iotbricks.core.binding.common.DefaultErrorTranslator;
 import org.iotbricks.core.binding.common.MessageResponseHandler;
 import org.iotbricks.core.binding.proton.ProtonRequestContext;
 import org.iotbricks.core.binding.proton.ProtonRequestProcessor;
+import org.iotbricks.core.proton.vertx.serializer.AmqpByteSerializer;
+import org.iotbricks.core.proton.vertx.serializer.AmqpSerializer;
 import org.iotbricks.core.utils.address.AddressProvider;
 import org.iotbricks.core.utils.address.DefaultAddressProvider;
 import org.iotbricks.core.utils.binding.RequestException;

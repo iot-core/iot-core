@@ -1,4 +1,4 @@
-package org.iotbricks.core.amqp.transport.serializer;
+package org.iotbricks.core.proton.vertx.serializer;
 
 import java.util.Objects;
 
