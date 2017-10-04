@@ -2,6 +2,7 @@ package iot.core.distribution.deviceregistry;
 
 import static io.vertx.core.Vertx.vertx;
 import static java.util.UUID.randomUUID;
+import static org.iotbricks.common.device.registry.serialization.jackson.JacksonSerializer.json;
 
 import org.iotbricks.client.device.registry.AmqpClient;
 import org.iotbricks.client.device.registry.Client;
@@ -20,7 +21,7 @@ public final class DeviceRegistryDemoClient {
         Vertx vertx = null;
         try {
             vertx = vertx();
-            Client client = AmqpClient.newClient().build(vertx);
+            Client client = AmqpClient.newClient().serializer(json()).build(vertx);
 
             String deviceId = randomUUID().toString();
             Device device = new Device();

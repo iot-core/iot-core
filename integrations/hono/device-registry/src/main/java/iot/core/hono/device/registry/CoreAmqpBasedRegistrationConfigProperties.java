@@ -12,6 +12,8 @@
 
 package iot.core.hono.device.registry;
 
+import static org.iotbricks.common.device.registry.serialization.jackson.JacksonSerializer.json;
+
 import org.eclipse.hono.config.SignatureSupportingConfigProperties;
 import org.eclipse.hono.deviceregistry.SignatureSupporting;
 import org.iotbricks.client.device.registry.AmqpClient;
@@ -51,6 +53,7 @@ public final class CoreAmqpBasedRegistrationConfigProperties implements Signatur
     @Override
     public Client createClient(final Vertx vertx) {
         return AmqpClient.newClient()
+                .serializer(json())
                 .hostname(this.hostname)
                 .port(this.port)
                 .build(vertx);

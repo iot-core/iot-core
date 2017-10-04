@@ -18,9 +18,7 @@ import org.apache.qpid.proton.amqp.messaging.Rejected;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.message.Message;
-import org.iotbricks.common.device.registry.serialization.jackson.JacksonSerializer;
 import org.iotbricks.core.proton.vertx.AbstractProtonConnection;
-import org.iotbricks.core.proton.vertx.serializer.AmqpByteSerializer;
 import org.iotbricks.core.proton.vertx.serializer.AmqpSerializer;
 import org.iotbricks.core.utils.address.AddressProvider;
 import org.iotbricks.core.utils.address.DefaultAddressProvider;
@@ -217,12 +215,11 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
 
     public static class Builder extends AbstractProtonConnection.Builder<AmqpTransport> {
 
-        private static final AmqpSerializer DEFAULT_SERIALIZER = AmqpByteSerializer.of(JacksonSerializer.json());
         private static final AmqpErrorConditionTranslator DEFAULT_ERROR_CONDITION_TRANSLATOR = DefaultAmqpErrorConditionTranslator
                 .instance();
         private static final AddressProvider DEFAULT_ADDRESS_PROVIDER = DefaultAddressProvider.instance();
 
-        private AmqpSerializer serializer = DEFAULT_SERIALIZER;
+        private AmqpSerializer serializer;
         private AddressProvider addressProvider = DEFAULT_ADDRESS_PROVIDER;
         private AmqpErrorConditionTranslator errorConditionTranslator = DEFAULT_ERROR_CONDITION_TRANSLATOR;
         private int requestBufferSize = -1;
@@ -239,7 +236,8 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
         }
 
         public Builder serializer(final AmqpSerializer serializer) {
-            this.serializer = serializer != null ? serializer : DEFAULT_SERIALIZER;
+            Objects.requireNonNull(serializer);
+            this.serializer = serializer;
             return this;
         }
 
@@ -277,6 +275,7 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
 
         @Override
         public AmqpTransport build(final Vertx vertx) {
+            Objects.requireNonNull(this.serializer, "'serializer' must be set");
             return new AmqpTransport(vertx, new Builder(this));
         }
     }

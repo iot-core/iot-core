@@ -1,5 +1,7 @@
 package org.iotbricks.client.device.registry;
 
+import static org.iotbricks.common.device.registry.serialization.jackson.JacksonSerializer.json;
+
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Optional;
@@ -21,6 +23,7 @@ public class Main {
 
     static Client createAmqpClient(final Vertx vertx) {
         return AmqpClient.newClient()
+                .serializer(json())
                 .build(vertx);
     }
 

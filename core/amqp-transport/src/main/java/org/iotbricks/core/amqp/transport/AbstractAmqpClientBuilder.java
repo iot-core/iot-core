@@ -1,6 +1,11 @@
 package org.iotbricks.core.amqp.transport;
 
 import java.time.Duration;
+import java.util.Objects;
+
+import org.iotbricks.core.proton.vertx.serializer.AmqpByteSerializer;
+import org.iotbricks.core.proton.vertx.serializer.AmqpSerializer;
+import org.iotbricks.core.utils.serializer.ByteSerializer;
 
 public abstract class AbstractAmqpClientBuilder<T extends AbstractAmqpClientBuilder<T>> {
 
@@ -66,6 +71,22 @@ public abstract class AbstractAmqpClientBuilder<T extends AbstractAmqpClientBuil
 
     public Duration syncTimeout() {
         return this.syncTimeout;
+    }
+
+    public T serializer(final AmqpSerializer serializer) {
+        Objects.requireNonNull(serializer);
+        this.transport.serializer(serializer);
+        return builder();
+    }
+
+    public T serializer(final ByteSerializer serializer) {
+        Objects.requireNonNull(serializer);
+        this.transport.serializer(AmqpByteSerializer.of(serializer));
+        return builder();
+    }
+
+    public AmqpSerializer serializer() {
+        return this.transport.serializer();
     }
 
 }
