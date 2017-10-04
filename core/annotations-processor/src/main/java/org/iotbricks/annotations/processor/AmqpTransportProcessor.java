@@ -73,7 +73,7 @@ public class AmqpTransportProcessor extends AbstractClientProcessor {
             out.println("        @Override protected Builder builder() { return this; }");
             out.println("            public Client build(final Vertx vertx) {");
             out.println(
-                    "                return new AmqpClient(vertx, new AmqpTransport.Builder(transport()), syncTimeout());");
+                    "                return new AmqpClient(vertx, AmqpTransport.newTransport(transport()), syncTimeout());");
             out.println("            }");
             out.println("    }");
 
