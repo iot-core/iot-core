@@ -10,36 +10,22 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>amqp-transport</artifactId>
+    <artifactId>iotbricks-core-utils</artifactId>
 
     <dependencies>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>core-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>device-serialization-jackson</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-proton</artifactId>
-            <version>${vertx.version}</version>
+            <groupId>io.glutamate</groupId>
+            <artifactId>glutamate</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>io.glutamate</groupId>
-            <artifactId>glutamate</artifactId>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
 
         <dependency>

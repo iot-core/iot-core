@@ -16,7 +16,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>amqp-transport</artifactId>
+            <artifactId>iotbricks-core-amqp-transport</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -33,13 +33,13 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>core-utils</artifactId>
+            <artifactId>iotbricks-core-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>iotbricks-annotations</artifactId>
+            <artifactId>iotbricks-core-annotations</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -82,7 +82,7 @@
                     <annotationProcessorPaths>
                         <path>
                             <groupId>${project.groupId}</groupId>
-                            <artifactId>iotbricks-annotations-processor</artifactId>
+                            <artifactId>iotbricks-core-annotations-processor</artifactId>
                             <version>${project.version}</version>
                         </path>
                     </annotationProcessorPaths>

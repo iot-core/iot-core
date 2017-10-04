@@ -11,5 +11,5 @@
         <relativePath>../..</relativePath>
     </parent>
 
-    <artifactId>iotbricks-annotations</artifactId>
+    <artifactId>iotbricks-core-annotations</artifactId>
 </project>

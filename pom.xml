@@ -38,12 +38,13 @@
     <modules>
         <module>build-tools</module>
 
-        <module>common/annotations</module>
-        <module>common/annotations-processor</module>
+        <module>core/amqp-transport</module>
+        <module>core/annotations</module>
+        <module>core/annotations-processor</module>
+        <module>core/utils</module>
 
         <module>service</module>
-        <module>core-utils</module>
-        <module>amqp-transport</module>
+
         <module>device-registry-client</module>
         <module>service-device-binding</module>
         <module>device-serialization-jackson</module>

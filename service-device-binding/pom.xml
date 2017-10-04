@@ -30,7 +30,7 @@
         </dependency>
         <dependency>
             <groupId>org.iotbricks</groupId>
-            <artifactId>core-utils</artifactId>
+            <artifactId>iotbricks-core-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
 

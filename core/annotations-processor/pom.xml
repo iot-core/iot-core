@@ -8,9 +8,10 @@
         <groupId>org.iotbricks</groupId>
         <artifactId>iotbricks</artifactId>
         <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../..</relativePath>
     </parent>
 
-    <artifactId>core-utils</artifactId>
+    <artifactId>iotbricks-core-annotations-processor</artifactId>
 
     <dependencies>
         <dependency>
@@ -19,14 +20,12 @@
         </dependency>
 
         <dependency>
-            <groupId>io.glutamate</groupId>
-            <artifactId>glutamate</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>iotbricks-core-annotations</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
+        <!-- testing -->
 
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -41,5 +40,17 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <proc>none</proc>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
