@@ -4,16 +4,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+import org.apache.qpid.proton.message.Message;
+import org.iotbricks.core.binding.ResponseHandler;
 import org.iotbricks.core.binding.ServiceBinding;
-import org.iotbricks.core.binding.amqp.AmqpRejectResponseHandler;
-import org.iotbricks.core.binding.amqp.AmqpRequestContext;
 import org.iotbricks.core.binding.common.DefaultErrorTranslator;
-import org.iotbricks.core.binding.common.MessageResponseHandler;
 import org.iotbricks.core.proton.vertx.AbstractProtonConnection;
 import org.iotbricks.core.proton.vertx.serializer.AmqpByteSerializer;
 import org.iotbricks.core.proton.vertx.serializer.AmqpSerializer;
 import org.iotbricks.core.utils.address.AddressProvider;
 import org.iotbricks.core.utils.address.DefaultAddressProvider;
+import org.iotbricks.core.utils.binding.ErrorResult;
 import org.iotbricks.core.utils.binding.ErrorTranslator;
 import org.iotbricks.core.utils.serializer.ByteSerializer;
 
@@ -36,6 +36,10 @@ public class ProtonBindingServer extends AbstractProtonConnection {
         private AddressProvider addressProvider = DEFAULT_ADDRESS_PROVIDER;
 
         private ErrorTranslator errorTranslator = DEFAULT_ERROR_TRANSLATOR;
+
+        private ResponseHandler<? super Object, ? super ProtonRequestContext, ? super ProtonResponseContext, Message> successHandler;
+
+        private ResponseHandler<? super ErrorResult, ? super ProtonRequestContext, ? super ProtonResponseContext, Message> errorHandler;
 
         private AmqpSerializer serializer;
 
@@ -92,6 +96,26 @@ public class ProtonBindingServer extends AbstractProtonConnection {
             return this.errorTranslator;
         }
 
+        public Builder successHandler(
+                final ResponseHandler<? super Object, ? super ProtonRequestContext, ? super ProtonResponseContext, Message> successHandler) {
+            this.successHandler = successHandler;
+            return this;
+        }
+
+        public ResponseHandler<? super Object, ? super ProtonRequestContext, ? super ProtonResponseContext, Message> successHandler() {
+            return this.successHandler;
+        }
+
+        public Builder errorHandler(
+                final ResponseHandler<? super ErrorResult, ? super ProtonRequestContext, ? super ProtonResponseContext, Message> errorHandler) {
+            this.errorHandler = errorHandler;
+            return this;
+        }
+
+        public ResponseHandler<? super ErrorResult, ? super ProtonRequestContext, ? super ProtonResponseContext, Message> errorHandler() {
+            return this.errorHandler;
+        }
+
         public Builder binding(final ServiceBinding binding) {
             Objects.requireNonNull(binding);
             this.bindings.add(binding);
@@ -107,6 +131,8 @@ public class ProtonBindingServer extends AbstractProtonConnection {
         @Override
         public ProtonBindingServer build(final Vertx vertx) {
             Objects.requireNonNull(this.serializer, "'serializer' must be set");
+            Objects.requireNonNull(this.successHandler, "'successHandler' must be set");
+            Objects.requireNonNull(this.errorHandler, "'errorHandler' must be set");
             return new ProtonBindingServer(vertx, new Builder(this));
         }
 
@@ -167,8 +193,8 @@ public class ProtonBindingServer extends AbstractProtonConnection {
         final ProtonRequestProcessor processor = new ProtonRequestProcessor(
                 this.options.serializer(),
                 sender,
-                new MessageResponseHandler<>(AmqpRequestContext::getReplyToAddress),
-                new AmqpRejectResponseHandler<>(),
+                this.options.successHandler(),
+                this.options.errorHandler(),
                 this.options.errorTranslator(),
                 binding.getHandler());
 
