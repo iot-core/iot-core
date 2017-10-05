@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+import org.iotbricks.core.binding.ServiceBinding;
 import org.iotbricks.core.binding.amqp.AmqpRejectResponseHandler;
 import org.iotbricks.core.binding.amqp.AmqpRequestContext;
 import org.iotbricks.core.binding.common.DefaultErrorTranslator;
@@ -38,7 +39,7 @@ public class ProtonBindingServer extends AbstractProtonConnection {
 
         private AmqpSerializer serializer;
 
-        private final List<ProtonServiceBinding> bindings;
+        private final List<ServiceBinding> bindings;
 
         private Builder() {
             this.bindings = new LinkedList<>();
@@ -91,13 +92,13 @@ public class ProtonBindingServer extends AbstractProtonConnection {
             return this.errorTranslator;
         }
 
-        public Builder binding(final ProtonServiceBinding binding) {
+        public Builder binding(final ServiceBinding binding) {
             Objects.requireNonNull(binding);
             this.bindings.add(binding);
             return this;
         }
 
-        public Builder bindings(final Iterable<ProtonServiceBinding> bindings) {
+        public Builder bindings(final Iterable<ServiceBinding> bindings) {
             Objects.requireNonNull(bindings);
             bindings.forEach(this.bindings::add);
             return this;
@@ -151,7 +152,7 @@ public class ProtonBindingServer extends AbstractProtonConnection {
         @SuppressWarnings("rawtypes")
         final List<Future> futures = new LinkedList<>();
 
-        for (final ProtonServiceBinding binding : this.options.bindings) {
+        for (final ServiceBinding binding : this.options.bindings) {
             futures.add(bindServiceToConnection(binding, sender));
         }
 
@@ -159,7 +160,7 @@ public class ProtonBindingServer extends AbstractProtonConnection {
 
     }
 
-    protected Future<?> bindServiceToConnection(final ProtonServiceBinding binding, final ProtonSender sender) {
+    protected Future<?> bindServiceToConnection(final ServiceBinding binding, final ProtonSender sender) {
 
         final String address = this.options.addressProvider().requestAddress(binding.getServiceName());
 

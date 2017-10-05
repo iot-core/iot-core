@@ -30,8 +30,18 @@ public final class AmqpByteSerializer implements AmqpSerializer {
     }
 
     @Override
+    public Section encode(Object... objects) {
+        return new Data(new Binary(this.byteSerializer.encode(objects)));
+    }
+
+    @Override
     public <T> T decode(final Section section, final Class<T> clazz) {
         return this.byteSerializer.decode(((Data) section).getValue().asByteBuffer(), clazz);
+    }
+
+    @Override
+    public Object[] decode(final Section section, final Class<?>... clazzes) {
+        return this.byteSerializer.decode(((Data) section).getValue().asByteBuffer(), clazzes);
     }
 
     public static AmqpSerializer of(final ByteSerializer byteSerializer) {

@@ -1,18 +1,21 @@
 package org.iotbricks.common.device.registry.serialization.jackson;
 
-import java.io.FilterInputStream;
-import java.io.FilterOutputStream;
+import static io.glutamate.io.Close.shield;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Objects;
 
+import org.iotbricks.core.utils.serializer.AbstractByteSerializer;
 import org.iotbricks.core.utils.serializer.ByteSerializer;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class JacksonSerializer implements ByteSerializer {
+public class JacksonSerializer extends AbstractByteSerializer {
 
     public static ByteSerializer json() {
         return json(false);
@@ -34,11 +37,17 @@ public class JacksonSerializer implements ByteSerializer {
 
         if (value != null) {
             try {
-                this.mapper.writeValue(closeShield(stream), value);
+                this.mapper.writeValue(shield(stream), value);
             } catch (final JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @Override
+    public void encodeTo(final Object[] values, final OutputStream stream) throws IOException {
+        Objects.requireNonNull(values);
+        encodeTo((Object) values, stream);
     }
 
     @Override
@@ -51,26 +60,39 @@ public class JacksonSerializer implements ByteSerializer {
         Objects.requireNonNull(clazz);
 
         try {
-            return this.mapper.readValue(closeShield(stream), clazz);
+            return this.mapper.readValue(shield(stream), clazz);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static OutputStream closeShield(final OutputStream stream) {
-        return new FilterOutputStream(stream) {
-            @Override
-            public void close() {
-            }
-        };
-    }
+    @Override
+    public Object[] decodeFrom(final InputStream stream, final Class<?>[] clazzes) {
 
-    private static InputStream closeShield(final InputStream stream) {
-        return new FilterInputStream(stream) {
-            @Override
-            public void close() {
+        if (stream == null) {
+            return null;
+        }
+
+        Objects.requireNonNull(clazzes);
+
+        try (final JsonParser parser = this.mapper.getFactory().createParser(shield(stream))) {
+
+            final JsonToken token = parser.nextToken();
+            parser.nextToken(); // move to first array element
+
+            if (token != JsonToken.START_ARRAY) {
+                throw new IllegalStateException("Content is not encoded in array");
             }
-        };
+
+            final Object[] result = new Object[clazzes.length];
+            for (int i = 0; i < result.length; i++) {
+                result[i] = this.mapper.readValue(parser, clazzes[i]);
+            }
+
+            return result;
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

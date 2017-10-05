@@ -9,7 +9,7 @@
         </encoder>
     </appender>
 
-    <logger name="iot.core" level="DEBUG"/>
+    <logger name="org.iotbricks" level="TRACE"/>
 
     <root level="info">
         <appender-ref ref="STDOUT" />

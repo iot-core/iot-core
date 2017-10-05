@@ -16,13 +16,13 @@ public abstract class AbstractRequestProcessor<C1 extends RequestContext, C2 ext
     private final ResponseHandler<? super Object, ? super C1, ? super C2> success;
     private final ResponseHandler<? super ErrorResult, ? super C1, ? super C2> error;
     private ErrorTranslator errorTranslator;
-    private final RequestHandler<C1> handler;
+    private final RequestHandler<RequestContext> handler;
 
     public AbstractRequestProcessor(
             final ResponseHandler<? super Object, ? super C1, ? super C2> success,
             final ResponseHandler<? super ErrorResult, ? super C1, ? super C2> error,
             final ErrorTranslator errorTranslator,
-            final RequestHandler<C1> handler) {
+            final RequestHandler<RequestContext> handler) {
 
         Objects.requireNonNull(success);
         Objects.requireNonNull(error);

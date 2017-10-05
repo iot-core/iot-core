@@ -114,11 +114,7 @@ public class AmqpTransportProcessor extends AbstractClientProcessor {
 
                 // parameters
 
-                if (method.getParameters().size() > 1) {
-                    out.append("new Object[]{").append(method.parameterNames()).append("}");
-                } else {
-                    out.print(method.parameterNames());
-                }
+                out.append("new Object[]{").append(method.parameterNames()).append("}");
 
                 // return type
 

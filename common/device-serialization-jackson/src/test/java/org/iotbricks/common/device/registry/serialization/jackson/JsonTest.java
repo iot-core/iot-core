@@ -1,13 +1,11 @@
-package iot.core.services.device.registry.serialization.jackson;
+package org.iotbricks.common.device.registry.serialization.jackson;
 
-import com.google.common.collect.Maps;
-
-import org.iotbricks.common.device.registry.serialization.jackson.JacksonSerializer;
-import org.iotbricks.core.utils.serializer.ByteSerializer;
-import org.iotbricks.service.device.registry.api.Device;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNot.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FilterOutputStream;
@@ -19,12 +17,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import org.iotbricks.core.utils.serializer.ByteSerializer;
+import org.iotbricks.service.device.registry.api.Device;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.google.common.collect.Maps;
 
 public class JsonTest {
 
@@ -37,16 +36,7 @@ public class JsonTest {
 
     @Test
     public void test1() throws IOException {
-        final Device device1 = new Device();
-        device1.setDeviceId("id1");
-
-        final Map<String, Object> data = new HashMap<>();
-        data.put("string1", "String 1");
-        data.put("long1", Long.MAX_VALUE);
-        data.put("double1", Double.MAX_VALUE);
-        data.put("instant1", Instant.now().toString());
-
-        device1.setProperties(data);
+        final Device device1 = createDefaultDevice("id1");
 
         this.serializer.encodeTo(device1, System.out);
         System.out.println();
@@ -62,6 +52,41 @@ public class JsonTest {
         assertDevice(device1,
                 this.serializer.decode(encode(device1, ByteBuffer.allocate(1)), Device.class));
 
+    }
+
+    @Test
+    public void test2() throws IOException {
+        final Device device1 = createDefaultDevice("id1");
+
+        final Object[] args = new Object[] { "Foo", device1, 1 };
+        final Class<?>[] clazzes = new Class<?>[] { String.class, Device.class, int.class };
+
+        this.serializer.encodeTo(args, System.out);
+        System.out.println();
+        this.serializer.encodeTo(this.serializer.decode(this.serializer.encode(args), clazzes), System.out);
+        System.out.println();
+
+        assertDevices(args, this.serializer.decode(this.serializer.encode(args), clazzes));
+
+        assertDevices(args, this.serializer.decode(encode(args, null), clazzes));
+        assertDevices(args, this.serializer.decode(encode(args, ByteBuffer.allocateDirect(64 * 1024)), clazzes));
+
+        assertDevices(args, this.serializer.decode(encode(args, ByteBuffer.allocate(1)), clazzes));
+
+    }
+
+    private Device createDefaultDevice(final String id) {
+        final Device device1 = new Device();
+        device1.setDeviceId(id);
+
+        final Map<String, Object> data = new HashMap<>();
+        data.put("string1", "String 1");
+        data.put("long1", Long.MAX_VALUE);
+        data.put("double1", Double.MAX_VALUE);
+        data.put("instant1", Instant.now().toString());
+
+        device1.setProperties(data);
+        return device1;
     }
 
     @Test
@@ -81,6 +106,22 @@ public class JsonTest {
         final ByteBuffer buffer1 = this.serializer.encode(value, buffer);
         buffer1.flip();
         return buffer1;
+    }
+
+    private void assertDevices(final Object[] expected, final Object[] actual) {
+        assertTrue(expected != actual);
+
+        assertEquals(expected.length, actual.length);
+
+        for (int i = 0; i < expected.length; i++) {
+            final Object v1 = expected[i];
+            final Object v2 = actual[i];
+            if (v1 instanceof Device && v2 instanceof Device) {
+                assertDevice((Device) v1, (Device) v2);
+            } else {
+                assertEquals(v1, v2);
+            }
+        }
     }
 
     private void assertDevice(final Device expected, final Device actual) {

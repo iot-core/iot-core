@@ -325,7 +325,7 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
     }
 
     @Override
-    public <R> CloseableCompletionStage<R> request(final String service, final String verb, final Object requestBody,
+    public <R> CloseableCompletionStage<R> request(final String service, final String verb, final Object[] requestBody,
             final ReplyHandler<R, Message> replyHandler) {
 
         if (isClosed()) {
@@ -481,7 +481,7 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
         return new RequestException(condition, message);
     }
 
-    private Message createMessage(final String verb, final Object request, final String replyToAddress) {
+    private Message createMessage(final String verb, final Object[] request, final String replyToAddress) {
         final Properties p = new Properties();
         p.setSubject(verb);
         p.setReplyTo(replyToAddress);

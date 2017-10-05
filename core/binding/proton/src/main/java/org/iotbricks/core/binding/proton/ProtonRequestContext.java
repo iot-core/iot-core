@@ -22,17 +22,17 @@ public class ProtonRequestContext implements AmqpRequestContext {
 
     @Override
     public Optional<String> getVerb() {
-        return ofNullable(request.getSubject());
+        return ofNullable(this.request.getSubject());
     }
 
     @Override
     public Optional<String> getReplyToAddress() {
-        return ofNullable(request.getReplyTo());
+        return ofNullable(this.request.getReplyTo());
     }
 
     @Override
-    public <T> T decodeRequest(final Class<T> clazz) {
-        return serializer.decode(request.getBody(), clazz);
+    public Object[] decodeRequest(final Class<?>[] parameterTypes) {
+        return this.serializer.decode(this.request.getBody(), parameterTypes);
     }
 
 }

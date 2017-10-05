@@ -40,6 +40,10 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.glutamate</groupId>
+            <artifactId>glutamate</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.qpid</groupId>

@@ -3,6 +3,7 @@ package org.iotbricks.core.binding.proton;
 import java.util.Objects;
 
 import org.apache.qpid.proton.message.Message;
+import org.iotbricks.core.binding.RequestContext;
 import org.iotbricks.core.binding.RequestHandler;
 import org.iotbricks.core.binding.ResponseHandler;
 import org.iotbricks.core.binding.common.AbstractRequestProcessor;
@@ -25,7 +26,7 @@ public class ProtonRequestProcessor extends AbstractRequestProcessor<ProtonReque
             final ResponseHandler<? super Object, ? super ProtonRequestContext, ? super ProtonResponseContext> success,
             final ResponseHandler<? super ErrorResult, ? super ProtonRequestContext, ? super ProtonResponseContext> error,
             final ErrorTranslator errorTranslator,
-            final RequestHandler<ProtonRequestContext> handler) {
+            final RequestHandler<RequestContext> handler) {
 
         super(success, error, errorTranslator, handler);
 
@@ -47,11 +48,11 @@ public class ProtonRequestProcessor extends AbstractRequestProcessor<ProtonReque
     }
 
     protected ProtonRequestContext createRequestContext(final ProtonDelivery delivery, final Message message) {
-        return new ProtonRequestContext(serializer, delivery, message);
+        return new ProtonRequestContext(this.serializer, delivery, message);
     }
 
     protected ProtonResponseContext createResponseContext(final ProtonDelivery delivery) {
-        return new ProtonResponseContext(serializer, delivery, sender);
+        return new ProtonResponseContext(this.serializer, delivery, this.sender);
     }
 
 }

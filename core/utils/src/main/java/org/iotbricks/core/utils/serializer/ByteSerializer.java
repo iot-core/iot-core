@@ -1,73 +1,37 @@
 package org.iotbricks.core.utils.serializer;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 public interface ByteSerializer {
-    public default byte[] encode(final Object value) {
-        if (value == null) {
-            return null;
-        }
 
-        final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        try {
-            encodeTo(value, stream);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-        return stream.toByteArray();
-    }
+    // === Decoders ====
 
-    public default ByteBuffer encode(final Object value, final ByteBuffer buffer) {
+    public <T> T decodeFrom(InputStream stream, Class<T> clazz) throws IOException;
 
-        // FIXME: fix double allocation
+    public <T> T decode(ByteBuffer data, Class<T> clazz);
 
-        if (value == null) {
-            return buffer;
-        }
+    public <T> T decode(byte[] data, Class<T> clazz);
 
-        final byte[] data = encode(value);
-        if (buffer == null) {
-            return ByteBuffer.wrap(data);
-        } else if (buffer.remaining() >= data.length) {
-            buffer.put(data);
-            return buffer;
-        } else {
-            buffer.flip();
+    public Object[] decodeFrom(InputStream stream, Class<?>[] clazz) throws IOException;
 
-            final ByteBuffer newBuffer = ByteBuffer.allocate(buffer.remaining() + data.length);
-            newBuffer.put(buffer);
-            newBuffer.put(data);
-            return newBuffer;
-        }
-    }
+    public Object[] decode(ByteBuffer data, Class<?>[] clazz);
+
+    public Object[] decode(byte[] data, Class<?>[] clazz);
+
+    // === Encoders ====
 
     public void encodeTo(Object value, OutputStream stream) throws IOException;
 
-    public default <T> T decode(final byte[] data, final Class<T> clazz) {
-        try {
-            return decodeFrom(data != null ? new ByteArrayInputStream(data) : null, clazz);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    public ByteBuffer encode(Object value, ByteBuffer buffer);
 
-    public default <T> T decode(final ByteBuffer data, final Class<T> clazz) {
+    byte[] encode(Object value);
 
-        if (data.hasArray()) {
-            return decode(data.array(), clazz);
-        }
+    public void encodeTo(Object[] value, OutputStream stream) throws IOException;
 
-        // FIXME: fix double allocation
+    public ByteBuffer encode(Object[] value, ByteBuffer buffer);
 
-        final byte[] buffer = new byte[data.remaining()];
-        data.get(buffer);
-        return decode(buffer, clazz);
-    }
-
-    public <T> T decodeFrom(InputStream stream, Class<T> clazz) throws IOException;
+    byte[] encode(Object[] value);
 }

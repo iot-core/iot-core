@@ -7,7 +7,7 @@ import org.apache.qpid.proton.message.Message;
 
 public interface Transport<M> extends AutoCloseable {
 
-    public <R> CompletionStage<R> request(String address, String verb, Object request,
+    public <R> CompletionStage<R> request(String address, String verb, Object[] request,
             ReplyHandler<R, Message> replyHandler);
 
     public ReplyHandler<Void, M> ignoreBody();
