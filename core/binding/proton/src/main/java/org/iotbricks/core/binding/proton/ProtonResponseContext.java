@@ -16,29 +16,33 @@ public class ProtonResponseContext implements AmqpResponseContext {
 
     private final AmqpSerializer serializer;
     private final ProtonDelivery delivery;
-    private ProtonSender sender;
+    private final ProtonSender sender;
+    private final Message requestMessage;
 
     public ProtonResponseContext(final AmqpSerializer serializer, final ProtonDelivery delivery,
-            final ProtonSender anonymousSender) {
+            final ProtonSender anonymousSender, final Message requestMessage) {
 
         Objects.requireNonNull(serializer);
         Objects.requireNonNull(delivery);
         Objects.requireNonNull(anonymousSender);
+        Objects.requireNonNull(requestMessage);
 
         this.serializer = serializer;
         this.delivery = delivery;
 
         this.sender = anonymousSender;
+        this.requestMessage = requestMessage;
     }
 
     @Override
     public void sendMessage(final String address, final Object value) {
         final Message message = Message.Factory.create();
 
-        message.setBody(serializer.encode(value));
+        message.setBody(this.serializer.encode(value));
         message.setAddress(address);
+        message.setCorrelationId(this.requestMessage.getMessageId());
 
-        sender.send(message);
+        this.sender.send(message);
     }
 
     @Override

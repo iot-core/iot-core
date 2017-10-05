@@ -44,15 +44,15 @@ public class ProtonRequestProcessor extends AbstractRequestProcessor<ProtonReque
     public ProtonMessageHandler messageHandler() {
         return (delivery, message) -> process(
                 createRequestContext(delivery, message),
-                createResponseContext(delivery));
+                createResponseContext(delivery, message));
     }
 
     protected ProtonRequestContext createRequestContext(final ProtonDelivery delivery, final Message message) {
         return new ProtonRequestContext(this.serializer, delivery, message);
     }
 
-    protected ProtonResponseContext createResponseContext(final ProtonDelivery delivery) {
-        return new ProtonResponseContext(this.serializer, delivery, this.sender);
+    protected ProtonResponseContext createResponseContext(final ProtonDelivery delivery, final Message requestMessage) {
+        return new ProtonResponseContext(this.serializer, delivery, this.sender, requestMessage);
     }
 
 }
