@@ -13,7 +13,7 @@ import org.iotbricks.core.utils.binding.amqp.AmqpErrorConditionTranslator;
 /**
  * Handle error as AMQP delivery rejection.
  */
-public class AmqpRejectResponseHandler implements ResponseHandler<ErrorResult, RequestContext, AmqpResponseContext> {
+public class AmqpRejectResponseHandler<M> implements ResponseHandler<ErrorResult, RequestContext, AmqpResponseContext<M>, M> {
 
     private AmqpErrorConditionTranslator errorConditionTranslator;
 
@@ -27,7 +27,7 @@ public class AmqpRejectResponseHandler implements ResponseHandler<ErrorResult, R
     }
 
     @Override
-    public void handle(final RequestContext request, final AmqpResponseContext response, final ErrorResult error) {
+    public void handle(final RequestContext request, final AmqpResponseContext<M> response, final ErrorResult error) {
         response.reject(mapError(error.getCondition()), error.getMessage());
     }
 

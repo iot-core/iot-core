@@ -1,6 +1,7 @@
 package org.iotbricks.core.binding.proton;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Rejected;
@@ -12,7 +13,7 @@ import org.iotbricks.core.proton.vertx.serializer.AmqpSerializer;
 import io.vertx.proton.ProtonDelivery;
 import io.vertx.proton.ProtonSender;
 
-public class ProtonResponseContext implements AmqpResponseContext {
+public class ProtonResponseContext implements AmqpResponseContext<Message> {
 
     private final AmqpSerializer serializer;
     private final ProtonDelivery delivery;
@@ -35,12 +36,16 @@ public class ProtonResponseContext implements AmqpResponseContext {
     }
 
     @Override
-    public void sendMessage(final String address, final Object value) {
+    public void sendMessage(final String address, final Object value, final Consumer<Message> messageCustomizer) {
         final Message message = Message.Factory.create();
 
         message.setBody(this.serializer.encode(value));
         message.setAddress(address);
         message.setCorrelationId(this.requestMessage.getMessageId());
+
+        if (messageCustomizer != null) {
+            messageCustomizer.accept(message);
+        }
 
         this.sender.send(message);
     }

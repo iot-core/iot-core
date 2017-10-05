@@ -168,7 +168,7 @@ public class ProtonBindingServer extends AbstractProtonConnection {
                 this.options.serializer(),
                 sender,
                 new MessageResponseHandler<>(AmqpRequestContext::getReplyToAddress),
-                new AmqpRejectResponseHandler(),
+                new AmqpRejectResponseHandler<>(),
                 this.options.errorTranslator(),
                 binding.getHandler());
 

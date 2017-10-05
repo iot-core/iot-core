@@ -10,17 +10,17 @@ import org.iotbricks.core.binding.ResponseHandler;
 import org.iotbricks.core.utils.binding.ErrorResult;
 import org.iotbricks.core.utils.binding.ErrorTranslator;
 
-public abstract class AbstractRequestProcessor<C1 extends RequestContext, C2 extends ResponseContext>
-        implements RequestProcessor<C1, C2> {
+public abstract class AbstractRequestProcessor<C1 extends RequestContext, C2 extends ResponseContext<M>, M>
+        implements RequestProcessor<C1, C2, M> {
 
-    private final ResponseHandler<? super Object, ? super C1, ? super C2> success;
-    private final ResponseHandler<? super ErrorResult, ? super C1, ? super C2> error;
-    private ErrorTranslator errorTranslator;
+    private final ResponseHandler<? super Object, ? super C1, ? super C2, M> success;
+    private final ResponseHandler<? super ErrorResult, ? super C1, ? super C2, M> error;
+    private final ErrorTranslator errorTranslator;
     private final RequestHandler<RequestContext> handler;
 
     public AbstractRequestProcessor(
-            final ResponseHandler<? super Object, ? super C1, ? super C2> success,
-            final ResponseHandler<? super ErrorResult, ? super C1, ? super C2> error,
+            final ResponseHandler<? super Object, ? super C1, ? super C2, M> success,
+            final ResponseHandler<? super ErrorResult, ? super C1, ? super C2, M> error,
             final ErrorTranslator errorTranslator,
             final RequestHandler<RequestContext> handler) {
 
@@ -39,11 +39,11 @@ public abstract class AbstractRequestProcessor<C1 extends RequestContext, C2 ext
     public void process(final C1 request, final C2 response) {
 
         try {
-            final Object result = handler.process(request);
-            success.handle(request, response, result);
+            final Object result = this.handler.process(request);
+            this.success.handle(request, response, result);
         } catch (final Exception e) {
-            final ErrorResult errorResult = errorTranslator.translate(e);
-            error.handle(request, response, errorResult);
+            final ErrorResult errorResult = this.errorTranslator.translate(e);
+            this.error.handle(request, response, errorResult);
         }
 
     }

@@ -15,7 +15,8 @@ import io.vertx.proton.ProtonDelivery;
 import io.vertx.proton.ProtonMessageHandler;
 import io.vertx.proton.ProtonSender;
 
-public class ProtonRequestProcessor extends AbstractRequestProcessor<ProtonRequestContext, ProtonResponseContext> {
+public class ProtonRequestProcessor
+        extends AbstractRequestProcessor<ProtonRequestContext, ProtonResponseContext, Message> {
 
     private final AmqpSerializer serializer;
 
@@ -23,8 +24,8 @@ public class ProtonRequestProcessor extends AbstractRequestProcessor<ProtonReque
 
     public ProtonRequestProcessor(final AmqpSerializer serializer,
             final ProtonSender anonymousSender,
-            final ResponseHandler<? super Object, ? super ProtonRequestContext, ? super ProtonResponseContext> success,
-            final ResponseHandler<? super ErrorResult, ? super ProtonRequestContext, ? super ProtonResponseContext> error,
+            final ResponseHandler<? super Object, ? super ProtonRequestContext, ? super ProtonResponseContext, Message> success,
+            final ResponseHandler<? super ErrorResult, ? super ProtonRequestContext, ? super ProtonResponseContext, Message> error,
             final ErrorTranslator errorTranslator,
             final RequestHandler<RequestContext> handler) {
 
