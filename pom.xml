@@ -41,8 +41,6 @@
 
         <module>core</module>
 
-        <module>common/device-serialization-jackson</module>
-
         <module>client/device-registry</module>
 
         <module>service</module>

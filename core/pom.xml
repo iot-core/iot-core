@@ -25,6 +25,8 @@
         <module>utils</module>
 
         <module>proton-vertx</module>
+        
+        <module>serialization-jackson</module>
 
     </modules>
 
