@@ -1,4 +1,4 @@
-package org.iotbricks.common.device.registry.serialization.jackson;
+package org.iotbricks.core.serialization.jackson;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.iotbricks.core.serialization.jackson.JacksonSerializer;
 import org.iotbricks.core.utils.serializer.ByteSerializer;
 import org.iotbricks.service.device.registry.api.Device;
 import org.junit.Assert;

@@ -2,9 +2,9 @@ package iot.core.service.device.binding;
 
 import static org.iotbricks.core.binding.common.NameProvider.serviceName;
 
-import org.iotbricks.common.device.registry.serialization.jackson.JacksonSerializer;
 import org.iotbricks.core.binding.common.BeanServiceBinding;
 import org.iotbricks.core.binding.proton.ProtonBindingServer;
+import org.iotbricks.core.serialization.jackson.JacksonSerializer;
 import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 import org.iotbricks.service.device.registry.inmemory.InMemoryDeviceRegistryService;
 import org.iotbricks.service.device.registry.spi.AlwaysPassingDeviceSchemaValidator;

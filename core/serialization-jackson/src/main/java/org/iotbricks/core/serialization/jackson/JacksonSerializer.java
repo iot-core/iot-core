@@ -1,4 +1,4 @@
-package org.iotbricks.common.device.registry.serialization.jackson;
+package org.iotbricks.core.serialization.jackson;
 
 import static io.glutamate.io.Close.shield;
 

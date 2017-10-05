@@ -12,7 +12,7 @@
 
 package iot.core.hono.device.registry;
 
-import static org.iotbricks.common.device.registry.serialization.jackson.JacksonSerializer.json;
+import static org.iotbricks.core.serialization.jackson.JacksonSerializer.json;
 
 import org.eclipse.hono.config.SignatureSupportingConfigProperties;
 import org.eclipse.hono.deviceregistry.SignatureSupporting;

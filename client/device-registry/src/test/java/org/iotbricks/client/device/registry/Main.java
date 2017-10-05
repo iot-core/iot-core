@@ -1,6 +1,6 @@
 package org.iotbricks.client.device.registry;
 
-import static org.iotbricks.common.device.registry.serialization.jackson.JacksonSerializer.json;
+import static org.iotbricks.core.serialization.jackson.JacksonSerializer.json;
 
 import java.time.Instant;
 import java.util.HashMap;

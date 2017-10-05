@@ -1,4 +1,4 @@
-package org.iotbricks.common.device.registry.serialization.jackson;
+package org.iotbricks.core.serialization.jackson;
 
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;

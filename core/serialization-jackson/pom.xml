@@ -11,7 +11,7 @@
         <relativePath>../..</relativePath>
     </parent>
 
-    <artifactId>iotbricks-common-device-serialization-jackson</artifactId>
+    <artifactId>iotbricks-core-serialization-jackson</artifactId>
 
     <dependencies>
         <dependency>
