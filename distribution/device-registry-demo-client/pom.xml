@@ -15,7 +15,11 @@
         <dependency>
             <groupId>org.iotbricks</groupId>
             <artifactId>iotbricks-client-device-registry</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.iotbricks</groupId>
+            <artifactId>iotbricks-service-device-registry-api</artifactId>
         </dependency>
     </dependencies>
 
