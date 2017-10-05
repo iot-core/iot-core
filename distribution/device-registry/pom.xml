@@ -16,6 +16,7 @@
     </properties>
 
     <dependencies>
+        <!-- iotbricks dependencies -->
         <dependency>
             <groupId>org.iotbricks</groupId>
             <artifactId>iotbricks-service-device-binding</artifactId>
@@ -29,11 +30,52 @@
             <artifactId>iotbricks-service-device-registry-mongo</artifactId>
         </dependency>
 
+        <!-- Spring Boot runtime -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
             <version>${spring-boot.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/docker</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <configuration>
+                    <images>
+                        <image>
+                            <name>iotbricks/device-registry-service:${project.version}</name>
+                            <build>
+                                <dockerFile>${build.directory}/classes/Dockerfile</dockerFile>
+                                <assembly>
+                                    <descriptorRef>artifact</descriptorRef>
+                                </assembly>
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>1.5.7.RELEASE</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
