@@ -112,11 +112,11 @@ public class ProtonBindingServer extends AbstractProtonConnection {
 
     }
 
-    public static Builder newBinding() {
+    public static Builder newServer() {
         return new Builder();
     }
 
-    public static Builder newBinding(final Builder other) {
+    public static Builder newServer(final Builder other) {
         return new Builder(other);
     }
 

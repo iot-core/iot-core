@@ -26,7 +26,7 @@ public class DeviceRegistryBinding {
     public void start() {
         this.vertx = Vertx.vertx();
 
-        this.server = ProtonBindingServer.newBinding()
+        this.server = ProtonBindingServer.newServer()
                 .binding(BeanServiceBinding.newBinding(deviceRegistryService)
                         .nameProvider(serviceName())
                         .build())
