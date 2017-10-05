@@ -22,6 +22,11 @@ public final class AmqpByteSerializer implements AmqpSerializer {
     }
 
     @Override
+    public String getContentType() {
+        return this.byteSerializer.getContentType();
+    }
+
+    @Override
     public Section encode(final Object object) {
         if (object == null) {
             return null;
@@ -30,7 +35,7 @@ public final class AmqpByteSerializer implements AmqpSerializer {
     }
 
     @Override
-    public Section encode(Object... objects) {
+    public Section encode(final Object... objects) {
         return new Data(new Binary(this.byteSerializer.encode(objects)));
     }
 

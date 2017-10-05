@@ -13,4 +13,11 @@ public interface AmqpSerializer {
     public <T> T decode(Section section, Class<T> clazz);
 
     public Object[] decode(Section section, Class<?>... clazzes);
+
+    /**
+     * Get the content type as per RFC-2046 (MIME type)
+     * 
+     * @return the content type
+     */
+    public String getContentType();
 }

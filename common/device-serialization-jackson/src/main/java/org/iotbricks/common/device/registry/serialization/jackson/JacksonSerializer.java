@@ -32,6 +32,11 @@ public class JacksonSerializer extends AbstractByteSerializer {
     }
 
     @Override
+    public String getContentType() {
+        return "text/json";
+    }
+
+    @Override
     public void encodeTo(final Object value, final OutputStream stream) throws IOException {
         Objects.requireNonNull(stream);
 

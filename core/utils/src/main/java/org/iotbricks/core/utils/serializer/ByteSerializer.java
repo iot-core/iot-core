@@ -7,6 +7,13 @@ import java.nio.ByteBuffer;
 
 public interface ByteSerializer {
 
+    /**
+     * Get the content type as per RFC-2046 (MIME type)
+     *
+     * @return the content type
+     */
+    public String getContentType();
+
     // === Decoders ====
 
     public <T> T decodeFrom(InputStream stream, Class<T> clazz) throws IOException;

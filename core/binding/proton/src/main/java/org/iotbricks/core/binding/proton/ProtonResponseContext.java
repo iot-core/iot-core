@@ -40,6 +40,7 @@ public class ProtonResponseContext implements AmqpResponseContext<Message> {
         final Message message = Message.Factory.create();
 
         message.setBody(this.serializer.encode(value));
+        message.setContentType(this.serializer.getContentType());
         message.setAddress(address);
         message.setCorrelationId(this.requestMessage.getMessageId());
 
