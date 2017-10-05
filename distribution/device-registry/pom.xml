@@ -53,7 +53,7 @@
                         <image>
                             <name>iotbricks/device-registry-service:${project.version}</name>
                             <build>
-                                <dockerFile>${build.directory}/classes/Dockerfile</dockerFile>
+                                <dockerFile>${project.build.directory}/classes/Dockerfile</dockerFile>
                                 <assembly>
                                     <descriptorRef>artifact</descriptorRef>
                                 </assembly>
