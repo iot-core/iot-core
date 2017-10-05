@@ -154,6 +154,9 @@ public class ServiceMethod {
 
     public static List<ServiceMethod> getServiceMethods(final Types types, final Element serviceType) {
 
+        Objects.requireNonNull(types);
+        Objects.requireNonNull(serviceType);
+
         final List<ServiceMethod> result = new ArrayList<>();
 
         for (final Element child : serviceType.getEnclosedElements()) {
