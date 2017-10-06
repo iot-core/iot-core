@@ -13,7 +13,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.message.Message;
 import org.iotbricks.core.proton.vertx.AbstractProtonConnection;
 import org.iotbricks.core.proton.vertx.serializer.AmqpSerializer;
@@ -474,13 +473,11 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
     }
 
     private Message createMessage(final String verb, final Object[] request, final String replyToAddress) {
-        final Properties p = new Properties();
-        p.setSubject(verb);
-        p.setReplyTo(replyToAddress);
 
         final Message message = Message.Factory.create();
 
-        message.setProperties(p);
+        message.setSubject(verb);
+        message.setReplyTo(replyToAddress);
         message.setBody(this.options.serializer().encode(request));
 
         return message;
