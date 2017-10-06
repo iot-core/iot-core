@@ -30,7 +30,7 @@ public class ProtonErrorMessageResponseHandler extends MessageResponseHandler<Pr
     }
 
     public ProtonErrorMessageResponseHandler() {
-        super(AmqpRequestContext::getReplyToAddress);
+        this(AmqpRequestContext::getReplyToAddress);
     }
 
 }
