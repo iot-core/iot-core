@@ -3,8 +3,15 @@ package org.iotbricks.core.utils.binding;
 import com.google.common.base.MoreObjects;
 
 public class ErrorResult {
-    private final ErrorCondition condition;
-    private final String message;
+    private ErrorCondition condition;
+    private String message;
+
+    /**
+     * Default constructor for data mapping frameworks (e.g. Jackson).
+     */
+    @SuppressWarnings("unused")
+    private ErrorResult() {
+    }
 
     public ErrorResult(final ErrorCondition condition, final String message) {
         this.condition = condition;
@@ -12,11 +19,11 @@ public class ErrorResult {
     }
 
     public ErrorCondition getCondition() {
-        return condition;
+        return this.condition;
     }
 
     public String getMessage() {
-        return message;
+        return this.message;
     }
 
     @Override
