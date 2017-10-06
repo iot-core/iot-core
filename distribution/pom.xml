@@ -13,7 +13,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>device-registry</module>
+        <module>device-registry-service</module>
         <module>device-registry-demo-client</module>
     </modules>
 
