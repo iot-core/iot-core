@@ -214,11 +214,14 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
         private static final AmqpErrorConditionTranslator DEFAULT_ERROR_CONDITION_TRANSLATOR = DefaultAmqpErrorConditionTranslator
                 .instance();
         private static final AddressProvider DEFAULT_ADDRESS_PROVIDER = DefaultAddressProvider.instance();
+        private static final MessageIdSupplier<?> DEFAULT_MESSAGE_ID_SUPPLIER = MessageIdSupplier.randomUUID();
 
         private AmqpSerializer serializer;
         private AddressProvider addressProvider = DEFAULT_ADDRESS_PROVIDER;
         private AmqpErrorConditionTranslator errorConditionTranslator = DEFAULT_ERROR_CONDITION_TRANSLATOR;
         private int requestBufferSize = -1;
+
+        private MessageIdSupplier<?> messageIdSupplier = DEFAULT_MESSAGE_ID_SUPPLIER;
 
         private Builder() {
         }
@@ -229,6 +232,7 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
             this.serializer = other.serializer;
             this.addressProvider = other.addressProvider;
             this.errorConditionTranslator = other.errorConditionTranslator;
+            this.messageIdSupplier = other.messageIdSupplier;
         }
 
         @Override
@@ -272,6 +276,15 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
 
         public int requestBufferSize() {
             return this.requestBufferSize;
+        }
+
+        public Builder messageIdSupplier(final MessageIdSupplier<?> messageIdSupplier) {
+            this.messageIdSupplier = messageIdSupplier != null ? messageIdSupplier : DEFAULT_MESSAGE_ID_SUPPLIER;
+            return this;
+        }
+
+        public MessageIdSupplier<?> messageIdSupplier() {
+            return this.messageIdSupplier;
         }
 
         @Override
@@ -336,7 +349,9 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
 
         final String address = this.options.addressProvider().requestAddress(service);
         final String replyToAddress = this.options.addressProvider().replyAddress(service, createReplyToken());
+
         final Message message = createMessage(verb, requestBody, replyToAddress);
+        message.setMessageId(this.options.messageIdSupplier.create());
 
         final Request<R> request = new Request<>(address, message, replyHandler);
 
@@ -467,6 +482,7 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
 
         message.setProperties(p);
         message.setBody(this.options.serializer().encode(request));
+
         return message;
     }
 
