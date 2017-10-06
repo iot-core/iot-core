@@ -2,18 +2,16 @@ package org.iotbricks.core.amqp.transport;
 
 import static java.util.Optional.ofNullable;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
 import org.apache.qpid.proton.message.Message;
+import org.iotbricks.core.amqp.transport.internal.AmqpTransportContext;
+import org.iotbricks.core.amqp.transport.internal.Buffer;
+import org.iotbricks.core.amqp.transport.internal.Request;
+import org.iotbricks.core.amqp.transport.internal.RequestSender;
+import org.iotbricks.core.amqp.transport.internal.SharedReceiverRequestSender;
 import org.iotbricks.core.proton.vertx.AbstractProtonConnection;
 import org.iotbricks.core.proton.vertx.serializer.AmqpSerializer;
 import org.iotbricks.core.utils.address.AddressProvider;
@@ -25,191 +23,17 @@ import org.slf4j.LoggerFactory;
 
 import io.glutamate.util.concurrent.CloseableCompletableFuture;
 import io.glutamate.util.concurrent.CloseableCompletionStage;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.proton.ProtonConnection;
-import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
 
 public class AmqpTransport extends AbstractProtonConnection implements Transport<Message> {
 
     private static final Logger logger = LoggerFactory.getLogger(AmqpTransport.class);
 
-    /**
-     * A request.
-     * <p>
-     * A request may be closed, which is a request to abort the request. The request
-     * to abort is only processed locally and not propagated to the server.
-     *
-     * @param <R>
-     *            the return type of the request
-     */
-    public static class Request<R> extends CloseableCompletableFuture<R> {
-        private final String address;
-        private final Message message;
-        private final ReplyHandler<R, Message> replyHandler;
-
-        public Request(final String address, final Message message, final ReplyHandler<R, Message> replyHandler) {
-            this.address = address;
-            this.message = message;
-            this.replyHandler = replyHandler;
-        }
-
-        public String getAddress() {
-            return this.address;
-        }
-
-        public String getReplyAddress() {
-            return this.message.getReplyTo();
-        }
-
-        public Message getMessage() {
-            return this.message;
-        }
-
-        public void fail(final String reason) {
-            fail(new RuntimeException(reason));
-        }
-
-        public void fail(final Throwable cause) {
-            completeExceptionally(cause);
-        }
-
-        @Override
-        public boolean completeExceptionally(final Throwable ex) {
-            try {
-                return super.completeExceptionally(ex);
-            } finally {
-                try {
-                    close();
-                } catch (final Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-
-        @Override
-        public boolean complete(final R value) {
-            try {
-                return super.complete(value);
-            } finally {
-                try {
-                    close();
-                } catch (final Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-
-        public void complete(final Message replyMessage) {
-            logger.debug("Received reply: {}", replyMessage);
-
-            try {
-                complete(this.replyHandler.handleReply(replyMessage));
-            } catch (final Exception e) {
-                fail(e);
-            } finally {
-                try {
-                    close();
-                } catch (final Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-
-        @Override
-        public String toString() {
-            return String.format("[Request - %s, %s = %s]", this.address, this.message.getSubject(), this.message);
-        }
-    }
-
-    /**
-     * A buffer for {@link Request}s.
-     */
-    private class Buffer {
-
-        private Set<Request<?>> requests = new LinkedHashSet<>();
-        private final int limit;
-
-        public Buffer(final int limit) {
-            this.limit = limit <= 0 ? Integer.MAX_VALUE : limit;
-        }
-
-        public void append(final Request<?> request) {
-
-            final String address = request.getAddress();
-            final ProtonSender sender = requestSender(address);
-
-            if (sender != null) {
-                logger.debug("Sender is available - {} -> {}", address, sender);
-                sendRequest(sender, request);
-                return;
-            }
-
-            logger.debug("Waiting for sender: {}", address);
-
-            if (this.requests.size() < this.limit) {
-                this.requests.add(request);
-            } else {
-                request.fail("Local send buffer is full");
-            }
-        }
-
-        public void remove(final Request<?> request) {
-            this.requests.remove(request);
-        }
-
-        public Request<?> poll(final String address) {
-            final Iterator<Request<?>> i = this.requests.iterator();
-            while (i.hasNext()) {
-                final Request<?> request = i.next();
-                if (address.equals(request.getAddress())) {
-                    i.remove();
-                    return request;
-                }
-            }
-
-            return null;
-        }
-
-        public void flush(final String address, final Consumer<Request<?>> consumer) {
-            if (address == null) {
-                flush(consumer);
-            }
-
-            // FIXME: this needs to be improved
-
-            final List<Request<?>> result = new ArrayList<>();
-
-            final Iterator<Request<?>> i = this.requests.iterator();
-            while (i.hasNext()) {
-                final Request<?> request = i.next();
-                if (address.equals(request.getAddress())) {
-                    result.add(request);
-                    i.remove();
-                }
-            }
-
-            result.forEach(consumer);
-        }
-
-        public void flush(final Consumer<Request<?>> consumer) {
-            final Set<Request<?>> requests = this.requests;
-            this.requests = new LinkedHashSet<>();
-            requests.forEach(consumer);
-        }
-
-        public Set<String> getAddresses() {
-            // FIXME: this needs to be improved
-            return this.requests
-                    .stream()
-                    .map(Request::getAddress)
-                    .collect(Collectors.toSet());
-        }
-    }
-
     public static class Builder extends AbstractProtonConnection.Builder<AmqpTransport, Builder> {
 
+        private static final Supplier<RequestSender> DEFAULT_REQUEST_SENDER_FACTORY = SharedReceiverRequestSender::new;
         private static final AmqpErrorConditionTranslator DEFAULT_ERROR_CONDITION_TRANSLATOR = DefaultAmqpErrorConditionTranslator
                 .instance();
         private static final AddressProvider DEFAULT_ADDRESS_PROVIDER = DefaultAddressProvider.instance();
@@ -222,6 +46,8 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
 
         private MessageIdSupplier<?> messageIdSupplier = DEFAULT_MESSAGE_ID_SUPPLIER;
 
+        private Supplier<RequestSender> requestSenderFactory = DEFAULT_REQUEST_SENDER_FACTORY;
+
         private Builder() {
         }
 
@@ -232,6 +58,7 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
             this.addressProvider = other.addressProvider;
             this.errorConditionTranslator = other.errorConditionTranslator;
             this.messageIdSupplier = other.messageIdSupplier;
+            this.requestSenderFactory = other.requestSenderFactory;
         }
 
         @Override
@@ -286,6 +113,16 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
             return this.messageIdSupplier;
         }
 
+        public Builder requestSenderFactory(final Supplier<RequestSender> requestSenderFactory) {
+            this.requestSenderFactory = requestSenderFactory != null ? requestSenderFactory
+                    : DEFAULT_REQUEST_SENDER_FACTORY;
+            return this;
+        }
+
+        public Supplier<RequestSender> requestSenderFactory() {
+            return this.requestSenderFactory;
+        }
+
         @Override
         public AmqpTransport build(final Vertx vertx) {
             Objects.requireNonNull(this.serializer, "'serializer' must be set");
@@ -306,7 +143,9 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
 
     private final Buffer buffer;
 
-    private final DefaultReplyStrategy replyStrategy;
+    private final ReplyStrategy replyStrategy;
+
+    private final RequestSender requestSender;
 
     public AmqpTransport(final Vertx vertx, final Builder options) {
         super(vertx, options);
@@ -315,17 +154,38 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
 
         this.options = options;
 
-        this.buffer = new Buffer(options.requestBufferSize());
+        this.requestSender = options.requestSenderFactory().get();
+        this.requestSender.initialize(new Builder(options));
+
         this.replyStrategy = new DefaultReplyStrategy(options.serializer(), options.errorConditionTranslator());
+        this.buffer = new Buffer(new AmqpTransportContext() {
+
+            @Override
+            public void sendRequest(final ProtonSender sender, final Request<?> request) {
+                AmqpTransport.this.sendRequest(sender, request);
+            }
+
+            @Override
+            public ProtonSender requestSender(final String service) {
+                return AmqpTransport.this.requestSender(service);
+            }
+        }, options.requestBufferSize());
 
         open();
     }
 
     @Override
-    protected void performEstablished(final AsyncResult<ProtonConnection> result) {
-        super.performEstablished(result);
+    protected void performEstablished(final ProtonConnection connection) {
+        super.performEstablished(connection);
 
-        this.buffer.getAddresses().forEach(this::requestSender);
+        this.requestSender.connected(connection).setHandler(ready -> {
+            if (ready.failed()) {
+                connection.close();
+                return;
+            }
+
+            this.buffer.getServices().forEach(this::requestSender);
+        });
     }
 
     @Override
@@ -346,23 +206,16 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
             return result;
         }
 
-        final String address = this.options.addressProvider().requestAddress(service);
-        final String replyToAddress = this.options.addressProvider().replyAddress(service, createReplyToken());
+        final Message message = createMessage(verb, requestBody);
+        message.setMessageId(this.options.messageIdSupplier().create());
 
-        final Message message = createMessage(verb, requestBody, replyToAddress);
-        message.setMessageId(this.options.messageIdSupplier.create());
-
-        final Request<R> request = new Request<>(address, message, replyHandler);
+        final Request<R> request = new Request<>(service, message, replyHandler);
 
         this.context.runOnContext(v -> {
             startRequest(request);
         });
 
         return request;
-    }
-
-    protected String createReplyToken() {
-        return UUID.randomUUID().toString();
     }
 
     private <R> void startRequest(final Request<R> request) {
@@ -376,13 +229,20 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
         this.buffer.append(request);
     }
 
-    private ProtonSender requestSender(final String address) {
+    private ProtonSender requestSender(final String service) {
         if (this.connection == null) {
             logger.debug("No connection");
             return null;
         }
 
-        final ProtonSender sender = this.connection.attachments().get("sender." + address, ProtonSender.class);
+        if (!this.requestSender.isReady()) {
+            logger.debug("Request sender is not ready");
+            return null;
+        }
+
+        final String address = this.options.addressProvider().requestAddress(service);
+
+        final ProtonSender sender = this.connection.attachments().get("sender." + service, ProtonSender.class);
 
         logger.debug("Checking for existing sender -> {}", sender);
 
@@ -394,17 +254,17 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
                 logger.debug("Sender ready -> {}", senderReady);
 
                 if (senderReady.failed()) {
-                    senderFailed(address);
+                    senderFailed(service);
                 } else {
                     senderReady.result().sendQueueDrainHandler(v -> {
                         logger.debug("Sender queue can accept");
-                        senderReady(senderReady.result(), address);
+                        senderReady(senderReady.result(), service);
                     });
                 }
             });
             newSender.open();
 
-            this.connection.attachments().set("sender." + address, ProtonSender.class, newSender);
+            this.connection.attachments().set("sender." + service, ProtonSender.class, newSender);
 
             // wait until the sender is ready
             return null;
@@ -425,13 +285,13 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
         return sender;
     }
 
-    protected void senderFailed(final String address) {
+    protected void senderFailed(final String service) {
         logger.debug("Sender failed ... flushing requests");
-        this.buffer.flush(address, request -> request.fail("Sender failed"));
+        this.buffer.flush(service, request -> request.fail("Sender failed"));
     }
 
-    protected void senderReady(final ProtonSender sender, final String address) {
-        logger.debug("Sender ready for {} - > {}", address, sender);
+    protected void senderReady(final ProtonSender sender, final String service) {
+        logger.debug("Sender ready for {} - > {}", service, sender);
 
         while (!sender.sendQueueFull()) {
 
@@ -439,7 +299,7 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
                 logger.debug("Queue size: {}", sender.getQueued());
             }
 
-            final Request<?> request = this.buffer.poll(address);
+            final Request<?> request = this.buffer.poll(service);
             logger.debug("Next request: {}", request);
 
             if (request == null) {
@@ -451,33 +311,14 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
     }
 
     private void sendRequest(final ProtonSender sender, final Request<?> request) {
-        final ProtonReceiver receiver = this.connection.createReceiver(request.getReplyAddress());
-        receiver.openHandler(ready -> {
-
-            logger.debug("Receiver -> {}", ready);
-
-            if (ready.failed()) {
-                request.fail(ready.cause());
-                return;
-            }
-
-            request.whenClosed(() -> receiver.close());
-
-            ready.result().handler((delivery, message) -> this.replyStrategy.handleResponse(request, message));
-
-            logger.debug("Sending message: {}", request);
-
-            sender.send(request.getMessage(), delivery -> this.replyStrategy.handleDelivery(request, delivery));
-        });
-        receiver.open();
+        this.requestSender.sendRequest(sender, request, this.replyStrategy);
     }
 
-    private Message createMessage(final String verb, final Object[] request, final String replyToAddress) {
+    private Message createMessage(final String verb, final Object[] request) {
 
         final Message message = Message.Factory.create();
 
         message.setSubject(verb);
-        message.setReplyTo(replyToAddress);
         message.setBody(this.options.serializer().encode(request));
 
         return message;

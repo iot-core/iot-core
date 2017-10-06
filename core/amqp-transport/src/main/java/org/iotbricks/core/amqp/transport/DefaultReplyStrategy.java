@@ -1,6 +1,6 @@
 package org.iotbricks.core.amqp.transport;
 
-import static org.iotbricks.core.amqp.transport.Properties.status;
+import static org.iotbricks.core.amqp.transport.internal.Properties.status;
 import static org.iotbricks.core.utils.binding.ErrorCondition.INTERNAL_ERROR;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -10,7 +10,7 @@ import org.apache.qpid.proton.amqp.messaging.Rejected;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.message.Message;
-import org.iotbricks.core.amqp.transport.AmqpTransport.Request;
+import org.iotbricks.core.amqp.transport.internal.Request;
 import org.iotbricks.core.proton.vertx.serializer.AmqpSerializer;
 import org.iotbricks.core.utils.binding.ErrorResult;
 import org.iotbricks.core.utils.binding.RequestException;

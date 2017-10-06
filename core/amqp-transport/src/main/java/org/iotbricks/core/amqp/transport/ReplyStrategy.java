@@ -1,7 +1,7 @@
 package org.iotbricks.core.amqp.transport;
 
 import org.apache.qpid.proton.message.Message;
-import org.iotbricks.core.amqp.transport.AmqpTransport.Request;
+import org.iotbricks.core.amqp.transport.internal.Request;
 
 import io.vertx.proton.ProtonDelivery;
 

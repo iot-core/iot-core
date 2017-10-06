@@ -187,11 +187,11 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
             this.connection = result.result();
             this.connection.disconnectHandler(this::handleDisconnected);
 
-            performEstablished(result);
+            performEstablished(result.result());
         }
     }
 
-    protected void performEstablished(final AsyncResult<ProtonConnection> result) {
+    protected void performEstablished(final ProtonConnection conection) {
     }
 
     protected void performClose() {

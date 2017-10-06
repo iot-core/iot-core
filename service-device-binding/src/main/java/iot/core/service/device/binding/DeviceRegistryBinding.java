@@ -7,6 +7,7 @@ import org.iotbricks.core.binding.amqp.AmqpRequestContext;
 import org.iotbricks.core.binding.common.BeanServiceBinding;
 import org.iotbricks.core.binding.common.MessageResponseHandler;
 import org.iotbricks.core.binding.proton.ProtonBindingServer;
+import org.iotbricks.core.binding.proton.ProtonErrorMessageResponseHandler;
 import org.iotbricks.core.serialization.jackson.JacksonSerializer;
 import org.iotbricks.service.device.registry.api.DeviceRegistryService;
 import org.iotbricks.service.device.registry.inmemory.InMemoryDeviceRegistryService;
@@ -35,9 +36,9 @@ public class DeviceRegistryBinding {
                         .build())
                 .serializer(JacksonSerializer.json())
                 .successHandler(new MessageResponseHandler<>(AmqpRequestContext::getReplyToAddress))
-                .errorHandler(new AmqpRejectResponseHandler<>())
+                .errorHandler(new AmqpRejectResponseHandler<>()) // Choose this ...
+                .errorHandler(new ProtonErrorMessageResponseHandler()) // ... or this
                 .build(vertx);
-
     }
 
     public void stop() {

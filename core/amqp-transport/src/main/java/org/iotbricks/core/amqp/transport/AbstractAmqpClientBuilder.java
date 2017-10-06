@@ -2,6 +2,7 @@ package org.iotbricks.core.amqp.transport;
 
 import java.time.Duration;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import org.iotbricks.core.proton.vertx.serializer.AmqpByteSerializer;
 import org.iotbricks.core.proton.vertx.serializer.AmqpSerializer;
@@ -26,6 +27,11 @@ public abstract class AbstractAmqpClientBuilder<T extends AbstractAmqpClientBuil
 
     public AmqpTransport.Builder transport() {
         return this.transport;
+    }
+
+    public T transport(final Consumer<AmqpTransport.Builder> transportCustomizer) {
+        transportCustomizer.accept(this.transport);
+        return builder();
     }
 
     public T hostname(final String hostname) {

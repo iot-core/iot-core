@@ -9,6 +9,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import org.iotbricks.core.amqp.transport.internal.ReceiverPerRequestSender;
 import org.iotbricks.service.device.registry.api.Device;
 import org.iotbricks.service.device.registry.inmemory.InMemoryDeviceRegistryService;
 import org.iotbricks.service.device.registry.spi.AlwaysPassingDeviceSchemaValidator;
@@ -24,6 +25,15 @@ public class Main {
     static Client createAmqpClient(final Vertx vertx) {
         return AmqpClient.newClient()
                 .serializer(json())
+                .build(vertx);
+    }
+
+    static Client createAmqpClient2(final Vertx vertx) {
+        return AmqpClient.newClient()
+                .serializer(json())
+                .transport(transport -> {
+                    transport.requestSenderFactory(ReceiverPerRequestSender::new);
+                })
                 .build(vertx);
     }
 
