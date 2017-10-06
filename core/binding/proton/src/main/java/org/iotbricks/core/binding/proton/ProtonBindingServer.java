@@ -54,6 +54,8 @@ public class ProtonBindingServer extends AbstractProtonConnection {
             this.addressProvider = other.addressProvider;
             this.serializer = other.serializer;
             this.errorTranslator = other.errorTranslator;
+            this.successHandler = other.successHandler;
+            this.errorHandler = other.errorHandler;
             this.bindings = new LinkedList<>(other.bindings);
         }
 
