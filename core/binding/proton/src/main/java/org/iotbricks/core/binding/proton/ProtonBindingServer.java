@@ -16,6 +16,8 @@ import org.iotbricks.core.utils.address.DefaultAddressProvider;
 import org.iotbricks.core.utils.binding.ErrorResult;
 import org.iotbricks.core.utils.binding.ErrorTranslator;
 import org.iotbricks.core.utils.serializer.ByteSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
@@ -148,6 +150,8 @@ public class ProtonBindingServer extends AbstractProtonConnection {
         return new Builder(other);
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(ProtonBindingServer.class);
+
     private final Builder options;
 
     public ProtonBindingServer(final Vertx vertx, final Builder options) {
@@ -165,7 +169,8 @@ public class ProtonBindingServer extends AbstractProtonConnection {
 
         sender.openHandler(senderReady -> {
             if (senderReady.failed()) {
-                // FIXME: handle error;
+                logger.warn("Failed to open sender", senderReady.cause());
+                this.connection.close();
                 return;
             }
 
