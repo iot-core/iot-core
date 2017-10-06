@@ -14,15 +14,11 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.qpid.proton.amqp.messaging.Properties;
-import org.apache.qpid.proton.amqp.messaging.Rejected;
-import org.apache.qpid.proton.amqp.transport.DeliveryState;
-import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.message.Message;
 import org.iotbricks.core.proton.vertx.AbstractProtonConnection;
 import org.iotbricks.core.proton.vertx.serializer.AmqpSerializer;
 import org.iotbricks.core.utils.address.AddressProvider;
 import org.iotbricks.core.utils.address.DefaultAddressProvider;
-import org.iotbricks.core.utils.binding.RequestException;
 import org.iotbricks.core.utils.binding.amqp.AmqpErrorConditionTranslator;
 import org.iotbricks.core.utils.binding.amqp.DefaultAmqpErrorConditionTranslator;
 import org.slf4j.Logger;
@@ -49,7 +45,7 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
      * @param <R>
      *            the return type of the request
      */
-    private static class Request<R> extends CloseableCompletableFuture<R> {
+    public static class Request<R> extends CloseableCompletableFuture<R> {
         private final String address;
         private final Message message;
         private final ReplyHandler<R, Message> replyHandler;
@@ -298,6 +294,8 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
 
     private final Buffer buffer;
 
+    private final DefaultReplyStrategy replyStrategy;
+
     public AmqpTransport(final Vertx vertx, final Builder options) {
         super(vertx, options);
 
@@ -306,6 +304,7 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
         this.options = options;
 
         this.buffer = new Buffer(options.requestBufferSize());
+        this.replyStrategy = new DefaultReplyStrategy(options.serializer(), options.errorConditionTranslator());
 
         open();
     }
@@ -449,36 +448,14 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
             }
 
             request.whenClosed(() -> receiver.close());
-            ready.result().handler((delivery, message) -> request.complete(message));
+
+            ready.result().handler((delivery, message) -> this.replyStrategy.handleResponse(request, message));
 
             logger.debug("Sending message: {}", request);
 
-            sender.send(request.getMessage(), delivery -> {
-                final DeliveryState state = delivery.getRemoteState();
-
-                logger.debug("Remote state - {} for {}", state, request);
-
-                if (state instanceof Rejected) {
-                    request.fail(unwrapRemoteException((Rejected) state));
-                }
-
-            });
+            sender.send(request.getMessage(), delivery -> this.replyStrategy.handleDelivery(request, delivery));
         });
         receiver.open();
-    }
-
-    private Exception unwrapRemoteException(final Rejected state) {
-
-        final ErrorCondition error = state.getError();
-        if (error == null || error.getCondition() == null) {
-            return new RuntimeException("Unknown remote exception");
-        }
-
-        final org.iotbricks.core.utils.binding.ErrorCondition condition = this.options.errorConditionTranslator()
-                .fromAmqp(error.getCondition().toString());
-        final String message = state.getError().getDescription();
-
-        return new RequestException(condition, message);
     }
 
     private Message createMessage(final String verb, final Object[] request, final String replyToAddress) {
