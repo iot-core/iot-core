@@ -19,4 +19,14 @@ public class MongoDeviceRegistryServiceConfiguration {
         return new MongoDeviceRegistryService(mongo, deviceSchemaValidator);
     }
 
+    /**
+     * If MongoDB configuration is disabled, we don't want Spring Boot to attempt to connect to MongoDB server.
+     *
+     * @return
+     */
+    @ConditionalOnProperty(name = "iotbricks.mongo.enabled", havingValue = "false", matchIfMissing = true)
+    @Bean MongoClient mongo() {
+        return null;
+    }
+
 }
