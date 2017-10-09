@@ -33,7 +33,7 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
 
     public static class Builder extends AbstractProtonConnection.Builder<AmqpTransport, Builder> {
 
-        private static final Supplier<RequestSender> DEFAULT_REQUEST_SENDER_FACTORY = SharedReceiverRequestSender::new;
+        private static final Supplier<RequestSender> DEFAULT_REQUEST_SENDER_FACTORY = SharedReceiverRequestSender::dynamic;
         private static final AmqpErrorConditionTranslator DEFAULT_ERROR_CONDITION_TRANSLATOR = DefaultAmqpErrorConditionTranslator
                 .instance();
         private static final AddressProvider DEFAULT_ADDRESS_PROVIDER = DefaultAddressProvider.instance();
