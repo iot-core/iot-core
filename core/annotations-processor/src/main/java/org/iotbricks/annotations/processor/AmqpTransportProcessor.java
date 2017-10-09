@@ -99,10 +99,6 @@ public class AmqpTransportProcessor extends AbstractClientProcessor {
 
             for (final ServiceMethod method : ServiceMethod.getServiceMethods(this.types, serviceType)) {
 
-                // @Override protected CloseableCompletionStage<Void> internalUpdate(final
-                // Device device) { return this.transport.request("device", "update", device,
-                // this.transport.ignoreBody()); }
-
                 out.format("    @Override%n");
                 out.format("    protected CloseableCompletionStage<%s> %s(",
                         method.getReturnType(), method.getInternalName());

@@ -32,6 +32,10 @@ public class ServiceMethod {
             this.typeMirror = typeMirror;
         }
 
+        public boolean isVoid() {
+            return this.typeMirror.getKind() == TypeKind.VOID;
+        }
+
         public String getName() {
             return this.type;
         }
