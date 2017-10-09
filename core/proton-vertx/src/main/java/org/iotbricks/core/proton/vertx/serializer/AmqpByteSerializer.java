@@ -35,7 +35,7 @@ public final class AmqpByteSerializer implements AmqpSerializer {
     }
 
     @Override
-    public Section encode(final Object... objects) {
+    public Section encode(final Object[] objects) {
         return new Data(new Binary(this.byteSerializer.encode(objects)));
     }
 
@@ -45,7 +45,7 @@ public final class AmqpByteSerializer implements AmqpSerializer {
     }
 
     @Override
-    public Object[] decode(final Section section, final Class<?>... clazzes) {
+    public Object[] decode(final Section section, final Class<?>[] clazzes) {
         return this.byteSerializer.decode(((Data) section).getValue().asByteBuffer(), clazzes);
     }
 

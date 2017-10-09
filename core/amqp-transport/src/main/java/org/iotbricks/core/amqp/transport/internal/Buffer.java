@@ -25,7 +25,7 @@ public class Buffer {
     private final AmqpTransportContext context;
     private final int limit;
 
-    public Buffer(final AmqpTransportContext context, final int limit) {
+    public Buffer(final int limit, final AmqpTransportContext context) {
         this.context = context;
         this.limit = limit <= 0 ? Integer.MAX_VALUE : limit;
     }

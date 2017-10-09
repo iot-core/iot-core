@@ -158,7 +158,7 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
         this.requestSender.initialize(new Builder(options));
 
         this.replyStrategy = new DefaultReplyStrategy(options.serializer(), options.errorConditionTranslator());
-        this.buffer = new Buffer(new AmqpTransportContext() {
+        this.buffer = new Buffer(options.requestBufferSize(), new AmqpTransportContext() {
 
             @Override
             public void sendRequest(final ProtonSender sender, final Request<?> request) {
@@ -169,7 +169,7 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
             public ProtonSender requestSender(final String service) {
                 return AmqpTransport.this.requestSender(service);
             }
-        }, options.requestBufferSize());
+        });
 
         open();
     }
@@ -195,8 +195,7 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
         this.buffer.flush(request -> request.fail("Client closed"));
     }
 
-    @Override
-    public <R> CloseableCompletionStage<R> request(final String service, final String verb, final Object[] requestBody,
+    protected <R> CloseableCompletionStage<R> request(final String service, final String verb, final Message message,
             final ReplyHandler<R, Message> replyHandler) {
 
         if (isClosed()) {
@@ -206,7 +205,7 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
             return result;
         }
 
-        final Message message = createMessage(verb, requestBody);
+        message.setSubject(verb);
         message.setMessageId(this.options.messageIdSupplier().create());
 
         final Request<R> request = new Request<>(service, message, replyHandler);
@@ -216,6 +215,26 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
         });
 
         return request;
+    }
+
+    @Override
+    public <R> CloseableCompletionStage<R> request(final String service, final String verb, final Object[] requestBody,
+            final ReplyHandler<R, Message> replyHandler) {
+
+        final Message message = Message.Factory.create();
+        message.setBody(this.options.serializer().encode(requestBody));
+
+        return request(service, verb, message, replyHandler);
+    }
+
+    @Override
+    public <R> CloseableCompletionStage<R> request(final String service, final String verb, final Object requestBody,
+            final ReplyHandler<R, Message> replyHandler) {
+
+        final Message message = Message.Factory.create();
+        message.setBody(this.options.serializer().encode(requestBody));
+
+        return request(service, verb, message, replyHandler);
     }
 
     private <R> void startRequest(final Request<R> request) {
@@ -312,16 +331,6 @@ public class AmqpTransport extends AbstractProtonConnection implements Transport
 
     private void sendRequest(final ProtonSender sender, final Request<?> request) {
         this.requestSender.sendRequest(sender, request, this.replyStrategy);
-    }
-
-    private Message createMessage(final String verb, final Object[] request) {
-
-        final Message message = Message.Factory.create();
-
-        message.setSubject(verb);
-        message.setBody(this.options.serializer().encode(request));
-
-        return message;
     }
 
     @Override
