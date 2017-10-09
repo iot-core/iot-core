@@ -120,29 +120,26 @@ public class ClientProcessor extends AbstractClientProcessor {
             out.println("    public AbstractDefaultClient(final Duration timeout) { this.timeout = timeout; }");
             out.println();
             out.format(
-                    "    @Override public %s sync() { return new SyncDeviceRegistryServiceWrapper(async(), this.timeout); }%n%n",
+                    "    @Override%n    public %s sync() { return new SyncDeviceRegistryServiceWrapper(async(), this.timeout); }%n%n",
                     serviceName);
 
-            out.format("    @Override public %s sync(final Duration timeout) {%n", serviceName);
+            out.format("    @Override%n    public %s sync(final Duration timeout) {%n", serviceName);
             out.println("        if (timeout == null) { return sync(); }");
             out.println("        return new SyncDeviceRegistryServiceWrapper(async(), timeout);");
             out.println("    }");
             out.println();
 
-            out.format("    @Override public %s async() {%n", asyncTypeName);
+            out.format("    @Override%n    public %s async() {%n", asyncTypeName);
             out.format("        return new %s() {%n", asyncTypeName);
 
             for (final ServiceMethod method : getServiceMethods(this.types, serviceType)) {
 
-                // @Override public CloseableCompletionStage<String> save(final Device device) {
-                // return internalSave(device); }
-
-                out.format("            @Override public CloseableCompletionStage<%s> %s (",
+                out.format("            @Override%n            public CloseableCompletionStage<%s> %s (",
                         method.getReturnType(), method.getName());
                 out.print(method.getParameters().stream().map(Object::toString).collect(Collectors.joining(", ")));
                 out.format(") { return %s(", method.getInternalName());
                 out.print(method.parameterNames());
-                out.format(");}%n");
+                out.format("); }%n%n");
             }
 
             out.println("        };");
@@ -192,11 +189,11 @@ public class ClientProcessor extends AbstractClientProcessor {
 
                 if (!method.getReturnType().getName().equals("java.lang.Void")) {
                     out.format(
-                            "    @Override public %4$s %1$s(%2$s) { return await(this.async.%1$s(%3$s)); }%n",
+                            "    @Override%n    public %4$s %1$s(%2$s) { return await(this.async.%1$s(%3$s)); }%n",
                             method.getName(), method.parameterList(), method.parameterNames(), method.getReturnType());
                 } else {
                     out.format(
-                            "    @Override public void %1$s(%2$s) { await(this.async.%1$s(%3$s)); }%n",
+                            "    @Override%n    public void %1$s(%2$s) { await(this.async.%1$s(%3$s)); }%n",
                             method.getName(), method.parameterList(), method.parameterNames());
                 }
 

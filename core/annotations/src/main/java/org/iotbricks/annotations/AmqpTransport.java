@@ -20,5 +20,5 @@ import java.lang.annotation.Target;
 @Retention(SOURCE)
 @Target(PACKAGE)
 public @interface AmqpTransport {
-    String value();
+    String value() default "";
 }

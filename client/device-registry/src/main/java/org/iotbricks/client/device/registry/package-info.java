@@ -1,5 +1,5 @@
 @Client(DeviceRegistryService.class)
-@AmqpTransport("device")
+@AmqpTransport
 @LocalTransport
 package org.iotbricks.client.device.registry;
 

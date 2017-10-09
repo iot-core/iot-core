@@ -13,9 +13,11 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
 import org.iotbricks.annotations.AmqpTransport;
+import org.iotbricks.annotations.ServiceName;
 
 @SupportedAnnotationTypes("org.iotbricks.annotations.AmqpTransport")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
@@ -43,7 +45,21 @@ public class AmqpTransportProcessor extends AbstractClientProcessor {
 
         String serviceTopic = transport.value();
         if (serviceTopic == null || serviceTopic.isEmpty()) {
+            final ServiceName serviceName = serviceType.getAnnotation(ServiceName.class);
+            if (serviceName != null) {
+                serviceTopic = serviceName.value();
+            }
+        }
+        if (serviceTopic == null || serviceTopic.isEmpty()) {
             serviceTopic = serviceType.getQualifiedName().toString();
+        }
+
+        if (serviceTopic == null || serviceTopic.isEmpty()) {
+            this.messager.printMessage(Kind.ERROR,
+                    "Unable to detect service name. You can fall back setting the value attribute of @"
+                            + AmqpTransport.class.getSimpleName(),
+                    element);
+            throw new IllegalStateException();
         }
 
         final String name = element.toString() + ".AmqpClient";
@@ -70,7 +86,7 @@ public class AmqpTransportProcessor extends AbstractClientProcessor {
 
             out.println("    public static final class Builder extends AbstractAmqpClientBuilder<Builder> {");
             out.println("        public Builder(final AmqpTransport.Builder builder) { super(builder); }");
-            out.println("        @Override protected Builder builder() { return this; }");
+            out.format("        @Override%n        protected Builder builder() { return this; }%n");
             out.println("            public Client build(final Vertx vertx) {");
             out.println(
                     "                return new AmqpClient(vertx, AmqpTransport.newTransport(transport()), syncTimeout());");
@@ -93,8 +109,8 @@ public class AmqpTransportProcessor extends AbstractClientProcessor {
             out.println("    }");
 
             out.println();
-            out.println(
-                    "    @Override public void close() throws Exception { this.transport.close(); super.close(); }");
+            out.format(
+                    "    @Override%n    public void close() throws Exception { this.transport.close(); super.close(); }%n");
             out.println();
 
             for (final ServiceMethod method : ServiceMethod.getServiceMethods(this.types, serviceType)) {

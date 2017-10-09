@@ -13,6 +13,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic.Kind;
 
@@ -53,9 +54,6 @@ public abstract class AbstractClientProcessor extends AbstractProcessor {
                 return true;
             }
 
-            final String serviceName = getServiceType(client);
-            final TypeElement serviceType = this.processingEnv.getElementUtils().getTypeElement(serviceName);
-
             if (!(element instanceof PackageElement)) {
                 throw new IllegalStateException("Annotation must be on package level");
             }
@@ -65,6 +63,9 @@ public abstract class AbstractClientProcessor extends AbstractProcessor {
                 throw new IllegalStateException(
                         "Annotation must be on named package. Unnamed packages are not supported!");
             }
+
+            final TypeMirror service = getServiceType(client);
+            final TypeElement serviceType = this.processingEnv.getElementUtils().getTypeElement(service.toString());
 
             try {
                 processClient(packageElement, serviceType, roundEnv);
