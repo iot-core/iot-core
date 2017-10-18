@@ -1,12 +1,14 @@
-package org.iotbricks.core.amqp.transport.internal;
+package org.iotbricks.core.amqp.transport.proton;
 
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.apache.qpid.proton.amqp.messaging.Terminus;
 import org.apache.qpid.proton.amqp.transport.Source;
-import org.iotbricks.core.amqp.transport.ReplyStrategy;
+import org.iotbricks.core.amqp.transport.RequestInstance;
+import org.iotbricks.core.amqp.transport.internal.Correlator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +17,7 @@ import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
 
-public class SharedReceiverRequestSender implements RequestSender {
+public class SharedReceiverRequestSender<RQ extends Request> implements RequestSender<RQ> {
 
     private static final Logger logger = LoggerFactory.getLogger(SharedReceiverRequestSender.class);
 
@@ -86,19 +88,18 @@ public class SharedReceiverRequestSender implements RequestSender {
     }
 
     @Override
-    public void sendRequest(final ProtonSender sender, final Request<?> request,
-            final ReplyStrategy replyStrategy) {
+    public void sendRequest(final ProtonSender sender, final RequestInstance<?, RQ> request) {
 
         final Object messageId = request.getMessage().getMessageId();
 
         request.getMessage().setReplyTo(this.clientReplyAddress);
 
         request.whenClosed(() -> this.correlator.remove(messageId));
-        this.correlator.put(messageId, message -> replyStrategy.handleResponse(request, message));
+        this.correlator.put(messageId, message -> request.handleResponse(message));
 
         logger.debug("Sending message: {}", request);
 
-        sender.send(request.getMessage(), delivery -> replyStrategy.handleDelivery(request, delivery));
+        sender.send(request.getMessage(), delivery -> request.handleDelivery(delivery));
     }
 
     /**
@@ -106,8 +107,8 @@ public class SharedReceiverRequestSender implements RequestSender {
      *
      * @return a new request sender
      */
-    public static RequestSender dynamic() {
-        return new SharedReceiverRequestSender(() -> null);
+    public static <RQ extends Request> RequestSender<RQ> dynamic() {
+        return new SharedReceiverRequestSender<>(() -> null);
     }
 
     /**
@@ -118,9 +119,26 @@ public class SharedReceiverRequestSender implements RequestSender {
      *
      * @return a new request sender
      */
-    public static RequestSender of(final Supplier<String> replyAddressProvider) {
+    public static <RQ extends Request> RequestSender<RQ> of(final Supplier<String> replyAddressProvider) {
         Objects.requireNonNull(replyAddressProvider);
-        return new SharedReceiverRequestSender(replyAddressProvider);
+        return new SharedReceiverRequestSender<>(replyAddressProvider);
+    }
+
+    /**
+     * Create a new request sender using a client shared address.
+     *
+     * @param replyAddressProvider
+     *            The address provider for the client reply address
+     *
+     * @return a new request sender
+     */
+    public static <RQ extends Request> RequestSender<RQ> id(final Supplier<String> tokenProvider,
+            final Function<String, String> formatter) {
+
+        Objects.requireNonNull(tokenProvider);
+        Objects.requireNonNull(formatter);
+
+        return new SharedReceiverRequestSender<>(() -> formatter.apply(tokenProvider.get()));
     }
 
     /**
@@ -128,8 +146,12 @@ public class SharedReceiverRequestSender implements RequestSender {
      *
      * @return a new request sender
      */
-    public static RequestSender uuid() {
-        return new SharedReceiverRequestSender(() -> UUID.randomUUID().toString());
+    public static <RQ extends Request> RequestSender<RQ> uuid() {
+        return new SharedReceiverRequestSender<>(() -> UUID.randomUUID().toString());
+    }
+
+    public static <RQ extends Request> RequestSender<RQ> uuid(final Function<String, String> formatter) {
+        return id(() -> UUID.randomUUID().toString(), formatter);
     }
 
 }

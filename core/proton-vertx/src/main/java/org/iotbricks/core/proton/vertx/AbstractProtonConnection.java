@@ -1,5 +1,6 @@
 package org.iotbricks.core.proton.vertx;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
@@ -90,6 +91,10 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
         }
 
         public abstract C build(final Vertx vertx);
+
+        public void validate() {
+            Objects.requireNonNull(this.hostname, "'hostname' must be set");
+        }
     }
 
     private final AtomicBoolean closed = new AtomicBoolean();

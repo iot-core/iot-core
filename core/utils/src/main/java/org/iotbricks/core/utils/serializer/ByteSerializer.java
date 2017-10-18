@@ -5,14 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-public interface ByteSerializer {
-
-    /**
-     * Get the content type as per RFC-2046 (MIME type)
-     *
-     * @return the content type
-     */
-    public String getContentType();
+public interface ByteSerializer extends Serializer {
 
     // === Decoders ====
 
@@ -34,11 +27,11 @@ public interface ByteSerializer {
 
     public ByteBuffer encode(Object value, ByteBuffer buffer);
 
-    byte[] encode(Object value);
+    public byte[] encode(Object value);
 
     public void encodeTo(Object[] value, OutputStream stream) throws IOException;
 
     public ByteBuffer encode(Object[] value, ByteBuffer buffer);
 
-    byte[] encode(Object[] value);
+    public byte[] encode(Object[] value);
 }

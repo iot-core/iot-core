@@ -1,4 +1,4 @@
-package org.iotbricks.core.amqp.transport.internal;
+package org.iotbricks.core.amqp.transport.utils;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;

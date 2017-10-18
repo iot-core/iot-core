@@ -1,23 +1,26 @@
 package org.iotbricks.core.amqp.transport;
 
-import java.util.Optional;
-
-import org.apache.qpid.proton.message.Message;
+import java.nio.ByteBuffer;
 
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 
 public interface Transport<M> extends AutoCloseable {
 
-    public <R> CloseableCompletionStage<R> request(String address, String verb, Object[] request,
-            ReplyHandler<R, Message> replyHandler);
+    public interface RequestBuilder<R, RB extends RequestBuilder<R, RB>> {
 
-    public <R> CloseableCompletionStage<R> request(String service, String verb, Object request,
-            ReplyHandler<R, Message> replyHandler);
+        public RB builder();
 
-    public ReplyHandler<Void, M> ignoreBody();
+        public default RB payload(final byte[] payload) {
+            payload(ByteBuffer.wrap(payload));
+            return builder();
+        }
 
-    public <T> ReplyHandler<T, M> bodyAs(final Class<T> clazz);
+        public RB payload(ByteBuffer payload);
 
-    public <T> ReplyHandler<Optional<T>, M> bodyAsOptional(final Class<T> clazz);
+        public RB payload(String payload);
 
+        public CloseableCompletionStage<R> execute();
+    }
+
+    public <R> RequestBuilder<R, ? extends RequestBuilder<R, ?>> newRequest(ResponseHandler<R, M> responseHandler);
 }

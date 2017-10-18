@@ -1,4 +1,4 @@
-package org.iotbricks.core.amqp.transport;
+package org.iotbricks.core.amqp.transport.client;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -10,26 +10,26 @@ import org.iotbricks.core.utils.serializer.ByteSerializer;
 
 public abstract class AbstractAmqpClientBuilder<T extends AbstractAmqpClientBuilder<T>> {
 
-    private AmqpTransport.Builder transport;
+    private AmqpClientTransport.Builder transport;
 
     private Duration syncTimeout = Duration.ofSeconds(5);
 
-    protected AbstractAmqpClientBuilder(final AmqpTransport.Builder transport) {
+    protected AbstractAmqpClientBuilder(final AmqpClientTransport.Builder transport) {
         this.transport = transport;
     }
 
     protected abstract T builder();
 
-    public T transport(final AmqpTransport.Builder transport) {
+    public T transport(final AmqpClientTransport.Builder transport) {
         this.transport = transport;
         return builder();
     }
 
-    public AmqpTransport.Builder transport() {
+    public AmqpClientTransport.Builder transport() {
         return this.transport;
     }
 
-    public T transport(final Consumer<AmqpTransport.Builder> transportCustomizer) {
+    public T transport(final Consumer<AmqpClientTransport.Builder> transportCustomizer) {
         transportCustomizer.accept(this.transport);
         return builder();
     }

@@ -23,7 +23,9 @@ import org.iotbricks.annotations.ServiceName;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class AmqpTransportProcessor extends AbstractClientProcessor {
 
-    private static final String PKG_CORE_AMQP_TRANSPORT = "org.iotbricks.core.amqp.transport";
+    private static final String PKG_CORE_AMQP_TRANSPORT = "org.iotbricks.core.amqp.transport.client";
+    private static final String CLASS_AMQP_TRANSPORT = "AmqpClientTransport";
+    private static final String CLASS_ABSTRACT_CLIENT_BUILDER = "AbstractAmqpClientBuilder";
 
     public AmqpTransportProcessor() {
         super(AmqpTransport.class);
@@ -77,33 +79,38 @@ public class AmqpTransportProcessor extends AbstractClientProcessor {
             out.println("import io.glutamate.util.concurrent.CloseableCompletionStage;");
             out.println("import io.vertx.core.Vertx;");
             out.println();
-            out.format("import %s.AmqpTransport;%n", PKG_CORE_AMQP_TRANSPORT);
-            out.format("import %s.AbstractAmqpClientBuilder;%n", PKG_CORE_AMQP_TRANSPORT);
+            out.format("import %s.%s;%n", PKG_CORE_AMQP_TRANSPORT, CLASS_AMQP_TRANSPORT);
+            out.format("import %s.%s;%n", PKG_CORE_AMQP_TRANSPORT, CLASS_ABSTRACT_CLIENT_BUILDER);
             out.println();
 
             out.println("public class AmqpClient extends AbstractDefaultClient {");
             out.println();
 
-            out.println("    public static final class Builder extends AbstractAmqpClientBuilder<Builder> {");
-            out.println("        public Builder(final AmqpTransport.Builder builder) { super(builder); }");
+            out.format("    public static final class Builder extends %s<Builder> {%n", CLASS_ABSTRACT_CLIENT_BUILDER);
+            out.format("        public Builder(final %s.Builder builder) { super(builder); }%n",
+                    CLASS_AMQP_TRANSPORT);
             out.format("        @Override%n        protected Builder builder() { return this; }%n");
             out.println("            public Client build(final Vertx vertx) {");
-            out.println(
-                    "                return new AmqpClient(vertx, AmqpTransport.newTransport(transport()), syncTimeout());");
+            out.format(
+                    "                return new AmqpClient(vertx, %s.newTransport(transport()), syncTimeout());%n",
+                    CLASS_AMQP_TRANSPORT);
             out.println("            }");
             out.println("    }");
 
             out.println();
 
-            out.println("    public static Builder newClient() { return new Builder(AmqpTransport.newTransport()); }");
-            out.println(
-                    "    public static Builder newClient(final AmqpTransport.Builder transport) { return new Builder(requireNonNull(transport)); }");
+            out.format("    public static Builder newClient() { return new Builder(%s.newTransport()); }%n",
+                    CLASS_AMQP_TRANSPORT);
+            out.format(
+                    "    public static Builder newClient(final %s.Builder transport) { return new Builder(requireNonNull(transport)); }%n",
+                    CLASS_AMQP_TRANSPORT);
             out.println();
-            out.println("    private final AmqpTransport transport;");
+            out.format("    private final %s transport;%n", CLASS_AMQP_TRANSPORT);
 
             out.println();
-            out.println(
-                    "    private AmqpClient(final Vertx vertx, final AmqpTransport.Builder transport, final Duration syncTimeout) {");
+            out.format(
+                    "    private AmqpClient(final Vertx vertx, final %s.Builder transport, final Duration syncTimeout) {%n",
+                    CLASS_AMQP_TRANSPORT);
             out.println("        super(syncTimeout);");
             out.println("        this.transport = transport.build(vertx);");
             out.println("    }");

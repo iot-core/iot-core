@@ -5,11 +5,12 @@ import static org.iotbricks.core.serialization.jackson.JacksonSerializer.json;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import org.iotbricks.core.amqp.transport.internal.ReceiverPerRequestSender;
+import org.iotbricks.core.amqp.transport.proton.ReceiverPerRequestSender;
 import org.iotbricks.service.device.registry.api.Device;
 import org.iotbricks.service.device.registry.inmemory.InMemoryDeviceRegistryService;
 import org.iotbricks.service.device.registry.spi.AlwaysPassingDeviceSchemaValidator;
@@ -32,7 +33,10 @@ public class Main {
         return AmqpClient.newClient()
                 .serializer(json())
                 .transport(transport -> {
-                    transport.requestSenderFactory(ReceiverPerRequestSender::new);
+                    transport
+                            .requestSenderFactory(
+                                    () -> new ReceiverPerRequestSender<>(() -> UUID.randomUUID().toString(),
+                                            (request, id) -> request.getInformation().getService() + "." + id));
                 })
                 .build(vertx);
     }
