@@ -5,8 +5,12 @@ import org.iotbricks.core.amqp.transport.ResponseHandler;
 import org.iotbricks.core.utils.serializer.StringSerializer;
 import org.iotbricks.hono.transport.HonoTransport;
 import org.iotbricks.hono.transport.HonoTransport.HonoAmqpRequestBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractHonoClient implements AutoCloseable {
+
+    private static final Logger logger = LoggerFactory.getLogger(AbstractHonoClient.class);
 
     private final HonoTransport transport;
     protected final StringSerializer serializer;
@@ -34,8 +38,12 @@ public abstract class AbstractHonoClient implements AutoCloseable {
     protected <T> HonoAmqpRequestBuilder<T> request(final String subject, final Object payload,
             final ResponseHandler<T, Message> handler) {
 
+        final String data = this.serializer.encodeString(payload);
+
+        logger.debug("Request - subject: {}, payload: {}", subject, data);
+
         return request(subject, handler)
-                .payload(this.serializer.encodeString(payload));
+                .payload(data);
     }
 
     @Override
