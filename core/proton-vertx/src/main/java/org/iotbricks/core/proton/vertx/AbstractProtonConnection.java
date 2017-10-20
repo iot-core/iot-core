@@ -144,6 +144,7 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
     @Override
     public void close() {
         if (this.closed.compareAndSet(false, true)) {
+            logger.debug("Schedule close");
             this.context.runOnContext(v -> performClose());
         }
     }
