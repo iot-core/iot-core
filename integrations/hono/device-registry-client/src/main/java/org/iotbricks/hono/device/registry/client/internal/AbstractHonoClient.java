@@ -11,8 +11,11 @@ public abstract class AbstractHonoClient implements AutoCloseable {
     private final HonoTransport transport;
     protected final StringSerializer serializer;
     private final String tenant;
+    private final String service;
 
-    public AbstractHonoClient(final String tenant, final StringSerializer serializer, final HonoTransport transport) {
+    public AbstractHonoClient(final String service, final String tenant, final StringSerializer serializer,
+            final HonoTransport transport) {
+        this.service = service;
         this.tenant = tenant;
         this.serializer = serializer;
         this.transport = transport;
@@ -23,7 +26,7 @@ public abstract class AbstractHonoClient implements AutoCloseable {
             final ResponseHandler<T, Message> handler) {
 
         return this.transport.newRequest(handler)
-                .service("registration", this.tenant)
+                .service(this.service, this.tenant)
                 .subject(subject)
                 .rejected((rejected, request) -> request.fail("Request rejected by server"));
     }

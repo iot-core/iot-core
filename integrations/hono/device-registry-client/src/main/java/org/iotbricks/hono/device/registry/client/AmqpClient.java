@@ -75,7 +75,7 @@ public class AmqpClient extends AbstractHonoClient implements Client {
     }
 
     private AmqpClient(final Vertx vertx, final String tenant, final HonoTransport.Builder transport) {
-        super(tenant, JacksonSerializer.json(), transport.build(vertx));
+        super("registration", tenant, JacksonSerializer.json(), transport.build(vertx));
     }
 
     @Override
