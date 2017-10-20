@@ -99,6 +99,7 @@ public abstract class ProtonTransport<RI>
             ApplicationProperties properties = this.message.getApplicationProperties();
             if (properties == null) {
                 properties = new ApplicationProperties(new HashMap<>());
+                this.message.setApplicationProperties(properties);
             }
             properties.getValue().put(key, value);
             return builder();
