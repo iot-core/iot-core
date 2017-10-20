@@ -3,6 +3,7 @@ package org.iotbricks.hono.device.registry.client.internal;
 import static io.glutamate.util.Optionals.presentAndEqual;
 import static org.iotbricks.core.amqp.transport.utils.Properties.status;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -30,12 +31,12 @@ public abstract class AbstractHonoClient implements AutoCloseable {
                     .requestSenderFactory(HonoTransport::requestSender);
         }
 
-        protected abstract B builder();
-
         public Builder(final B other) {
             this.transport = HonoTransport.newTransport(other.transport());
             this.tenant = other.tenant();
         }
+
+        protected abstract B builder();
 
         public B tenant(final String tenant) {
             this.tenant = tenant;
@@ -58,6 +59,11 @@ public abstract class AbstractHonoClient implements AutoCloseable {
         public B transport(final Consumer<HonoTransport.Builder> transportCustomizer) {
             transportCustomizer.accept(this.transport);
             return builder();
+        }
+
+        protected void validate() {
+            Objects.requireNonNull(this.tenant(), "'tenant' must not be null");
+            Objects.requireNonNull(this.transport(), "'transport' must not be null");
         }
 
     }

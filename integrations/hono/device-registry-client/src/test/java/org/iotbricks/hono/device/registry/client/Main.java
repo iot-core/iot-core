@@ -1,9 +1,9 @@
 package org.iotbricks.hono.device.registry.client;
 
+import static io.glutamate.util.concurrent.Await.await;
 import static io.vertx.core.Vertx.vertx;
 import static java.lang.Integer.parseInt;
 import static java.time.Duration.ofSeconds;
-import static org.iotbricks.hono.device.registry.client.Client.sync;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -57,7 +57,7 @@ public class Main {
                     .build(vertx.get())) {
 
                 {
-                    final DeviceInformation result = sync(client.getDevice(id), ofSeconds(15));
+                    final DeviceInformation result = await(client.getDevice(id), ofSeconds(15));
                     System.out.println("Current device: " + result);
                 }
 

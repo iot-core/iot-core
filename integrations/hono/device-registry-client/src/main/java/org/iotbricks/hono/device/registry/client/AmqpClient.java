@@ -15,6 +15,13 @@ public class AmqpClient extends AbstractHonoClient implements Client {
 
     public static class Builder extends AbstractHonoClient.Builder<Builder> {
 
+        public Builder() {
+        }
+
+        public Builder(final Builder other) {
+            super(other);
+        }
+
         @Override
         protected Builder builder() {
             return this;
@@ -24,8 +31,7 @@ public class AmqpClient extends AbstractHonoClient implements Client {
 
             Objects.requireNonNull(vertx, "'vertx' must not be null");
 
-            Objects.requireNonNull(this.tenant(), "'tenant' must not be null");
-            Objects.requireNonNull(this.transport(), "'transport' must not be null");
+            validate();
 
             return new AmqpClient(vertx, this.tenant(), this.transport());
         }
