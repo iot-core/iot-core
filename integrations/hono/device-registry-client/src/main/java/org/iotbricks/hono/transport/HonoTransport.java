@@ -1,4 +1,4 @@
-package org.iotbricks.hono.device.registry.client.transport;
+package org.iotbricks.hono.transport;
 
 import java.util.Objects;
 import java.util.UUID;

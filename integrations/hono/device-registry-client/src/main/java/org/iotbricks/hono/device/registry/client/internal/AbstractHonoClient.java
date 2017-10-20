@@ -3,8 +3,8 @@ package org.iotbricks.hono.device.registry.client.internal;
 import org.apache.qpid.proton.message.Message;
 import org.iotbricks.core.amqp.transport.ResponseHandler;
 import org.iotbricks.core.utils.serializer.StringSerializer;
-import org.iotbricks.hono.device.registry.client.transport.HonoTransport;
-import org.iotbricks.hono.device.registry.client.transport.HonoTransport.HonoAmqpRequestBuilder;
+import org.iotbricks.hono.transport.HonoTransport;
+import org.iotbricks.hono.transport.HonoTransport.HonoAmqpRequestBuilder;
 
 public abstract class AbstractHonoClient implements AutoCloseable {
 

@@ -2,6 +2,8 @@ package org.iotbricks.hono.device.registry.client;
 
 import static java.lang.Integer.parseInt;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,7 +12,6 @@ import org.iotbricks.hono.device.registry.client.model.DeviceInformation;
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.Vertx;
 import io.vertx.core.net.PemKeyCertOptions;
-import io.vertx.core.net.PemTrustOptions;
 
 public class Main {
 
@@ -24,13 +25,11 @@ public class Main {
 
         final Vertx vertx = Vertx.vertx();
 
-        final PemKeyCertOptions keyCert = new PemKeyCertOptions();
-        keyCert.addCertPath(
-                "/home/jreimann/git/hono/example/target/config/hono-demo-certs-jar/device-registry-cert.pem");
-        keyCert.addKeyPath("/home/jreimann/git/hono/example/target/config/hono-demo-certs-jar/device-registry-key.pem");
+        final Path certsPath = Paths.get("/home/jreimann/git/hono/example/target/config/hono-demo-certs-jar");
 
-        final PemTrustOptions trust = new PemTrustOptions();
-        trust.addCertPath("/home/jreimann/git/hono/example/target/config/hono-demo-certs-jar/trusted-certs.pem");
+        final PemKeyCertOptions keyCert = new PemKeyCertOptions();
+        keyCert.addCertPath(certsPath.resolve("device-registry-cert.pem").toString());
+        keyCert.addKeyPath(certsPath.resolve("device-registry-key.pem").toString());
 
         try (Client client = AmqpClient.newClient()
                 .tenant("foo-bar-baz")
@@ -48,7 +47,6 @@ public class Main {
                                         .setKeyCertOptions(keyCert)
                                         .setSniServerName(args[1])
                                         .setHostnameVerificationAlgorithm("")
-                                        .setTrustOptions(trust)
                                         .setTrustAll(true);
                             });
                 })

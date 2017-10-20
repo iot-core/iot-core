@@ -13,7 +13,7 @@ import org.apache.qpid.proton.message.Message;
 import org.iotbricks.core.serialization.jackson.JacksonSerializer;
 import org.iotbricks.hono.device.registry.client.internal.AbstractHonoClient;
 import org.iotbricks.hono.device.registry.client.model.DeviceInformation;
-import org.iotbricks.hono.device.registry.client.transport.HonoTransport;
+import org.iotbricks.hono.transport.HonoTransport;
 
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.Vertx;
