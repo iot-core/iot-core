@@ -70,7 +70,7 @@ public class SharedClientAndRequestReceiverRequestSender<T, RQ extends Request>
 
         Objects.requireNonNull(responseAddressProvider);
 
-        return () -> new SharedClientAndRequestReceiverRequestSender<>(() -> randomUUID(), responseAddressProvider);
+        return () -> uuid(responseAddressProvider);
     }
 
 }
