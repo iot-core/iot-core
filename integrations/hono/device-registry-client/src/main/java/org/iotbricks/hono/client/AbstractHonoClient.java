@@ -1,4 +1,4 @@
-package org.iotbricks.hono.device.registry.client.internal;
+package org.iotbricks.hono.client;
 
 import static io.glutamate.util.Optionals.presentAndEqual;
 import static org.iotbricks.core.amqp.transport.utils.Properties.status;

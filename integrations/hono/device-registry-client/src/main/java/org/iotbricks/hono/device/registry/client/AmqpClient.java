@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.iotbricks.core.serialization.jackson.JacksonSerializer;
-import org.iotbricks.hono.device.registry.client.internal.AbstractHonoClient;
+import org.iotbricks.hono.client.AbstractHonoClient;
 import org.iotbricks.hono.device.registry.client.model.DeviceInformation;
 import org.iotbricks.hono.transport.HonoTransport;
 
