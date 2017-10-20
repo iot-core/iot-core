@@ -4,21 +4,78 @@ import static io.glutamate.util.Optionals.presentAndEqual;
 import static org.iotbricks.core.amqp.transport.utils.Properties.status;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
 import org.apache.qpid.proton.message.Message;
 import org.iotbricks.core.serialization.jackson.JacksonSerializer;
 import org.iotbricks.hono.device.registry.client.internal.AbstractHonoClient;
 import org.iotbricks.hono.device.registry.client.model.DeviceInformation;
+import org.iotbricks.hono.device.registry.client.transport.HonoTransport;
 
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.Vertx;
 
 public class AmqpClient extends AbstractHonoClient implements Client {
 
-    public AmqpClient(final Vertx vertx, final String tenant) {
-        super(vertx, tenant, JacksonSerializer.json());
+    public static class Builder {
+
+        private HonoTransport.Builder transport;
+
+        private String tenant;
+
+        public Builder() {
+            this.transport = HonoTransport.newTransport()
+                    .requestSenderFactory(HonoTransport::requestSender);
+        }
+
+        public Builder builder() {
+            return this;
+        }
+
+        public Builder(final Builder other) {
+            this.transport = HonoTransport.newTransport(other.transport);
+            this.tenant = other.tenant;
+        }
+
+        public Builder tenant(final String tenant) {
+            this.tenant = tenant;
+            return builder();
+        }
+
+        public String tenant() {
+            return this.tenant;
+        }
+
+        public Builder transport(final HonoTransport.Builder transport) {
+            this.transport = transport;
+            return builder();
+        }
+
+        public HonoTransport.Builder transport() {
+            return this.transport;
+        }
+
+        public Builder transport(final Consumer<HonoTransport.Builder> transportCustomizer) {
+            transportCustomizer.accept(this.transport);
+            return builder();
+        }
+
+        public AmqpClient build(final Vertx vertx) {
+            Objects.requireNonNull(this.tenant, "'tenant' must not be null");
+            return new AmqpClient(vertx, this.tenant, this.transport);
+        }
+
+    }
+
+    public static Builder newClient() {
+        return new Builder();
+    }
+
+    private AmqpClient(final Vertx vertx, final String tenant, final HonoTransport.Builder transport) {
+        super(tenant, JacksonSerializer.json(), transport.build(vertx));
     }
 
     @Override

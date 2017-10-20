@@ -1,11 +1,13 @@
 package org.iotbricks.core.amqp.transport.proton;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
+import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Rejected;
 import org.apache.qpid.proton.amqp.messaging.Section;
@@ -90,7 +92,11 @@ public abstract class ProtonTransport<RI>
         @SuppressWarnings("unchecked")
         @Override
         public RB applicationProperty(final String key, final Object value) {
-            this.message.getApplicationProperties().getValue().put(key, value);
+            ApplicationProperties properties = this.message.getApplicationProperties();
+            if (properties == null) {
+                properties = new ApplicationProperties(new HashMap<>());
+            }
+            properties.getValue().put(key, value);
             return builder();
         }
 

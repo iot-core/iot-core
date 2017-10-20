@@ -1,11 +1,14 @@
 package org.iotbricks.hono.device.registry.client.transport;
 
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Function;
 
 import org.apache.qpid.proton.message.Message;
 import org.iotbricks.core.amqp.transport.ResponseHandler;
 import org.iotbricks.core.amqp.transport.proton.ProtonTransport;
+import org.iotbricks.core.amqp.transport.proton.RequestSender;
+import org.iotbricks.core.amqp.transport.proton.SharedClientAndRequestReceiverRequestSender;
 
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.Vertx;
@@ -47,6 +50,8 @@ public class HonoTransport extends ProtonTransport<HonoRequestInformation> {
     protected HonoTransport(final Vertx vertx,
             final Builder options) {
         super(vertx, HonoTransport::toAddress, options);
+
+        open();
     }
 
     public static class HonoAmqpRequestBuilder<R>
@@ -85,6 +90,18 @@ public class HonoTransport extends ProtonTransport<HonoRequestInformation> {
 
     protected static String toAddress(final HonoRequestInformation information) {
         return String.format("%s.%s", information.getService(), information.getTenant());
+    }
+
+    protected static String toResponseAddress(final UUID uuid,
+            final ProtonRequest<HonoRequestInformation> request) {
+
+        final HonoRequestInformation information = request.getInformation();
+        return String.format("%s.%s", information.getService(), information.getTenant());
+
+    }
+
+    public static RequestSender<ProtonRequest<HonoRequestInformation>> requestSender() {
+        return SharedClientAndRequestReceiverRequestSender.uuid(HonoTransport::toResponseAddress);
     }
 
 }

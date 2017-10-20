@@ -1,13 +1,13 @@
 package org.iotbricks.core.amqp.transport.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.iotbricks.core.amqp.transport.RequestInstance;
 import org.iotbricks.core.amqp.transport.proton.Request;
@@ -26,24 +26,18 @@ public class Buffer<RQ extends Request> {
     private Set<RequestInstance<?, RQ>> requests = new LinkedHashSet<>();
 
     private final int limit;
-    private final Function<RQ, String> addressProvider;
     private final AmqpTransportContext<RQ> context;
 
-    public Buffer(final int limit, final Function<RQ, String> addressProvider, final AmqpTransportContext<RQ> context) {
+    public Buffer(final int limit, final AmqpTransportContext<RQ> context) {
         this.limit = limit <= 0 ? Integer.MAX_VALUE : limit;
-        this.addressProvider = addressProvider;
         this.context = context;
-    }
-
-    private String address(final RequestInstance<?, RQ> request) {
-        return this.addressProvider.apply(request.getRequest());
     }
 
     public void append(final RequestInstance<?, RQ> request) {
 
-        final String address = address(request);
+        final String address = request.getAddress();
 
-        final ProtonSender sender = this.context.requestSender(address);
+        final ProtonSender sender = this.context.requestSender(request);
 
         if (sender != null) {
             logger.debug("Sender is available - {} -> {}", address, sender);
@@ -68,7 +62,7 @@ public class Buffer<RQ extends Request> {
         final Iterator<RequestInstance<?, RQ>> i = this.requests.iterator();
         while (i.hasNext()) {
             final RequestInstance<?, RQ> request = i.next();
-            if (address.equals(address(request))) {
+            if (address.equals(request.getAddress())) {
                 i.remove();
                 return request;
             }
@@ -89,7 +83,7 @@ public class Buffer<RQ extends Request> {
         final Iterator<RequestInstance<?, RQ>> i = this.requests.iterator();
         while (i.hasNext()) {
             final RequestInstance<?, RQ> request = i.next();
-            if (address.equals(address(request))) {
+            if (address.equals(request.getAddress())) {
                 result.add(request);
                 i.remove();
             }
@@ -98,17 +92,54 @@ public class Buffer<RQ extends Request> {
         result.forEach(consumer);
     }
 
+    /**
+     * Flush requests, sending to target address
+     *
+     * @param address
+     */
+    public void flush(final String address) {
+        logger.debug("Flushing buffer to address: {}", address);
+
+        if (address == null) {
+            return;
+        }
+
+        final Iterator<RequestInstance<?, RQ>> i = this.requests.iterator();
+
+        while (i.hasNext()) {
+            final RequestInstance<?, RQ> request = i.next();
+
+            // TODO: improve access by address
+
+            if (!address.equals(request.getAddress())) {
+                continue;
+            }
+
+            logger.debug("Try acquiring sender: {}", request);
+
+            final ProtonSender sender = this.context.requestSender(request);
+            if (sender == null) {
+                logger.debug("Sender not ready");
+                return;
+            }
+
+            if (sender != null) {
+                logger.trace("Sender ready ... sending request");
+                i.remove();
+                this.context.sendRequest(sender, request);
+            }
+
+        }
+    }
+
     public void flush(final Consumer<RequestInstance<?, RQ>> consumer) {
         final Set<RequestInstance<?, RQ>> requests = this.requests;
         this.requests = new LinkedHashSet<>();
         requests.forEach(consumer);
     }
 
-    public Set<String> getAddresses() {
-        // FIXME: this needs to be improved
-        return this.requests
-                .stream()
-                .map(this::address)
-                .collect(Collectors.toSet());
+    public Collection<RequestInstance<?, RQ>> getRequests() {
+        return Collections.unmodifiableCollection(this.requests);
     }
+
 }

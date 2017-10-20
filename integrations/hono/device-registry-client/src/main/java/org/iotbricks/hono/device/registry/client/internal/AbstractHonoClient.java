@@ -2,12 +2,9 @@ package org.iotbricks.hono.device.registry.client.internal;
 
 import org.apache.qpid.proton.message.Message;
 import org.iotbricks.core.amqp.transport.ResponseHandler;
-import org.iotbricks.core.amqp.transport.proton.SharedReceiverRequestSender;
 import org.iotbricks.core.utils.serializer.StringSerializer;
 import org.iotbricks.hono.device.registry.client.transport.HonoTransport;
 import org.iotbricks.hono.device.registry.client.transport.HonoTransport.HonoAmqpRequestBuilder;
-
-import io.vertx.core.Vertx;
 
 public abstract class AbstractHonoClient implements AutoCloseable {
 
@@ -15,14 +12,10 @@ public abstract class AbstractHonoClient implements AutoCloseable {
     protected final StringSerializer serializer;
     private final String tenant;
 
-    public AbstractHonoClient(final Vertx vertx, final String tenant, final StringSerializer serializer) {
-
+    public AbstractHonoClient(final String tenant, final StringSerializer serializer, final HonoTransport transport) {
         this.tenant = tenant;
         this.serializer = serializer;
-
-        this.transport = HonoTransport.newTransport()
-                .requestSenderFactory(SharedReceiverRequestSender::uuid)
-                .build(vertx);
+        this.transport = transport;
 
     }
 

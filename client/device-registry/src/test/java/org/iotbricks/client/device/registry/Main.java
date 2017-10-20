@@ -1,5 +1,6 @@
 package org.iotbricks.client.device.registry;
 
+import static org.iotbricks.core.amqp.transport.proton.SharedClientAndRequestReceiverRequestSender.uuidFactory;
 import static org.iotbricks.core.serialization.jackson.JacksonSerializer.json;
 
 import java.time.Instant;
@@ -41,11 +42,24 @@ public class Main {
                 .build(vertx);
     }
 
+    static Client createAmqpClient3(final Vertx vertx) {
+        return AmqpClient.newClient()
+                .serializer(json())
+                .transport(transport -> {
+                    transport
+                            .requestSenderFactory(
+                                    uuidFactory((uuid, request) -> String.format("%s/%s/%s",
+                                            request.getInformation().getService(), request.getMessage().getSubject(),
+                                            uuid)));
+                })
+                .build(vertx);
+    }
+
     public static void main(final String[] args) throws Exception {
 
         final Vertx vertx = Vertx.vertx();
 
-        try (final Client client = createAmqpClient(vertx)) {
+        try (final Client client = createAmqpClient3(vertx)) {
 
             asyncSave(client, "id2");
             asyncFind(client, "id2");

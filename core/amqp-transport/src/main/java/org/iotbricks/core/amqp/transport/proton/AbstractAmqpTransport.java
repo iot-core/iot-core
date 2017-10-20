@@ -1,5 +1,7 @@
 package org.iotbricks.core.amqp.transport.proton;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -31,7 +33,7 @@ public abstract class AbstractAmqpTransport<RQ extends Request> extends Abstract
 
         private int requestBufferSize = -1;
 
-        private Supplier<RequestSender<RQ>> requestSenderFactory = SharedReceiverRequestSender::dynamic;
+        private Supplier<RequestSender<RQ>> requestSenderFactory = SharedClientReceiverRequestSender::dynamic;
 
         protected Builder() {
         }
@@ -64,7 +66,7 @@ public abstract class AbstractAmqpTransport<RQ extends Request> extends Abstract
 
         public B requestSenderFactory(final Supplier<RequestSender<RQ>> requestSenderFactory) {
             this.requestSenderFactory = requestSenderFactory != null ? requestSenderFactory
-                    : SharedReceiverRequestSender::dynamic;
+                    : SharedClientReceiverRequestSender::dynamic;
             return builder();
         }
 
@@ -80,8 +82,10 @@ public abstract class AbstractAmqpTransport<RQ extends Request> extends Abstract
 
     private final Builder<RQ, ? extends AbstractAmqpTransport<?>, ?> options;
 
-    private final Buffer<RQ> buffer;
     private final RequestSender<RQ> requestSender;
+    private Function<RQ, String> addressProvider;
+
+    private final Buffer<RQ> buffer;
 
     protected AbstractAmqpTransport(final Vertx vertx, final Function<RQ, String> addressProvider,
             final Builder<RQ, ? extends AbstractAmqpTransport<?>, ?> options) {
@@ -90,8 +94,9 @@ public abstract class AbstractAmqpTransport<RQ extends Request> extends Abstract
         this.options = options;
 
         this.requestSender = options.requestSenderFactory().get();
+        this.addressProvider = addressProvider;
 
-        this.buffer = new Buffer<>(options.requestBufferSize(), addressProvider, new AmqpTransportContext<RQ>() {
+        this.buffer = new Buffer<>(options.requestBufferSize(), new AmqpTransportContext<RQ>() {
 
             @Override
             public void sendRequest(final ProtonSender sender, final RequestInstance<?, RQ> request) {
@@ -99,8 +104,21 @@ public abstract class AbstractAmqpTransport<RQ extends Request> extends Abstract
             }
 
             @Override
-            public ProtonSender requestSender(final String service) {
-                return AbstractAmqpTransport.this.requestSender(service);
+            public ProtonSender requestSender(final RequestInstance<?, RQ> request) {
+                return AbstractAmqpTransport.this.requestSender(request);
+            }
+        });
+
+        this.requestSender.initialize(new RequestSenderContext<RQ>() {
+
+            @Override
+            public Buffer<RQ> getBuffer() {
+                return AbstractAmqpTransport.this.buffer;
+            }
+
+            @Override
+            public void senderReady(final String address) {
+                AbstractAmqpTransport.this.requestSenderReady(address);
             }
         });
     }
@@ -115,7 +133,21 @@ public abstract class AbstractAmqpTransport<RQ extends Request> extends Abstract
                 return;
             }
 
-            this.buffer.getAddresses().forEach(this::requestSender);
+            /*
+             * For each target address we request the sender for the first time. But only
+             * for the first request. Target addresses might be mapped to difference
+             * receiver addresses. Which could end up in a N*M combination of addresses.
+             * However we want to maintain the order of requests for each target address.
+             */
+
+            final Set<String> addresses = new HashSet<>();
+
+            for (final RequestInstance<?, RQ> requestInstance : this.buffer.getRequests()) {
+                final String address = this.addressProvider.apply(requestInstance.getRequest());
+                if (addresses.add(address)) {
+                    requestSender(requestInstance);
+                }
+            }
         });
     }
 
@@ -128,21 +160,33 @@ public abstract class AbstractAmqpTransport<RQ extends Request> extends Abstract
 
     protected <R> CloseableCompletionStage<R> request(final RQ request, final ReplyStrategy<R, RQ> replyStrategy) {
 
+        if (request == null || replyStrategy == null) {
+            return CloseableCompletableFuture.failed(new NullPointerException());
+        }
+
         if (isClosed()) {
             // early fail
             return CloseableCompletableFuture.failed(new RuntimeException("Client closed"));
         }
 
         final Message message = request.getMessage();
+        if (message == null) {
+            return CloseableCompletableFuture.failed(new NullPointerException("Request has a null message"));
+        }
         message.setMessageId(this.options.messageIdSupplier().create());
 
-        final RequestInstance<R, RQ> requestnstance = new RequestInstance<>(request, replyStrategy);
+        final String address = this.addressProvider.apply(request);
+        if (address == null || address.isEmpty()) {
+            return CloseableCompletableFuture.failed(new RuntimeException("Empty or null target address"));
+        }
+
+        final RequestInstance<R, RQ> requestInstance = new RequestInstance<>(address, request, replyStrategy);
 
         this.context.runOnContext(v -> {
-            startRequest(requestnstance);
+            startRequest(requestInstance);
         });
 
-        return requestnstance;
+        return requestInstance;
     }
 
     private <T> void startRequest(final RequestInstance<T, RQ> request) {
@@ -156,16 +200,22 @@ public abstract class AbstractAmqpTransport<RQ extends Request> extends Abstract
         this.buffer.append(request);
     }
 
-    private ProtonSender requestSender(final String address) {
+    private ProtonSender requestSender(final RequestInstance<?, RQ> request) {
         if (this.connection == null) {
             logger.debug("No connection");
             return null;
         }
 
-        if (!this.requestSender.isReady()) {
-            logger.debug("RequestInstance sender is not ready");
+        if (!this.requestSender.prepareRequest(request)) {
+            /*
+             * The request sender is not ready now. But it will inform us by calling
+             * requestSenderReady() once it is good to go.
+             */
+            logger.debug("Request sender is not ready");
             return null;
         }
+
+        final String address = request.getAddress();
 
         final ProtonSender sender = this.connection.attachments().get("sender." + address, ProtonSender.class);
 
@@ -182,7 +232,9 @@ public abstract class AbstractAmqpTransport<RQ extends Request> extends Abstract
                     senderFailed(address);
                 } else {
                     senderReady.result().sendQueueDrainHandler(v -> {
-                        logger.debug("Sender queue can accept");
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Sender drained: {}", senderReady.result().getTarget().getAddress());
+                        }
                         senderReady(senderReady.result(), address);
                     });
                 }
@@ -220,12 +272,12 @@ public abstract class AbstractAmqpTransport<RQ extends Request> extends Abstract
 
         while (!sender.sendQueueFull()) {
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Queue size: {}", sender.getQueued());
+            if (logger.isTraceEnabled()) {
+                logger.trace("Queue size: {}", sender.getQueued());
             }
 
             final RequestInstance<?, RQ> request = this.buffer.poll(address);
-            logger.debug("Next request: {}", request);
+            logger.trace("Next request: {}", request);
 
             if (request == null) {
                 break;
@@ -233,6 +285,15 @@ public abstract class AbstractAmqpTransport<RQ extends Request> extends Abstract
 
             sendRequest(sender, request);
         }
+    }
+
+    private void requestSenderReady(final String address) {
+        // the receiver is ready, now we need to wait for the sender
+
+        logger.debug("Request sender notified us it is ready for: {}", address);
+
+        this.buffer.flush(address);
+
     }
 
     private void sendRequest(final ProtonSender sender, final RequestInstance<?, RQ> request) {

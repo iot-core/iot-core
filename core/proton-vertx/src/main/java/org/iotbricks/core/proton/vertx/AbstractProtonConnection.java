@@ -2,6 +2,7 @@ package org.iotbricks.core.proton.vertx;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.proton.ProtonClient;
+import io.vertx.proton.ProtonClientOptions;
 import io.vertx.proton.ProtonConnection;
 
 /**
@@ -27,12 +29,15 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
     public abstract static class Builder<C extends AbstractProtonConnection, B extends AbstractProtonConnection.Builder<C, B>> {
 
         private String hostname = "localhost";
-        private int port = 5672;
+        private int port;
         private String username;
         private String password;
         private String container;
+        private Consumer<ProtonClientOptions> protonClientOptions;
 
         protected Builder() {
+            this.hostname = "localhost";
+            this.port = 5672;
         }
 
         protected Builder(final B other) {
@@ -41,6 +46,7 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
             this.username = other.username();
             this.password = other.password();
             this.container = other.container();
+            this.protonClientOptions = other.protonClientOptions();
         }
 
         protected abstract B builder();
@@ -90,6 +96,15 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
             return this.container;
         }
 
+        public B protonClientOptions(final Consumer<ProtonClientOptions> protonClientOptions) {
+            this.protonClientOptions = protonClientOptions;
+            return builder();
+        }
+
+        public Consumer<ProtonClientOptions> protonClientOptions() {
+            return this.protonClientOptions;
+        }
+
         public abstract C build(final Vertx vertx);
 
         public void validate() {
@@ -106,11 +121,20 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
 
     protected ProtonConnection connection;
 
+    private final ProtonClientOptions protonOptions;
+
     public AbstractProtonConnection(final Vertx vertx, final Builder<? extends AbstractProtonConnection, ?> options) {
         this.vertx = vertx;
         this.options = options;
 
         this.context = vertx.getOrCreateContext();
+
+        this.protonOptions = new ProtonClientOptions();
+
+        if (this.options.protonClientOptions != null) {
+            this.options.protonClientOptions.accept(this.protonOptions);
+        }
+
     }
 
     protected void open() {
@@ -150,13 +174,14 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
 
         final ProtonClient client = ProtonClient.create(this.vertx);
 
-        client.connect(this.options.hostname(), this.options.port(),
+        client.connect(this.protonOptions, this.options.hostname(), this.options.port(),
                 this.options.username(), this.options.password(),
                 con -> {
 
                     logger.debug("Connection -> {}", con);
 
                     if (con.failed()) {
+                        logger.debug("Connection failed", con.cause());
                         handler.handle(con);
                         return;
                     }

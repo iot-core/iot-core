@@ -4,6 +4,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.apache.qpid.proton.message.Message;
 import org.iotbricks.core.amqp.transport.RequestInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,12 @@ import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
 
+/**
+ * A request sender which uses a unique response address per request.
+ *
+ * @param <RQ>
+ *            The type of the request
+ */
 public class ReceiverPerRequestSender<RQ extends Request> implements RequestSender<RQ> {
 
     private static final Logger logger = LoggerFactory.getLogger(ReceiverPerRequestSender.class);
@@ -37,7 +44,7 @@ public class ReceiverPerRequestSender<RQ extends Request> implements RequestSend
     }
 
     @Override
-    public boolean isReady() {
+    public boolean prepareRequest(final RequestInstance<?, RQ> request) {
         return true;
     }
 
@@ -61,10 +68,15 @@ public class ReceiverPerRequestSender<RQ extends Request> implements RequestSend
 
             ready.result().handler((delivery, message) -> request.handleResponse(message));
 
-            logger.debug("Sending message: {}", request);
+            final Message message = request.getMessage();
+            message.setReplyTo(replyAddress);
 
-            request.getMessage().setReplyTo(replyAddress);
-            sender.send(request.getMessage(), delivery -> request.handleDelivery(delivery));
+            if (logger.isTraceEnabled()) {
+                logger.trace("Sending message: {} -> {}: {}",
+                        sender.getTarget().getAddress(), message.getReplyTo(), request);
+            }
+
+            sender.send(message, delivery -> request.handleDelivery(delivery));
         });
         receiver.open();
     }

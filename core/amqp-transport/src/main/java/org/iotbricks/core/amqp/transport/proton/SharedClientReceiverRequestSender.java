@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 
 import org.apache.qpid.proton.amqp.messaging.Terminus;
 import org.apache.qpid.proton.amqp.transport.Source;
+import org.apache.qpid.proton.message.Message;
 import org.iotbricks.core.amqp.transport.RequestInstance;
 import org.iotbricks.core.amqp.transport.internal.Correlator;
 import org.slf4j.Logger;
@@ -17,9 +18,16 @@ import io.vertx.proton.ProtonConnection;
 import io.vertx.proton.ProtonReceiver;
 import io.vertx.proton.ProtonSender;
 
-public class SharedReceiverRequestSender<RQ extends Request> implements RequestSender<RQ> {
+/**
+ * A request sender which uses a single shared response address for the
+ * transport.
+ *
+ * @param <RQ>
+ *            The request type
+ */
+public class SharedClientReceiverRequestSender<RQ extends Request> implements RequestSender<RQ> {
 
-    private static final Logger logger = LoggerFactory.getLogger(SharedReceiverRequestSender.class);
+    private static final Logger logger = LoggerFactory.getLogger(SharedClientReceiverRequestSender.class);
 
     private String clientReplyAddress;
     private ProtonReceiver receiver;
@@ -28,7 +36,7 @@ public class SharedReceiverRequestSender<RQ extends Request> implements RequestS
 
     private final Supplier<String> replyAddressProvider;
 
-    private SharedReceiverRequestSender(final Supplier<String> replyAddressProvider) {
+    private SharedClientReceiverRequestSender(final Supplier<String> replyAddressProvider) {
         this.replyAddressProvider = replyAddressProvider;
     }
 
@@ -83,23 +91,27 @@ public class SharedReceiverRequestSender<RQ extends Request> implements RequestS
     }
 
     @Override
-    public boolean isReady() {
+    public boolean prepareRequest(final RequestInstance<?, RQ> request) {
         return this.receiver != null;
     }
 
     @Override
     public void sendRequest(final ProtonSender sender, final RequestInstance<?, RQ> request) {
 
-        final Object messageId = request.getMessage().getMessageId();
+        final Message message = request.getMessage();
+        final Object messageId = message.getMessageId();
 
-        request.getMessage().setReplyTo(this.clientReplyAddress);
+        message.setReplyTo(this.clientReplyAddress);
 
         request.whenClosed(() -> this.correlator.remove(messageId));
-        this.correlator.put(messageId, message -> request.handleResponse(message));
+        this.correlator.put(messageId, request::handleResponse);
 
-        logger.debug("Sending message: {}", request);
+        if (logger.isTraceEnabled()) {
+            logger.trace("Sending message: {} -> {}: {}",
+                    sender.getTarget().getAddress(), message.getReplyTo(), request);
+        }
 
-        sender.send(request.getMessage(), delivery -> request.handleDelivery(delivery));
+        sender.send(message, delivery -> request.handleDelivery(delivery));
     }
 
     /**
@@ -108,7 +120,7 @@ public class SharedReceiverRequestSender<RQ extends Request> implements RequestS
      * @return a new request sender
      */
     public static <RQ extends Request> RequestSender<RQ> dynamic() {
-        return new SharedReceiverRequestSender<>(() -> null);
+        return new SharedClientReceiverRequestSender<>(() -> null);
     }
 
     /**
@@ -121,7 +133,7 @@ public class SharedReceiverRequestSender<RQ extends Request> implements RequestS
      */
     public static <RQ extends Request> RequestSender<RQ> of(final Supplier<String> replyAddressProvider) {
         Objects.requireNonNull(replyAddressProvider);
-        return new SharedReceiverRequestSender<>(replyAddressProvider);
+        return new SharedClientReceiverRequestSender<>(replyAddressProvider);
     }
 
     /**
@@ -130,7 +142,7 @@ public class SharedReceiverRequestSender<RQ extends Request> implements RequestS
      * @param replyAddressProvider
      *            The address provider for the client reply address
      *
-     * @return a new request sender
+     * @return a new request sender, never returns {@code null}
      */
     public static <RQ extends Request> RequestSender<RQ> id(final Supplier<String> tokenProvider,
             final Function<String, String> formatter) {
@@ -138,19 +150,30 @@ public class SharedReceiverRequestSender<RQ extends Request> implements RequestS
         Objects.requireNonNull(tokenProvider);
         Objects.requireNonNull(formatter);
 
-        return new SharedReceiverRequestSender<>(() -> formatter.apply(tokenProvider.get()));
+        return new SharedClientReceiverRequestSender<>(() -> formatter.apply(tokenProvider.get()));
     }
 
     /**
      * Create a new request sender using a client shared random UUID address.
      *
-     * @return a new request sender
+     * @return a new request sender, never returns {@code null}
      */
     public static <RQ extends Request> RequestSender<RQ> uuid() {
-        return new SharedReceiverRequestSender<>(() -> UUID.randomUUID().toString());
+        return new SharedClientReceiverRequestSender<>(() -> UUID.randomUUID().toString());
     }
 
+    /**
+     * Create a new request sender using a client shared address based on a random
+     * UUID address.
+     *
+     * @param formatter
+     *            The formatter to format the UUID address, may be used for prefix,
+     *            suffix the UUID id
+     * @return a new request sender, never returns {@code null}
+     */
     public static <RQ extends Request> RequestSender<RQ> uuid(final Function<String, String> formatter) {
+        Objects.requireNonNull(formatter);
+
         return id(() -> UUID.randomUUID().toString(), formatter);
     }
 

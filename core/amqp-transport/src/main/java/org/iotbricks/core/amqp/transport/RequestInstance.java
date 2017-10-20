@@ -18,12 +18,18 @@ import io.vertx.proton.ProtonDelivery;
  */
 public class RequestInstance<R, RQ extends Request> extends CloseableCompletableFuture<R> {
 
+    private final String address;
     private final RQ request;
     private final ReplyStrategy<R, RQ> replyStrategy;
 
-    public RequestInstance(final RQ request, final ReplyStrategy<R, RQ> replyStrategy) {
+    public RequestInstance(final String address, final RQ request, final ReplyStrategy<R, RQ> replyStrategy) {
+        this.address = address;
         this.request = request;
         this.replyStrategy = replyStrategy;
+    }
+
+    public String getAddress() {
+        return this.address;
     }
 
     public Message getMessage() {
@@ -82,6 +88,6 @@ public class RequestInstance<R, RQ extends Request> extends CloseableCompletable
 
     @Override
     public String toString() {
-        return String.format("[RequestInstance: %s]", this.request);
+        return String.format("[RequestInstance: %s - %s]", this.address, this.request);
     }
 }
