@@ -2,10 +2,13 @@ package org.iotbricks.hono.device.registry.client.model;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 
 public class DeviceInformation {
+    @JsonProperty("device-id")
     private String id;
+
     private Map<String, ?> data;
 
     public String getId() {

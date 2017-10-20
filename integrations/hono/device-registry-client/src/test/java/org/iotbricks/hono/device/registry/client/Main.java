@@ -2,6 +2,8 @@ package org.iotbricks.hono.device.registry.client;
 
 import static io.vertx.core.Vertx.vertx;
 import static java.lang.Integer.parseInt;
+import static java.time.Duration.ofSeconds;
+import static org.iotbricks.hono.device.registry.client.Client.sync;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,16 +50,22 @@ public class Main {
                                             .setSsl(true)
                                             .addEnabledSaslMechanism("PLAIN")
                                             .setKeyCertOptions(keyCert)
-                                            .setSniServerName(args[1])
                                             .setHostnameVerificationAlgorithm("")
                                             .setTrustAll(true);
                                 });
                     })
                     .build(vertx.get())) {
 
-                try (CloseableCompletionStage<DeviceInformation> request = client.registerDevice(id, data)) {
-                    final DeviceInformation result = request.toCompletableFuture().get();
-                    System.out.println(result);
+                {
+                    final DeviceInformation result = sync(client.getDevice(id), ofSeconds(15));
+                    System.out.println("Current device: " + result);
+                }
+
+                {
+                    try (CloseableCompletionStage<DeviceInformation> request = client.registerDevice(id, data)) {
+                        final DeviceInformation result = request.toCompletableFuture().get();
+                        System.out.println(result);
+                    }
                 }
             }
         }
