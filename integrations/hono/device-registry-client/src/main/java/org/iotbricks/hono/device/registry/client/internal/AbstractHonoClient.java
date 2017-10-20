@@ -11,10 +11,13 @@ import org.apache.qpid.proton.amqp.messaging.AmqpValue;
 import org.apache.qpid.proton.message.Message;
 import org.iotbricks.core.amqp.transport.ResponseHandler;
 import org.iotbricks.core.utils.serializer.StringSerializer;
+import org.iotbricks.hono.transport.HonoException;
 import org.iotbricks.hono.transport.HonoTransport;
 import org.iotbricks.hono.transport.HonoTransport.HonoAmqpRequestBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.netty.handler.codec.http.HttpResponseStatus;
 
 public abstract class AbstractHonoClient implements AutoCloseable {
 
@@ -120,7 +123,10 @@ public abstract class AbstractHonoClient implements AutoCloseable {
 
     protected static RuntimeException unwrapError(final Optional<Integer> status, final Message reply) {
         return status
-                .map(v -> new RuntimeException(String.format("Remote service error: %s", v)))
+                .map(v -> {
+                    final HttpResponseStatus http = HttpResponseStatus.valueOf(v);
+                    return (RuntimeException) new HonoException(v, http.reasonPhrase());
+                })
                 .orElseGet(() -> new RuntimeException("Status code missing in response"));
     }
 
