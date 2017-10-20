@@ -42,9 +42,19 @@ public final class Properties {
         // get status value
 
         final Object status = value.get("status");
+
+        if (status == null) {
+            return empty();
+        }
+
         if (status instanceof Number) {
             // return value as int
             return of(((Number) status).intValue());
+        }
+
+        try {
+            return of(Integer.parseInt(status.toString()));
+        } catch (final NumberFormatException e) {
         }
 
         // return nothing
