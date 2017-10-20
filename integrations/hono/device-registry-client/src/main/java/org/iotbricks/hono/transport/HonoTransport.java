@@ -89,14 +89,14 @@ public class HonoTransport extends ProtonTransport<HonoRequestInformation> {
     }
 
     protected static String toAddress(final HonoRequestInformation information) {
-        return String.format("%s.%s", information.getService(), information.getTenant());
+        return String.format("%s/%s", information.getService(), information.getTenant());
     }
 
     protected static String toResponseAddress(final UUID uuid,
             final ProtonRequest<HonoRequestInformation> request) {
 
         final HonoRequestInformation information = request.getInformation();
-        return String.format("%s.%s", information.getService(), information.getTenant());
+        return String.format("%s/%s/%s", information.getService(), information.getTenant(), uuid);
 
     }
 
