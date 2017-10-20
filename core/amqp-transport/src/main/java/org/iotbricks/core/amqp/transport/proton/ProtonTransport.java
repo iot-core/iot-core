@@ -17,6 +17,8 @@ import org.iotbricks.core.amqp.transport.AmqpTransport;
 import org.iotbricks.core.amqp.transport.RequestInstance;
 import org.iotbricks.core.amqp.transport.ResponseHandler;
 import org.iotbricks.core.amqp.transport.proton.ProtonTransport.ProtonRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.Vertx;
@@ -25,6 +27,8 @@ import io.vertx.proton.ProtonDelivery;
 public abstract class ProtonTransport<RI>
         extends AbstractAmqpTransport<ProtonRequest<RI>>
         implements AmqpTransport<Message> {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProtonTransport.class);
 
     protected static abstract class Builder<RI, C extends ProtonTransport<RI>, B extends Builder<RI, C, B>>
             extends AbstractAmqpTransport.Builder<ProtonRequest<RI>, ProtonTransport<?>, B> {
@@ -155,6 +159,7 @@ public abstract class ProtonTransport<RI>
                         final DeliveryState state = delivery.getRemoteState();
 
                         if (state instanceof Rejected) {
+                            logger.debug("Handle rejected: {}", ((Rejected) state).getError());
                             if (rejectedConsumer != null) {
                                 rejectedConsumer.accept((Rejected) state, request);
                             }
