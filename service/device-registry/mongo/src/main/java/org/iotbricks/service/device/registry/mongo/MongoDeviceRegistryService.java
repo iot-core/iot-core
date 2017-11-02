@@ -65,6 +65,12 @@ public class MongoDeviceRegistryService implements DeviceRegistryService {
         }
     }
 
+    @Override public void remove(String deviceId) {
+        BasicDBObject deviceQuery = new BasicDBObject();
+        deviceQuery.put("deviceId", deviceId);
+        devices().deleteOne(deviceQuery);
+    }
+
     @Override public Optional<Device> findById(String deviceId) {
         BasicDBObject deviceQuery = new BasicDBObject();
         deviceQuery.put("deviceId", deviceId);

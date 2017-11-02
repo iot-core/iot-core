@@ -55,6 +55,10 @@ public class InMemoryDeviceRegistryService implements DeviceRegistryService {
         }
     }
 
+    @Override public void remove(String deviceId) {
+        devices.remove(deviceId);
+    }
+
     @Override public Optional<Device> findById(String deviceId) {
         return Optional.ofNullable(devices.get(deviceId));
     }

@@ -16,6 +16,8 @@ public interface DeviceRegistryService {
 
     String save(Device device);
 
+    void remove(String deviceId);
+
     Optional<Device> findById(String deviceId);
 
 }

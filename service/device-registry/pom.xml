@@ -17,6 +17,7 @@
         <module>spi</module>
         <module>inmemory</module>
         <module>mongo</module>
+        <module>kafka</module>
     </modules>
 
 </project>
