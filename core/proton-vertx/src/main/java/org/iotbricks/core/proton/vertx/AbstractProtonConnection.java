@@ -31,7 +31,7 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
 
     public abstract static class Builder<C extends AbstractProtonConnection, B extends AbstractProtonConnection.Builder<C, B>> {
 
-        private String hostname = "localhost";
+        private String hostname;
         private int port;
         private String username;
         private String password;
