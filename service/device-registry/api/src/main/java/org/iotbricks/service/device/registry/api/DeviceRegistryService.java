@@ -10,10 +10,6 @@ import org.iotbricks.annotations.ServiceName;
 @ServiceName("device")
 public interface DeviceRegistryService {
 
-    String create(Device device);
-
-    void update(Device device);
-
     String save(Device device);
 
     void remove(String deviceId);

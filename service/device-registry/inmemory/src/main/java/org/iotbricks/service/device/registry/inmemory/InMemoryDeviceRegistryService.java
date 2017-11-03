@@ -20,7 +20,7 @@ public class InMemoryDeviceRegistryService implements DeviceRegistryService {
         this.schemaValidator = schemaValidator;
     }
 
-    @Override public String create(Device device) {
+    public String create(Device device) {
         schemaValidator.validate(device);
 
         if(devices.containsKey(device.getDeviceId())) {
@@ -34,7 +34,7 @@ public class InMemoryDeviceRegistryService implements DeviceRegistryService {
         return device.getDeviceId();
     }
 
-    @Override public void update(Device device) {
+    public void update(Device device) {
         schemaValidator.validate(device);
 
         if(!devices.containsKey(device.getDeviceId())) {

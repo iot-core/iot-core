@@ -31,7 +31,7 @@ public class InMemoryDeviceRegistryServiceConfigurationTest {
     public void shouldLoadDevice() {
         Device device = new Device();
         device.setDeviceId(randomUUID().toString());
-        deviceRegistryService.create(device);
+//        deviceRegistryService.create(device);
 
         Optional<Device> loadedDevice = deviceRegistryService.findById(device.getDeviceId());
 
@@ -42,11 +42,11 @@ public class InMemoryDeviceRegistryServiceConfigurationTest {
     public void shouldUpdateDevice() {
         Device device = new Device();
         device.setDeviceId(randomUUID().toString());
-        deviceRegistryService.create(device);
+//        deviceRegistryService.create(device);
 
         Optional<Device> loadedDevice = deviceRegistryService.findById(device.getDeviceId());
         loadedDevice.get().setType("newType");
-        deviceRegistryService.update(loadedDevice.get());
+//        deviceRegistryService.update(loadedDevice.get());
         loadedDevice = deviceRegistryService.findById(device.getDeviceId());
 
         assertThat(loadedDevice.get().getType()).isEqualTo("newType");
