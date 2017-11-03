@@ -1,5 +1,6 @@
 package org.iotbricks.client.device.registry;
 
+import static io.glutamate.lang.Resource.manage;
 import static org.iotbricks.core.amqp.transport.proton.SharedClientAndRequestReceiverRequestSender.uuidFactory;
 import static org.iotbricks.core.serialization.jackson.JacksonSerializer.json;
 
@@ -16,6 +17,7 @@ import org.iotbricks.service.device.registry.api.Device;
 import org.iotbricks.service.device.registry.inmemory.InMemoryDeviceRegistryService;
 import org.iotbricks.service.device.registry.spi.AlwaysPassingDeviceSchemaValidator;
 
+import io.glutamate.lang.Resource;
 import io.vertx.core.Vertx;
 
 public class Main {
@@ -24,13 +26,13 @@ public class Main {
         return new LocalClient(new InMemoryDeviceRegistryService(new AlwaysPassingDeviceSchemaValidator()));
     }
 
-    static Client createAmqpClient(final Vertx vertx) {
+    static Client createAmqpClient(final Resource<Vertx> vertx) {
         return AmqpClient.newClient()
                 .serializer(json())
                 .build(vertx);
     }
 
-    static Client createAmqpClient2(final Vertx vertx) {
+    static Client createAmqpClient2(final Resource<Vertx> vertx) {
         return AmqpClient.newClient()
                 .serializer(json())
                 .transport(transport -> {
@@ -42,7 +44,7 @@ public class Main {
                 .build(vertx);
     }
 
-    static Client createAmqpClient3(final Vertx vertx) {
+    static Client createAmqpClient3(final Resource<Vertx> vertx) {
         return AmqpClient.newClient()
                 .serializer(json())
                 .transport(transport -> {
@@ -57,9 +59,9 @@ public class Main {
 
     public static void main(final String[] args) throws Exception {
 
-        final Vertx vertx = Vertx.vertx();
-
-        try (final Client client = createAmqpClient3(vertx)) {
+        try (
+                final Resource<Vertx> vertx = manage(Vertx.vertx(), Vertx::close);
+                final Client client = createAmqpClient3(vertx)) {
 
             asyncSave(client, "id2");
             asyncFind(client, "id2");
@@ -70,11 +72,7 @@ public class Main {
             syncFind(client, "id1");
 
             Thread.sleep(1_000);
-
-        } finally {
-            vertx.close();
         }
-
     }
 
     private static void syncCreate(final Client client, final String id) {

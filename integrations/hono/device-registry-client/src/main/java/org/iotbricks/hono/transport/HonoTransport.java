@@ -10,6 +10,7 @@ import org.iotbricks.core.amqp.transport.proton.ProtonTransport;
 import org.iotbricks.core.amqp.transport.proton.RequestSender;
 import org.iotbricks.core.amqp.transport.proton.SharedClientAndRequestReceiverRequestSender;
 
+import io.glutamate.lang.Resource;
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.Vertx;
 
@@ -31,7 +32,7 @@ public class HonoTransport extends ProtonTransport<HonoRequestInformation> {
         }
 
         @Override
-        public HonoTransport build(final Vertx vertx) {
+        public HonoTransport build(final Resource<Vertx> vertx) {
             validate();
             return new HonoTransport(vertx, this);
         }
@@ -47,7 +48,7 @@ public class HonoTransport extends ProtonTransport<HonoRequestInformation> {
         return new Builder(other);
     }
 
-    protected HonoTransport(final Vertx vertx,
+    protected HonoTransport(final Resource<Vertx> vertx,
             final Builder options) {
         super(vertx, HonoTransport::toAddress, options);
 

@@ -1,5 +1,7 @@
 package org.iotbricks.core.proton.vertx;
 
+import static io.glutamate.lang.Exceptions.wrap;
+
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -7,6 +9,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.glutamate.lang.Resource;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
@@ -105,7 +108,7 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
             return this.protonClientOptions;
         }
 
-        public abstract C build(final Vertx vertx);
+        public abstract C build(final Resource<Vertx> vertx);
 
         public void validate() {
             Objects.requireNonNull(this.hostname, "'hostname' must be set");
@@ -114,7 +117,7 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
 
     private final AtomicBoolean closed = new AtomicBoolean();
 
-    protected final Vertx vertx;
+    protected final Resource<Vertx> vertx;
     private final Builder<? extends AbstractProtonConnection, ?> options;
 
     protected final Context context;
@@ -123,11 +126,12 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
 
     private final ProtonClientOptions protonOptions;
 
-    public AbstractProtonConnection(final Vertx vertx, final Builder<? extends AbstractProtonConnection, ?> options) {
+    public AbstractProtonConnection(final Resource<Vertx> vertx,
+            final Builder<? extends AbstractProtonConnection, ?> options) {
         this.vertx = vertx;
         this.options = options;
 
-        this.context = vertx.getOrCreateContext();
+        this.context = vertx.get().getOrCreateContext();
 
         this.protonOptions = new ProtonClientOptions();
 
@@ -173,7 +177,7 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
 
     protected void createConnection(final Handler<AsyncResult<ProtonConnection>> handler) {
 
-        final ProtonClient client = ProtonClient.create(this.vertx);
+        final ProtonClient client = ProtonClient.create(this.vertx.get());
 
         client.connect(this.protonOptions, this.options.hostname(), this.options.port(),
                 this.options.username(), this.options.password(),
@@ -207,7 +211,7 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
             }
 
             // set up timer for re-connect
-            this.vertx.setTimer(1_000, timer -> startConnection());
+            this.vertx.get().setTimer(1_000, timer -> startConnection());
         } else {
             if (isClosed()) {
                 // we got marked closed in the meantime
@@ -230,6 +234,7 @@ public abstract class AbstractProtonConnection implements AutoCloseable {
             this.connection.close();
             this.connection = null;
         }
+        wrap(this.vertx::close);
     }
 
     protected void handleDisconnected(final ProtonConnection connection) {

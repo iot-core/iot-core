@@ -14,6 +14,7 @@ import org.iotbricks.core.proton.vertx.AbstractProtonConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.glutamate.lang.Resource;
 import io.glutamate.util.concurrent.CloseableCompletableFuture;
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.Vertx;
@@ -87,7 +88,7 @@ public abstract class AbstractAmqpTransport<RQ extends Request> extends Abstract
 
     private final Buffer<RQ> buffer;
 
-    protected AbstractAmqpTransport(final Vertx vertx, final Function<RQ, String> addressProvider,
+    protected AbstractAmqpTransport(final Resource<Vertx> vertx, final Function<RQ, String> addressProvider,
             final Builder<RQ, ? extends AbstractAmqpTransport<?>, ?> options) {
         super(vertx, options);
 

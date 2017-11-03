@@ -1,5 +1,6 @@
 package iot.core.service.device.binding;
 
+import static io.glutamate.lang.Resource.use;
 import static org.iotbricks.core.binding.common.NameProvider.serviceName;
 
 import org.iotbricks.core.binding.amqp.AmqpRejectResponseHandler;
@@ -38,7 +39,7 @@ public class DeviceRegistryBinding {
                 .successHandler(new MessageResponseHandler<>(AmqpRequestContext::getReplyToAddress))
                 .errorHandler(new AmqpRejectResponseHandler<>()) // Choose this ...
                 .errorHandler(new ProtonErrorMessageResponseHandler()) // ... or this
-                .build(vertx);
+                .build(use(vertx));
     }
 
     public void stop() {

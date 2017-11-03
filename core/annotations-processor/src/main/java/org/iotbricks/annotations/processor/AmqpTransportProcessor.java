@@ -77,6 +77,7 @@ public class AmqpTransportProcessor extends AbstractClientProcessor {
             out.println("import java.time.Duration;");
             out.println();
             out.println("import io.glutamate.util.concurrent.CloseableCompletionStage;");
+            out.println("import io.glutamate.lang.Resource;");
             out.println("import io.vertx.core.Vertx;");
             out.println();
             out.format("import %s.%s;%n", PKG_CORE_AMQP_TRANSPORT, CLASS_AMQP_TRANSPORT);
@@ -90,7 +91,7 @@ public class AmqpTransportProcessor extends AbstractClientProcessor {
             out.format("        public Builder(final %s.Builder builder) { super(builder); }%n",
                     CLASS_AMQP_TRANSPORT);
             out.format("        @Override%n        protected Builder builder() { return this; }%n");
-            out.println("            public Client build(final Vertx vertx) {");
+            out.println("            public Client build(final Resource<Vertx> vertx) {");
             out.format(
                     "                return new AmqpClient(vertx, %s.newTransport(transport()), syncTimeout());%n",
                     CLASS_AMQP_TRANSPORT);
@@ -109,7 +110,7 @@ public class AmqpTransportProcessor extends AbstractClientProcessor {
 
             out.println();
             out.format(
-                    "    private AmqpClient(final Vertx vertx, final %s.Builder transport, final Duration syncTimeout) {%n",
+                    "    private AmqpClient(final Resource<Vertx> vertx, final %s.Builder transport, final Duration syncTimeout) {%n",
                     CLASS_AMQP_TRANSPORT);
             out.println("        super(syncTimeout);");
             out.println("        this.transport = transport.build(vertx);");

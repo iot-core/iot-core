@@ -8,6 +8,7 @@ import org.iotbricks.hono.client.AbstractHonoClient;
 import org.iotbricks.hono.device.registry.client.model.DeviceInformation;
 import org.iotbricks.hono.transport.HonoTransport;
 
+import io.glutamate.lang.Resource;
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.Vertx;
 
@@ -27,7 +28,7 @@ public class AmqpClient extends AbstractHonoClient implements Client {
             return this;
         }
 
-        public Client build(final Vertx vertx) {
+        public Client build(final Resource<Vertx> vertx) {
 
             Objects.requireNonNull(vertx, "'vertx' must not be null");
 
@@ -42,7 +43,7 @@ public class AmqpClient extends AbstractHonoClient implements Client {
         return new Builder();
     }
 
-    private AmqpClient(final Vertx vertx, final String tenant, final HonoTransport.Builder transport) {
+    private AmqpClient(final Resource<Vertx> vertx, final String tenant, final HonoTransport.Builder transport) {
         super("registration", tenant, JacksonSerializer.json(), transport.build(vertx));
     }
 

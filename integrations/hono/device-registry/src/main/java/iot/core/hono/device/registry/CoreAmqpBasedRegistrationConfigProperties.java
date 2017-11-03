@@ -12,6 +12,7 @@
 
 package iot.core.hono.device.registry;
 
+import static io.glutamate.lang.Resource.use;
 import static org.iotbricks.core.serialization.jackson.JacksonSerializer.json;
 
 import org.eclipse.hono.config.SignatureSupportingConfigProperties;
@@ -56,7 +57,7 @@ public final class CoreAmqpBasedRegistrationConfigProperties implements Signatur
                 .serializer(json())
                 .hostname(this.hostname)
                 .port(this.port)
-                .build(vertx);
+                .build(use(vertx));
     }
 
 }

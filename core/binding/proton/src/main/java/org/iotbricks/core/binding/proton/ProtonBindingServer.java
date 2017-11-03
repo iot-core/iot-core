@@ -19,6 +19,7 @@ import org.iotbricks.core.utils.serializer.ByteSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.glutamate.lang.Resource;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -132,7 +133,7 @@ public class ProtonBindingServer extends AbstractProtonConnection {
         }
 
         @Override
-        public ProtonBindingServer build(final Vertx vertx) {
+        public ProtonBindingServer build(final Resource<Vertx> vertx) {
             Objects.requireNonNull(this.serializer, "'serializer' must be set");
             Objects.requireNonNull(this.successHandler, "'successHandler' must be set");
             Objects.requireNonNull(this.errorHandler, "'errorHandler' must be set");
@@ -153,7 +154,7 @@ public class ProtonBindingServer extends AbstractProtonConnection {
 
     private final Builder options;
 
-    public ProtonBindingServer(final Vertx vertx, final Builder options) {
+    public ProtonBindingServer(final Resource<Vertx> vertx, final Builder options) {
         super(vertx, options);
         this.options = options;
 

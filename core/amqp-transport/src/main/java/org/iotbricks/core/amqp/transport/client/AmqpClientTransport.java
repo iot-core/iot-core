@@ -21,6 +21,7 @@ import org.iotbricks.core.utils.binding.amqp.DefaultAmqpErrorConditionTranslator
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.glutamate.lang.Resource;
 import io.glutamate.util.Optionals;
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.Vertx;
@@ -80,7 +81,7 @@ public class AmqpClientTransport extends ProtonTransport<ServiceRequestInformati
         }
 
         @Override
-        public AmqpClientTransport build(final Vertx vertx) {
+        public AmqpClientTransport build(final Resource<Vertx> vertx) {
             validate();
             return new AmqpClientTransport(vertx, new Builder(this));
         }
@@ -97,7 +98,7 @@ public class AmqpClientTransport extends ProtonTransport<ServiceRequestInformati
 
     private final Builder options;
 
-    public AmqpClientTransport(final Vertx vertx, final Builder options) {
+    public AmqpClientTransport(final Resource<Vertx> vertx, final Builder options) {
         super(vertx, ServiceRequestInformation::getService, options);
 
         logger.debug("Creating AMQP transport - {}", options);

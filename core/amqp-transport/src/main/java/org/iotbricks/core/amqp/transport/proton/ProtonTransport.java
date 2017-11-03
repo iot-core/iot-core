@@ -20,6 +20,7 @@ import org.iotbricks.core.amqp.transport.proton.ProtonTransport.ProtonRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.glutamate.lang.Resource;
 import io.glutamate.util.concurrent.CloseableCompletionStage;
 import io.vertx.core.Vertx;
 import io.vertx.proton.ProtonDelivery;
@@ -116,7 +117,7 @@ public abstract class ProtonTransport<RI>
         }
     }
 
-    protected ProtonTransport(final Vertx vertx, final Function<RI, String> addressProvider,
+    protected ProtonTransport(final Resource<Vertx> vertx, final Function<RI, String> addressProvider,
             final Builder<RI, ? extends ProtonTransport<?>, ?> options) {
         super(vertx, request -> addressProvider.apply(request.getInformation()), options);
     }

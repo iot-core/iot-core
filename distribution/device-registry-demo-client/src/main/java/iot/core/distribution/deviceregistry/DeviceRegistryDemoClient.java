@@ -1,5 +1,6 @@
 package iot.core.distribution.deviceregistry;
 
+import static io.glutamate.lang.Resource.manage;
 import static io.vertx.core.Vertx.vertx;
 import static java.util.UUID.randomUUID;
 import static org.iotbricks.core.serialization.jackson.JacksonSerializer.json;
@@ -18,10 +19,7 @@ public final class DeviceRegistryDemoClient {
     }
 
     public static void main(final String[] args) throws Exception {
-        Vertx vertx = null;
-        try {
-            vertx = vertx();
-            Client client = AmqpClient.newClient().serializer(json()).build(vertx);
+        try (Client client = AmqpClient.newClient().serializer(json()).build(manage(vertx(), Vertx::close))) {
 
             String deviceId = randomUUID().toString();
             Device device = new Device();
@@ -34,8 +32,7 @@ public final class DeviceRegistryDemoClient {
             System.out.println("Loading device state...");
             device = client.sync().findById(deviceId).get();
             System.out.println(device);
-        } finally {
-            vertx.close();
+
         }
     }
 
